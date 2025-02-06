@@ -1,3 +1,4 @@
+//path : src/lib/api-client.ts
 import axios, { AxiosError } from 'axios'
 import { useAuthStore } from '@/stores/authStore'
 

@@ -49,6 +49,7 @@
 //   }
 // })
 // // export const useAuth = () => useAuthStore((state) => state.auth)
+//path : src/stores/authStore.ts
 import { create } from 'zustand'
 import apiClient from '@/lib/api-client'
 
