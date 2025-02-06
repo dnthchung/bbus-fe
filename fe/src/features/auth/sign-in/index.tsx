@@ -35,10 +35,12 @@
 //     </AuthLayout>
 //   )
 // }
+//path: src/features/auth/sign-in/index.tsx
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { LoginCredentials } from '@/types/auth'
+import { API_SERVICES } from '@/api/api-services'
 import { useAuthStore } from '@/stores/authStore'
-import apiClient from '@/lib/api-client'
 import { Card } from '@/components/ui/card'
 import AuthLayout from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
@@ -49,15 +51,13 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleLogin = async (credentials: {
-    email: string
-    password: string
-  }) => {
+  const handleLogin = async (credentials: LoginCredentials) => {
     setLoading(true)
     setError(null)
     try {
       // Call the login API
-      await apiClient.post('/auth/login', credentials)
+      // await apiClient.post('/auth/login', credentials)
+      await API_SERVICES.auth.login(credentials)
       // Fetch user data after login
       await fetchUser()
       // Redirect to dashboard - dashboard is the home page so have : "/"

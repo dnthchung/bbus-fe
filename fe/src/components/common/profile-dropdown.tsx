@@ -1,7 +1,7 @@
 //path : src/components/common/profile-dropdown.tsx
 import { Link } from '@tanstack/react-router'
 // ✅ Lấy user từ API
-import { extractUsername } from '@/utils/extract-user-name'
+import { extractUsername } from '@/helpers/extract-user-name'
 import { useAuthQuery } from '@/hooks/use-auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'

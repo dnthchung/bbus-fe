@@ -1,11 +1,15 @@
 //path : src/hooks/use-auth.ts
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import apiClient from '@/lib/api-client'
+import { API_SERVICES } from '@/api/api-services'
+import { useAuthStore } from '@/stores/authStore'
+
+// ✅ Import API gộp
 
 export const useAuthQuery = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
 
   // Fetch user từ API `/auth/user`
   const {
@@ -15,9 +19,10 @@ export const useAuthQuery = () => {
   } = useQuery({
     queryKey: ['authUser'],
     queryFn: async () => {
-      const { data } = await apiClient.get('/user')
+      const { data } = await API_SERVICES.auth.fetchUser()
       return data
     },
+    enabled: isAuthenticated, // Chỉ fetch khi user đã login
     retry: false, // Không tự động retry nếu request fail
     staleTime: 5 * 60 * 1000, // Giữ dữ liệu 5 phút trước khi fetch lại
   })
@@ -25,8 +30,9 @@ export const useAuthQuery = () => {
   // Hàm logout → Gọi API và xóa cache user
   const logout = async () => {
     try {
-      await apiClient.get('/auth/logout')
+      await API_SERVICES.auth.logout()
       queryClient.setQueryData(['authUser'], null) // Xóa cache user
+      queryClient.cancelQueries({ queryKey: ['authUser'] }) // Hủy request đang chờ
       navigate({ to: '/sign-in' })
     } catch (error) {
       console.error('Logout error:', error)
