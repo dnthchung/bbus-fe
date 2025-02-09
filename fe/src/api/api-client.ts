@@ -6,6 +6,10 @@ import { useAuthStore } from '@/stores/authStore'
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // URL Backend
   withCredentials: true, // Gửi cookie HttpOnly
+  headers: {
+    'Content-Type': 'application/json',
+    // Authorization: `Bearer ${useAuthStore.getState().accessToken}`, // Gửi Access Token
+  },
 })
 
 // Interceptor xử lý lỗi 401 (hết hạn Access Token)

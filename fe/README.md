@@ -36,4 +36,13 @@ Start the server
   pnpm run dev
 ```
 
+- navigate method :
 
+```
+import { useNavigate } from '@tanstack/react-router'
+
+const navigate = useNavigate()
+
+navigate({ to: '/' })
+
+```

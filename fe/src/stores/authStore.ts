@@ -1,57 +1,6 @@
-// //path : src/stores/authStore.ts
-// import Cookies from 'js-cookie'
-// import { create } from 'zustand'
-// const ACCESS_TOKEN = 'thisisjustarandomstring'
-// interface AuthUser {
-//   accountNo: string
-//   email: string
-//   role: string[]
-//   exp: number
-// }
-// interface AuthState {
-//   auth: {
-//     user: AuthUser | null
-//     setUser: (user: AuthUser | null) => void
-//     accessToken: string
-//     setAccessToken: (accessToken: string) => void
-//     resetAccessToken: () => void
-//     reset: () => void
-//   }
-// }
-// export const useAuthStore = create<AuthState>()((set) => {
-//   const cookieState = Cookies.get(ACCESS_TOKEN)
-//   const initToken = cookieState ? JSON.parse(cookieState) : ''
-//   return {
-//     auth: {
-//       user: null,
-//       setUser: (user) =>
-//         set((state) => ({ ...state, auth: { ...state.auth, user } })),
-//       accessToken: initToken,
-//       setAccessToken: (accessToken) =>
-//         set((state) => {
-//           Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken))
-//           return { ...state, auth: { ...state.auth, accessToken } }
-//         }),
-//       resetAccessToken: () =>
-//         set((state) => {
-//           Cookies.remove(ACCESS_TOKEN)
-//           return { ...state, auth: { ...state.auth, accessToken: '' } }
-//         }),
-//       reset: () =>
-//         set((state) => {
-//           Cookies.remove(ACCESS_TOKEN)
-//           return {
-//             ...state,
-//             auth: { ...state.auth, user: null, accessToken: '' },
-//           }
-//         }),
-//     },
-//   }
-// })
-// // export const useAuth = () => useAuthStore((state) => state.auth)
-//path : src/stores/authStore.ts
+// src/stores/authStore.ts
 import { create } from 'zustand'
-import apiClient from '@/api/api-client'
+import { API_SERVICES } from '@/api/api-services'
 
 interface AuthUser {
   accountNo: string
@@ -63,26 +12,48 @@ interface AuthUser {
 interface AuthState {
   user: AuthUser | null
   isAuthenticated: boolean
-  fetchUser: () => Promise<void>
+  // fetchUser: () => Promise<void>
   logout: () => Promise<void>
 }
+// const navigate = useNavigate()
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
 
-  fetchUser: async () => {
-    try {
-      const { data } = await apiClient.get('/user')
-      set({ user: data, isAuthenticated: true })
-    } catch {
-      set({ user: null, isAuthenticated: false })
-    }
-  },
+  // fetchUser: async () => {
+  //   try {
+  //     const { data } = await API_SERVICES.auth.fetchUser() // ✅ Gửi request để lấy user
+  //     console.log('fetch user authStore.ts')
+
+  //     set({ user: data, isAuthenticated: true })
+  //     localStorage.setItem('isAuthenticated', 'true') // ✅ Lưu trạng thái vào localStorage
+  //   } catch {
+  //     set({ user: null, isAuthenticated: false })
+  //     localStorage.removeItem('isAuthenticated')
+  //   }
+  // },
 
   logout: async () => {
-    await apiClient.get('/auth/logout') // Gọi API để logout
+    // await apiClient.get('/auth/logout')
+    await API_SERVICES.auth.logout() // ✅ Gửi request để logout
     set({ user: null, isAuthenticated: false })
-    window.location.href = '/login' // Điều hướng về trang login
+    localStorage.removeItem('isAuthenticated') // ✅ Xóa trạng thái
+    window.location.href = '/sign-in'
+    // navigate({ to: '/sign-in' })
   },
 }))
+
+// ✅ Tự động fetch user sau khi reload
+if (localStorage.getItem('isAuthenticated') === 'true') {
+  // useAuthStore.getState().fetchUser()
+  API_SERVICES.auth
+    .fetchUser()
+    .then(({ data }) => {
+      useAuthStore.setState({ user: data, isAuthenticated: true })
+    })
+    .catch(() => {
+      useAuthStore.setState({ user: null, isAuthenticated: false })
+      localStorage.removeItem('isAuthenticated')
+    })
+}

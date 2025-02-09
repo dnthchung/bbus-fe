@@ -20,6 +20,8 @@ export const useAuthQuery = () => {
     queryKey: ['authUser'],
     queryFn: async () => {
       const { data } = await API_SERVICES.auth.fetchUser()
+      console.log('fetch use-auth.ts')
+
       return data
     },
     enabled: isAuthenticated, // Chỉ fetch khi user đã login

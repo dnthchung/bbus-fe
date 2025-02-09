@@ -1,3 +1,4 @@
+//path : fe/src/features/settings/index.tsx
 import { Outlet } from '@tanstack/react-router'
 import {
   IconBrowserCheck,
