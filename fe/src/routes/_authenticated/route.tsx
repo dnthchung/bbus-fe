@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { useAuthQuery } from '@/hooks/use-auth'
 import { SidebarProvider } from '@/components/ui/sidebar'
+import SkipToMain from '@/components/common/skip-to-main'
 import { AppSidebar } from '@/components/layout/app-sidebar'
-import SkipToMain from '@/components/skip-to-main'
 
 function ProtectedRouteWithLayout() {
   const { user, isLoading } = useAuthQuery()
