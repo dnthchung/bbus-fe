@@ -19,8 +19,9 @@ export const useAuthQuery = () => {
   } = useQuery({
     queryKey: ['authUser'],
     queryFn: async () => {
+      console.log('Fetching user from API /auth/user... (use-auth hook)')
       const { data } = await API_SERVICES.auth.fetchUser()
-      console.log('fetch use-auth.ts')
+      console.log('Fetched user data:', data)
 
       return data
     },
