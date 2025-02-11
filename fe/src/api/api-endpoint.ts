@@ -1,3 +1,4 @@
+//path : fe/src/api/api-endpoint.ts
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',

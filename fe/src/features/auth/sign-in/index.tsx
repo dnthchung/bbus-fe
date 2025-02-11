@@ -16,23 +16,60 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // const handleLogin = async (credentials: LoginCredentials) => {
+  //   setLoading(true)
+  //   setError(null)
+  //   try {
+  //     // Call the login API
+  //     // await apiClient.post('/auth/login', credentials)
+  //     // await API_SERVICES.auth.login(credentials)
+  //     // Fetch user data after login
+  //     // await fetchUser()
+  //     // Call the login API
+  //     const { data } = await API_SERVICES.auth.login(credentials)
+  //     console.log('login - index.tsx - user', data)
+  //     localStorage.setItem('isAuthenticated', 'true')
+
+  //     //call the fetchUser API
+  //     const { data: user } = await API_SERVICES.auth.fetchUser()
+
+  //     // Cập nhật dữ liệu người dùng vào cache của react-query
+  //     queryClient.setQueryData(['authUser'], user)
+  //     // Cập nhật trạng thái trong authStore
+  //     useAuthStore.setState({ user, isAuthenticated: true })
+  //     navigate({ to: '/' }) // Redirect to dashboard - dashboard is the home page so have : "/"
+  //   } catch (err) {
+  //     setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
   const handleLogin = async (credentials: LoginCredentials) => {
     setLoading(true)
     setError(null)
     try {
-      // Call the login API
-      // await apiClient.post('/auth/login', credentials)
-      // await API_SERVICES.auth.login(credentials)
-      // Fetch user data after login
-      // await fetchUser()
-      // Call the login API
-      const { data: user } = await API_SERVICES.auth.login(credentials)
-      // Cập nhật dữ liệu người dùng vào cache của react-query
-      queryClient.setQueryData(['authUser'], user)
-      // Cập nhật trạng thái trong authStore
-      useAuthStore.setState({ user, isAuthenticated: true })
+      // Gọi API login
+      const { data } = await API_SERVICES.auth.login(credentials)
+
+      console.log('login - index.tsx - response', data)
+
+      // Lưu accessToken vào localStorage (nếu cần)
+      localStorage.setItem('accessToken', data.accessToken)
       localStorage.setItem('isAuthenticated', 'true')
-      navigate({ to: '/' }) // Redirect to dashboard - dashboard is the home page so have : "/"
+
+      // Gọi API lấy thông tin user ngay sau khi login
+      const { data: user } = await API_SERVICES.auth.fetchUser()
+
+      console.log('login - index.tsx - fetched user', user)
+
+      // Cập nhật React Query Cache
+      queryClient.setQueryData(['authUser'], user)
+
+      // Cập nhật Zustand store
+      useAuthStore.setState({ user, isAuthenticated: true })
+
+      // Điều hướng về trang chủ
+      navigate({ to: '/' })
     } catch (err) {
       setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.')
     } finally {
