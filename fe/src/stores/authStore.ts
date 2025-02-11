@@ -19,7 +19,8 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  isAuthenticated: false,
+  // isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('isAuthenticated'), // Load trạng thái từ localStorage
 
   // fetchUser: async () => {
   //   try {
@@ -38,6 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // await apiClient.get('/auth/logout')
     await API_SERVICES.auth.logout() // ✅ Gửi request để logout
     set({ user: null, isAuthenticated: false })
+    localStorage.removeItem('accessToken') // Xóa token
     localStorage.removeItem('isAuthenticated') // ✅ Xóa trạng thái
     window.location.href = '/sign-in'
     // navigate({ to: '/sign-in' })
