@@ -22,7 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { SelectDropdown } from '@/components/select-dropdown'
+import { SelectDropdown } from '@/components/common/select-dropdown'
 import { Task } from '../data/schema'
 
 interface Props {

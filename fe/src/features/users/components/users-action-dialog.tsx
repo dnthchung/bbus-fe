@@ -23,8 +23,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { PasswordInput } from '@/components/password-input'
-import { SelectDropdown } from '@/components/select-dropdown'
+import { PasswordInput } from '@/components/common/password-input'
+import { SelectDropdown } from '@/components/common/select-dropdown'
 import { userTypes } from '../data/data'
 import { User } from '../data/schema'
 

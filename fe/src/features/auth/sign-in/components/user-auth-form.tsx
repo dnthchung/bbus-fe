@@ -142,7 +142,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { PasswordInput } from '@/components/password-input'
+import { PasswordInput } from '@/components/common/password-input'
 
 // Define the validation schema using zod
 const formSchema = z.object({
