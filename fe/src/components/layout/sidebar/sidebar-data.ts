@@ -1,3 +1,4 @@
+//path : fe/src/components/layout/data/sidebar-data.ts
 import {
   IconBarrierBlock,
   IconBrowserCheck,
@@ -8,7 +9,6 @@ import {
   IconLayoutDashboard,
   IconLock,
   IconLockAccess,
-  IconMessages,
   IconNotification,
   IconPackages,
   IconPalette,
@@ -20,7 +20,7 @@ import {
   IconUsers,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
-import { type SidebarData } from '../types'
+import { type SidebarData } from '@/components/layout/sidebar/sidebar-type'
 
 export const sidebarData: SidebarData = {
   user: {
@@ -55,6 +55,11 @@ export const sidebarData: SidebarData = {
           icon: IconLayoutDashboard,
         },
         {
+          title: 'Users',
+          url: '/users',
+          icon: IconUsers,
+        },
+        {
           title: 'Tasks',
           url: '/tasks',
           icon: IconChecklist,
@@ -63,17 +68,6 @@ export const sidebarData: SidebarData = {
           title: 'Apps',
           url: '/apps',
           icon: IconPackages,
-        },
-        {
-          title: 'Chats',
-          url: '/chats',
-          badge: '3',
-          icon: IconMessages,
-        },
-        {
-          title: 'Users',
-          url: '/users',
-          icon: IconUsers,
         },
       ],
     },
