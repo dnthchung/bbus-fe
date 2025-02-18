@@ -1,4 +1,4 @@
-//path : fe/src/components/layout/data/sidebar-type.ts
+// path: fe/src/components/layout/data/sidebar-type.ts
 import { LinkProps } from '@tanstack/react-router'
 
 interface User {
