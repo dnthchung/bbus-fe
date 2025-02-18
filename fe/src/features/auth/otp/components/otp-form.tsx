@@ -20,30 +20,30 @@ import { PinInput, PinInputField } from '@/components/common/pin-input'
 type OtpFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z.object({
-  otp: z.string().min(1, { message: 'Please enter your otp code.' }),
+  otp: z.string().min(1, { message: 'Vui lòng nhập mã OTP.' }),
 })
 
 export function OtpForm({ className, ...props }: OtpFormProps) {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [disabledBtn, setDisabledBtn] = useState(true)
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { otp: '' },
+    defaultValues: {
+      otp: '',
+    },
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
     toast({
-      title: 'You submitted the following values:',
+      title: 'Bạn đã gửi các giá trị sau:',
       description: (
         <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
           <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
         </pre>
       ),
     })
-
     setTimeout(() => {
       setIsLoading(false)
       navigate({ to: '/' })
@@ -74,7 +74,11 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
                           <PinInputField
                             key={i}
                             component={Input}
-                            className={`${form.getFieldState('otp').invalid ? 'border-red-500' : ''}`}
+                            className={`${
+                              form.getFieldState('otp').invalid
+                                ? 'border-red-500'
+                                : ''
+                            }`}
                           />
                         )
                       })}
@@ -85,7 +89,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
               )}
             />
             <Button className='mt-2' disabled={disabledBtn || isLoading}>
-              Verify
+              Xác thực
             </Button>
           </div>
         </form>
