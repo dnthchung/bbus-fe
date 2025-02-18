@@ -1,0 +1,1 @@
+- side bar được import trong // src/routes/_authenticated/route.tsx
