@@ -16,59 +16,23 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // const handleLogin = async (credentials: LoginCredentials) => {
-  //   setLoading(true)
-  //   setError(null)
-  //   try {
-  //     // Call the login API
-  //     // await apiClient.post('/auth/login', credentials)
-  //     // await API_SERVICES.auth.login(credentials)
-  //     // Fetch user data after login
-  //     // await fetchUser()
-  //     // Call the login API
-  //     const { data } = await API_SERVICES.auth.login(credentials)
-  //     console.log('login - index.tsx - user', data)
-  //     localStorage.setItem('isAuthenticated', 'true')
-
-  //     //call the fetchUser API
-  //     const { data: user } = await API_SERVICES.auth.fetchUser()
-
-  //     // Cập nhật dữ liệu người dùng vào cache của react-query
-  //     queryClient.setQueryData(['authUser'], user)
-  //     // Cập nhật trạng thái trong authStore
-  //     useAuthStore.setState({ user, isAuthenticated: true })
-  //     navigate({ to: '/' }) // Redirect to dashboard - dashboard is the home page so have : "/"
-  //   } catch (err) {
-  //     setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.')
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
   const handleLogin = async (credentials: LoginCredentials) => {
     setLoading(true)
     setError(null)
     try {
       // Gọi API login
       const { data } = await API_SERVICES.auth.login(credentials)
-
       console.log('login - index.tsx - response', data)
-
       // Lưu accessToken vào localStorage (nếu cần)
       localStorage.setItem('accessToken', data.accessToken)
       localStorage.setItem('isAuthenticated', 'true')
-
       // Gọi API lấy thông tin user ngay sau khi login
       const { data: user } = await API_SERVICES.auth.fetchUser()
-
       console.log('login - index.tsx - fetched user', user)
-
       // Cập nhật React Query Cache
       queryClient.setQueryData(['authUser'], user)
-
       // Cập nhật Zustand store
       useAuthStore.setState({ user, isAuthenticated: true })
-
       // Điều hướng về trang chủ
       navigate({ to: '/' })
     } catch (err) {
@@ -82,9 +46,10 @@ export default function SignIn() {
     <AuthLayout>
       <Card className='p-6'>
         <div className='flex flex-col space-y-2 text-left'>
-          <h1 className='text-2xl font-semibold tracking-tight'>Login</h1>
+          <h1 className='text-2xl font-semibold tracking-tight'>Đăng nhập</h1>
           <p className='text-sm text-muted-foreground'>
-            Enter your email and password below <br /> to log into your account
+            Nhập email và mật khẩu của bạn bên dưới <br /> để đăng nhập vào tài
+            khoản của bạn
           </p>
         </div>
         {/* Pass our custom onSubmit, isLoading and error to the form */}
@@ -94,19 +59,21 @@ export default function SignIn() {
           error={error}
         />
         <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
-          By clicking login, you agree to our{' '}
+          Bằng cách nhấp vào đăng nhập, bạn đồng ý với{' '}
           <a
             href='/terms'
             className='underline underline-offset-4 hover:text-primary'
           >
-            Terms of Service
+            Điều khoản dịch vụ
+            {/* Terms of Service */}
           </a>{' '}
-          and{' '}
+          và{' '}
           <a
             href='/privacy'
             className='underline underline-offset-4 hover:text-primary'
           >
-            Privacy Policy
+            Chính sách bảo mật
+            {/* Privacy Policy */}
           </a>
           .
         </p>
