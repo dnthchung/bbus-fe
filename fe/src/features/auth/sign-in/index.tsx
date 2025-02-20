@@ -48,8 +48,8 @@ export default function SignIn() {
         <div className='flex flex-col space-y-2 text-left'>
           <h1 className='text-2xl font-semibold tracking-tight'>Đăng nhập</h1>
           <p className='text-sm text-muted-foreground'>
-            Nhập email và mật khẩu của bạn bên dưới <br /> để đăng nhập vào tài
-            khoản của bạn
+            Nhập số điện thoại và mật khẩu của bạn bên dưới <br /> để đăng nhập
+            vào tài khoản của bạn
           </p>
         </div>
         {/* Pass our custom onSubmit, isLoading and error to the form */}

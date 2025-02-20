@@ -1,4 +1,5 @@
 // import { Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Card } from '@/components/ui/card'
 import AuthLayout from '../auth-layout'
 import { ForgotForm } from './components/forgot-password-form'
