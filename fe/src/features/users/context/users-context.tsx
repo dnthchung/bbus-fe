@@ -21,11 +21,7 @@ export default function UsersProvider({ children }: Props) {
   const [open, setOpen] = useDialogState<UsersDialogType>(null)
   const [currentRow, setCurrentRow] = useState<User | null>(null)
 
-  return (
-    <UsersContext value={{ open, setOpen, currentRow, setCurrentRow }}>
-      {children}
-    </UsersContext>
-  )
+  return <UsersContext value={{ open, setOpen, currentRow, setCurrentRow }}>{children}</UsersContext>
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
