@@ -16,24 +16,26 @@ export type UserStatus = z.infer<typeof userStatusSchema>
 
 // Định nghĩa schema cho vai trò của người dùng
 const userRoleSchema = z.union([
-  z.literal('superadmin'), // Quyền cao nhất, quản lý toàn bộ hệ thống
-  z.literal('admin'), // Quản trị viên có quyền quản lý chung
-  z.literal('cashier'), // Nhân viên thu ngân
-  z.literal('manager'), // Quản lý cấp trung
+  z.literal('system-admin'),
+  z.literal('business-admin'),
+  z.literal('teacher'),
+  z.literal('parent'),
+  z.literal('student'),
+  z.literal('assistant-driver'),
+  z.literal('bus-driver'),
 ])
 
 // Định nghĩa schema cho đối tượng người dùng
 const userSchema = z.object({
-  id: z.string(), // ID của người dùng (kiểu string)
-  firstName: z.string(), // Tên của người dùng
-  lastName: z.string(), // Họ của người dùng
-  username: z.string(), // Tên đăng nhập
-  email: z.string(), // Địa chỉ email
-  phoneNumber: z.string(), // Số điện thoại
-  status: userStatusSchema, // Trạng thái người dùng (đã định nghĩa bên trên)
-  role: userRoleSchema, // Vai trò người dùng (đã định nghĩa bên trên)
-  createdAt: z.coerce.date(), // Ngày tạo tài khoản (chuyển đổi sang kiểu Date)
-  updatedAt: z.coerce.date(), // Ngày cập nhật tài khoản (chuyển đổi sang kiểu Date)
+  id: z.string(),
+  fullName: z.string(), // Thay vì firstName + lastName
+  username: z.string(),
+  email: z.string(),
+  phoneNumber: z.string(),
+  status: userStatusSchema,
+  role: userRoleSchema,
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 })
 
 // Tạo kiểu TypeScript `User` từ schema

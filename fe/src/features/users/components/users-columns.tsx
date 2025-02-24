@@ -1,3 +1,4 @@
+//path : fe/src/features/users/components/users-columns.tsx
 import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -56,18 +57,33 @@ export const columns: ColumnDef<User>[] = [
     },
     enableHiding: false,
   },
+  // {
+  //   id: 'fullName',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title='Name' />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const { firstName, lastName } = row.original
+  //     const fullName = `${firstName} ${lastName}`
+  //     return <LongText className='max-w-36'>{fullName}</LongText>
+  //   },
+  //   meta: { className: 'w-36' },
+  // },
   {
-    id: 'fullName',
+    accessorKey: 'fullName',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
+      <DataTableColumnHeader column={column} title='Họ và Tên' />
     ),
     cell: ({ row }) => {
-      const { firstName, lastName } = row.original
-      const fullName = `${firstName} ${lastName}`
+      // Lấy trực tiếp giá trị fullName từ row
+      const fullName = row.getValue('fullName') as string
       return <LongText className='max-w-36'>{fullName}</LongText>
     },
-    meta: { className: 'w-36' },
+    meta: {
+      className: 'w-36',
+    },
   },
+
   {
     accessorKey: 'email',
     header: ({ column }) => (
@@ -80,7 +96,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'phoneNumber',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Phone Number' />
+      <DataTableColumnHeader column={column} title='Số điện thoại' />
     ),
     cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
     enableSorting: false,
@@ -88,7 +104,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'status',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title='Trạng thái TK' />
     ),
     cell: ({ row }) => {
       const { status } = row.original
@@ -110,22 +126,20 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'role',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Role' />
+      <DataTableColumnHeader column={column} title='Vai trò' />
     ),
     cell: ({ row }) => {
       const { role } = row.original
       const userType = userTypes.find(({ value }) => value === role)
-
       if (!userType) {
         return null
       }
-
       return (
         <div className='flex items-center gap-x-2'>
           {userType.icon && (
             <userType.icon size={16} className='text-muted-foreground' />
           )}
-          <span className='text-sm capitalize'>{row.getValue('role')}</span>
+          <span className='text-sm capitalize'>{userType.labelVi}</span>
         </div>
       )
     },
