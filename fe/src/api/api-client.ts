@@ -14,6 +14,17 @@ const apiClient = axios.create({
     // Authorization: `Bearer ${useAuthStore.getState().accessToken}`, // Gửi Access Token
   },
 })
+// Interceptor to attach token to each request
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken') // Retrieve token from localStorage
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}` // Attach token to Authorization header
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
 // Interceptor xử lý lỗi 401 (hết hạn Access Token)
 declare module 'axios' {
