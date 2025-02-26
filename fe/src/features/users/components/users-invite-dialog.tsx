@@ -4,33 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IconMailPlus, IconSend } from '@tabler/icons-react'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { SelectDropdown } from '@/components/common/select-dropdown'
 import { userTypes } from '../data/data'
 
 const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Email is required.' })
-    .email({ message: 'Email is invalid.' }),
+  email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Email is invalid.' }),
   role: z.string().min(1, { message: 'Role is required.' }),
   desc: z.string().optional(),
 })
@@ -73,17 +55,10 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
           <DialogTitle className='flex items-center gap-2'>
             <IconMailPlus /> Invite User
           </DialogTitle>
-          <DialogDescription>
-            Invite new user to join your team by sending them an email
-            invitation. Assign a role to define their access level.
-          </DialogDescription>
+          <DialogDescription>Invite new user to join your team by sending them an email invitation. Assign a role to define their access level.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            id='user-invite-form'
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='space-y-4'
-          >
+          <form id='user-invite-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <FormField
               control={form.control}
               name='email'
@@ -91,11 +66,7 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      type='email'
-                      placeholder='eg: john.doe@gmail.com'
-                      {...field}
-                    />
+                    <Input type='email' placeholder='eg: john.doe@gmail.com' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,11 +98,7 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
                 <FormItem className=''>
                   <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      className='resize-none'
-                      placeholder='Add a personal note to your invitation (optional)'
-                      {...field}
-                    />
+                    <Textarea className='resize-none' placeholder='Add a personal note to your invitation (optional)' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

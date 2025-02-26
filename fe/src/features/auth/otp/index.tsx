@@ -14,7 +14,7 @@ export default function Otp() {
           </h1>
           <p className='text-sm text-muted-foreground'>
             Vui lòng nhập mã xác thực. <br /> Chúng tôi đã gửi mã xác thực đến
-            email của bạn.
+            Zalo của bạn.
           </p>
         </div>
         <OtpForm />
