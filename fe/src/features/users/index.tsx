@@ -1,3 +1,4 @@
+//path : fe/src/features/users/index.tsx
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
