@@ -18,6 +18,7 @@ import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
+import { Route as AuthenticatedTransportationRoutesImport } from './routes/_authenticated/transportation/routes'
 
 // Create Virtual Routes
 
@@ -37,8 +38,8 @@ const AuthenticatedSettingsRouteLazyImport = createFileRoute(
 const AuthenticatedUsersIndexLazyImport = createFileRoute(
   '/_authenticated/users/',
 )()
-const AuthenticatedTasksIndexLazyImport = createFileRoute(
-  '/_authenticated/tasks/',
+const AuthenticatedTransportationIndexLazyImport = createFileRoute(
+  '/_authenticated/transportation/',
 )()
 const AuthenticatedStudentsIndexLazyImport = createFileRoute(
   '/_authenticated/students/',
@@ -46,17 +47,20 @@ const AuthenticatedStudentsIndexLazyImport = createFileRoute(
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
 )()
+const AuthenticatedReportsIndexLazyImport = createFileRoute(
+  '/_authenticated/reports/',
+)()
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
 const AuthenticatedAppsIndexLazyImport = createFileRoute(
   '/_authenticated/apps/',
 )()
+const AuthenticatedTransportationBusLazyImport = createFileRoute(
+  '/_authenticated/transportation/bus',
+)()
 const AuthenticatedSettingsNotificationsLazyImport = createFileRoute(
   '/_authenticated/settings/notifications',
-)()
-const AuthenticatedSettingsDisplayLazyImport = createFileRoute(
-  '/_authenticated/settings/display',
 )()
 const AuthenticatedSettingsAppearanceLazyImport = createFileRoute(
   '/_authenticated/settings/appearance',
@@ -180,13 +184,15 @@ const AuthenticatedUsersIndexLazyRoute =
     import('./routes/_authenticated/users/index.lazy').then((d) => d.Route),
   )
 
-const AuthenticatedTasksIndexLazyRoute =
-  AuthenticatedTasksIndexLazyImport.update({
-    id: '/tasks/',
-    path: '/tasks/',
+const AuthenticatedTransportationIndexLazyRoute =
+  AuthenticatedTransportationIndexLazyImport.update({
+    id: '/transportation/',
+    path: '/transportation/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
-    import('./routes/_authenticated/tasks/index.lazy').then((d) => d.Route),
+    import('./routes/_authenticated/transportation/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const AuthenticatedStudentsIndexLazyRoute =
@@ -205,6 +211,15 @@ const AuthenticatedSettingsIndexLazyRoute =
     getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/settings/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedReportsIndexLazyRoute =
+  AuthenticatedReportsIndexLazyImport.update({
+    id: '/reports/',
+    path: '/reports/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/reports/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedHelpCenterIndexLazyRoute =
@@ -228,6 +243,17 @@ const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
   import('./routes/_authenticated/apps/index.lazy').then((d) => d.Route),
 )
 
+const AuthenticatedTransportationBusLazyRoute =
+  AuthenticatedTransportationBusLazyImport.update({
+    id: '/transportation/bus',
+    path: '/transportation/bus',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/transportation/bus.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedSettingsNotificationsLazyRoute =
   AuthenticatedSettingsNotificationsLazyImport.update({
     id: '/notifications',
@@ -235,17 +261,6 @@ const AuthenticatedSettingsNotificationsLazyRoute =
     getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/settings/notifications.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
-const AuthenticatedSettingsDisplayLazyRoute =
-  AuthenticatedSettingsDisplayLazyImport.update({
-    id: '/display',
-    path: '/display',
-    getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/settings/display.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -271,6 +286,13 @@ const AuthenticatedSettingsAccountLazyRoute =
       (d) => d.Route,
     ),
   )
+
+const AuthenticatedTransportationRoutesRoute =
+  AuthenticatedTransportationRoutesImport.update({
+    id: '/transportation/routes',
+    path: '/transportation/routes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -374,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/transportation/routes': {
+      id: '/_authenticated/transportation/routes'
+      path: '/transportation/routes'
+      fullPath: '/transportation/routes'
+      preLoaderRoute: typeof AuthenticatedTransportationRoutesImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/settings/account': {
       id: '/_authenticated/settings/account'
       path: '/account'
@@ -388,19 +417,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAppearanceLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
-    '/_authenticated/settings/display': {
-      id: '/_authenticated/settings/display'
-      path: '/display'
-      fullPath: '/settings/display'
-      preLoaderRoute: typeof AuthenticatedSettingsDisplayLazyImport
-      parentRoute: typeof AuthenticatedSettingsRouteLazyImport
-    }
     '/_authenticated/settings/notifications': {
       id: '/_authenticated/settings/notifications'
       path: '/notifications'
       fullPath: '/settings/notifications'
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
+    }
+    '/_authenticated/transportation/bus': {
+      id: '/_authenticated/transportation/bus'
+      path: '/transportation/bus'
+      fullPath: '/transportation/bus'
+      preLoaderRoute: typeof AuthenticatedTransportationBusLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
@@ -414,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/help-center'
       fullPath: '/help-center'
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/reports/': {
+      id: '/_authenticated/reports/'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/': {
@@ -430,11 +466,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudentsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/tasks/': {
-      id: '/_authenticated/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof AuthenticatedTasksIndexLazyImport
+    '/_authenticated/transportation/': {
+      id: '/_authenticated/transportation/'
+      path: '/transportation'
+      fullPath: '/transportation'
+      preLoaderRoute: typeof AuthenticatedTransportationIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/users/': {
@@ -452,7 +488,6 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedSettingsRouteLazyRouteChildren {
   AuthenticatedSettingsAccountLazyRoute: typeof AuthenticatedSettingsAccountLazyRoute
   AuthenticatedSettingsAppearanceLazyRoute: typeof AuthenticatedSettingsAppearanceLazyRoute
-  AuthenticatedSettingsDisplayLazyRoute: typeof AuthenticatedSettingsDisplayLazyRoute
   AuthenticatedSettingsNotificationsLazyRoute: typeof AuthenticatedSettingsNotificationsLazyRoute
   AuthenticatedSettingsIndexLazyRoute: typeof AuthenticatedSettingsIndexLazyRoute
 }
@@ -463,8 +498,6 @@ const AuthenticatedSettingsRouteLazyRouteChildren: AuthenticatedSettingsRouteLaz
       AuthenticatedSettingsAccountLazyRoute,
     AuthenticatedSettingsAppearanceLazyRoute:
       AuthenticatedSettingsAppearanceLazyRoute,
-    AuthenticatedSettingsDisplayLazyRoute:
-      AuthenticatedSettingsDisplayLazyRoute,
     AuthenticatedSettingsNotificationsLazyRoute:
       AuthenticatedSettingsNotificationsLazyRoute,
     AuthenticatedSettingsIndexLazyRoute: AuthenticatedSettingsIndexLazyRoute,
@@ -478,10 +511,13 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedTransportationRoutesRoute: typeof AuthenticatedTransportationRoutesRoute
+  AuthenticatedTransportationBusLazyRoute: typeof AuthenticatedTransportationBusLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
+  AuthenticatedReportsIndexLazyRoute: typeof AuthenticatedReportsIndexLazyRoute
   AuthenticatedStudentsIndexLazyRoute: typeof AuthenticatedStudentsIndexLazyRoute
-  AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
+  AuthenticatedTransportationIndexLazyRoute: typeof AuthenticatedTransportationIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
 }
 
@@ -489,10 +525,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedTransportationRoutesRoute:
+    AuthenticatedTransportationRoutesRoute,
+  AuthenticatedTransportationBusLazyRoute:
+    AuthenticatedTransportationBusLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
+  AuthenticatedReportsIndexLazyRoute: AuthenticatedReportsIndexLazyRoute,
   AuthenticatedStudentsIndexLazyRoute: AuthenticatedStudentsIndexLazyRoute,
-  AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
+  AuthenticatedTransportationIndexLazyRoute:
+    AuthenticatedTransportationIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
 }
 
@@ -513,15 +555,17 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/transportation/bus': typeof AuthenticatedTransportationBusLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/reports': typeof AuthenticatedReportsIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/students': typeof AuthenticatedStudentsIndexLazyRoute
-  '/tasks': typeof AuthenticatedTasksIndexLazyRoute
+  '/transportation': typeof AuthenticatedTransportationIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
 }
 
@@ -537,15 +581,17 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/transportation/bus': typeof AuthenticatedTransportationBusLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/reports': typeof AuthenticatedReportsIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/students': typeof AuthenticatedStudentsIndexLazyRoute
-  '/tasks': typeof AuthenticatedTasksIndexLazyRoute
+  '/transportation': typeof AuthenticatedTransportationIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
 }
 
@@ -565,15 +611,17 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
-  '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/_authenticated/transportation/bus': typeof AuthenticatedTransportationBusLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/_authenticated/reports/': typeof AuthenticatedReportsIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/students/': typeof AuthenticatedStudentsIndexLazyRoute
-  '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
+  '/_authenticated/transportation/': typeof AuthenticatedTransportationIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
 }
 
@@ -593,15 +641,17 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
+    | '/transportation/routes'
     | '/settings/account'
     | '/settings/appearance'
-    | '/settings/display'
     | '/settings/notifications'
+    | '/transportation/bus'
     | '/apps'
     | '/help-center'
+    | '/reports'
     | '/settings/'
     | '/students'
-    | '/tasks'
+    | '/transportation'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -616,15 +666,17 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
+    | '/transportation/routes'
     | '/settings/account'
     | '/settings/appearance'
-    | '/settings/display'
     | '/settings/notifications'
+    | '/transportation/bus'
     | '/apps'
     | '/help-center'
+    | '/reports'
     | '/settings'
     | '/students'
-    | '/tasks'
+    | '/transportation'
     | '/users'
   id:
     | '__root__'
@@ -642,15 +694,17 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/_authenticated/transportation/routes'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
-    | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/transportation/bus'
     | '/_authenticated/apps/'
     | '/_authenticated/help-center/'
+    | '/_authenticated/reports/'
     | '/_authenticated/settings/'
     | '/_authenticated/students/'
-    | '/_authenticated/tasks/'
+    | '/_authenticated/transportation/'
     | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
 }
@@ -714,10 +768,13 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
+        "/_authenticated/transportation/routes",
+        "/_authenticated/transportation/bus",
         "/_authenticated/apps/",
         "/_authenticated/help-center/",
+        "/_authenticated/reports/",
         "/_authenticated/students/",
-        "/_authenticated/tasks/",
+        "/_authenticated/transportation/",
         "/_authenticated/users/"
       ]
     },
@@ -736,7 +793,6 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings/account",
         "/_authenticated/settings/appearance",
-        "/_authenticated/settings/display",
         "/_authenticated/settings/notifications",
         "/_authenticated/settings/"
       ]
@@ -769,6 +825,10 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/transportation/routes": {
+      "filePath": "_authenticated/transportation/routes.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/settings/account": {
       "filePath": "_authenticated/settings/account.lazy.tsx",
       "parent": "/_authenticated/settings"
@@ -777,13 +837,13 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings/appearance.lazy.tsx",
       "parent": "/_authenticated/settings"
     },
-    "/_authenticated/settings/display": {
-      "filePath": "_authenticated/settings/display.lazy.tsx",
-      "parent": "/_authenticated/settings"
-    },
     "/_authenticated/settings/notifications": {
       "filePath": "_authenticated/settings/notifications.lazy.tsx",
       "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/transportation/bus": {
+      "filePath": "_authenticated/transportation/bus.lazy.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/apps/": {
       "filePath": "_authenticated/apps/index.lazy.tsx",
@@ -791,6 +851,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/help-center/": {
       "filePath": "_authenticated/help-center/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/reports/": {
+      "filePath": "_authenticated/reports/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/": {
@@ -801,8 +865,8 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/students/index.lazy.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/tasks/": {
-      "filePath": "_authenticated/tasks/index.lazy.tsx",
+    "/_authenticated/transportation/": {
+      "filePath": "_authenticated/transportation/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/users/": {
