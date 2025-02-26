@@ -1,3 +1,4 @@
+// import { Link } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 import { Card } from '@/components/ui/card'
 import AuthLayout from '../auth-layout'
@@ -12,12 +13,12 @@ export default function ForgotPassword() {
             Quên mật khẩu
           </h1>
           <p className='text-sm text-muted-foreground'>
-            Nhập email đã đăng ký của bạn và <br /> chúng tôi sẽ gửi cho bạn một
-            liên kết để đặt lại mật khẩu của bạn.
+            Nhập số điện thoại đã đăng ký của bạn và <br /> chúng tôi sẽ gửi cho
+            bạn một mã OTP thông qua Zalo.
           </p>
         </div>
         <ForgotForm />
-        <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
+        {/* <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
           Bạn không có tài khoản?{' '}
           <Link
             to='/sign-up'
@@ -26,7 +27,7 @@ export default function ForgotPassword() {
             Đăng ký
           </Link>
           .
-        </p>
+        </p> */}
       </Card>
     </AuthLayout>
   )

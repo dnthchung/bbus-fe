@@ -1,6 +1,7 @@
 // src/types/auth.ts
 export interface LoginCredentials {
-  email: string
+  phone: string
+  // email: string
   password: string
 }
 
