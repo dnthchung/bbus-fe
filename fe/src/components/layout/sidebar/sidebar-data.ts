@@ -86,8 +86,8 @@
 //   ],
 // }
 //path : fe/src/components/layout/data/sidebar-data.ts
-import { IconBug, IconHelp, IconLayoutDashboard, IconLock, IconLockAccess, IconPalette, IconSettings, IconTool, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification } from '@tabler/icons-react'
-import { AudioWaveform, Command, GalleryVerticalEnd, Bus, MapPinPlus } from 'lucide-react'
+import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconTool, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification } from '@tabler/icons-react'
+import { Bus, MapPinPlus } from 'lucide-react'
 import { type SidebarData } from '@/components/layout/sidebar/sidebar-type'
 
 export const sidebarData: SidebarData = {
@@ -112,7 +112,7 @@ export const sidebarData: SidebarData = {
         { title: 'Quản lý TK người dùng', url: '/users', icon: IconLockAccess },
         { title: 'Quản lý học sinh', url: '/students', icon: IconUsers },
         {
-          title: 'Quản lý vận tải',
+          title: 'Quản lý đưa đón',
           icon: IconBusStop,
           items: [
             { title: 'Xe bus', url: '/transportation/bus', icon: IconBus },
@@ -120,7 +120,7 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: 'Quản lý báo cáo',
+          title: 'Quản lý báo cáo', // code sau
           icon: IconReport,
           items: [
             { title: 'Danh sách báo cáo', url: '/401', icon: IconFlag },
