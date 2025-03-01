@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Student } from '../data/schema'
 
-type StudentsDialogType = 'add' | 'edit' | 'delete' | 'import'
+type StudentsDialogType = 'add' | 'edit' | 'delete' | 'import' | 'export'
 
 interface StudentsContextType {
   open: StudentsDialogType | null

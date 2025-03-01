@@ -1,8 +1,6 @@
 //path : fe/src/features/students/data/schema.ts
 import { z } from 'zod'
 
-// Import thư viện Zod để xác thực dữ liệu
-
 // Định nghĩa schema cho trạng thái sử dụng dịch vụ xe buýt
 const busServiceStatusSchema = z.union([
   z.literal('Đang sử dụng'), // Học sinh đang sử dụng dịch vụ xe buýt
@@ -12,18 +10,6 @@ const busServiceStatusSchema = z.union([
 export type BusServiceStatus = z.infer<typeof busServiceStatusSchema>
 
 //Định nghĩa schema cho học sinh (chỉ học sinh đã đăng ký xe buýt)
-// export const studentSchema = z.object({
-//   studentId: z.string().uuid().optional(), // Với add mới có thể để optional
-//   avatar: z.string().url(),
-//   fullName: z.string(),
-//   birthDate: z.coerce.date(), // Ép kiểu string → date
-//   grade: z.number().int().min(1).max(9),
-//   class: z.string().regex(/^[1-9][A-J]$/, {
-//     message: "Class must match e.g. '1A', '2B', ... '9J'",
-//   }),
-//   busServiceStatus: busServiceStatusSchema,
-// })
-
 export const studentSchema = z
   .object({
     studentId: z.string().uuid().optional(),
