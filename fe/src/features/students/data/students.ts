@@ -1,3 +1,4 @@
+//path : fe/src/features/students/data/students.ts
 import { faker } from '@faker-js/faker'
 
 export const students = Array.from({ length: 20 }, () => {

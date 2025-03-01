@@ -1,3 +1,4 @@
+//path: fe/src/features/students/context/students-context.tsx
 import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Student } from '../data/schema'

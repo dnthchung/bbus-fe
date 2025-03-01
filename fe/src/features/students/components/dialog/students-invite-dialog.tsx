@@ -9,27 +9,27 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { SelectDropdown } from '@/components/common/select-dropdown'
-import { userTypes } from '../data/data'
+import { studentTypes } from '../../data/data'
 
 const formSchema = z.object({
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Email is invalid.' }),
   role: z.string().min(1, { message: 'Role is required.' }),
   desc: z.string().optional(),
 })
-type UserInviteForm = z.infer<typeof formSchema>
+type studentInviteForm = z.infer<typeof formSchema>
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function UsersInviteDialog({ open, onOpenChange }: Props) {
-  const form = useForm<UserInviteForm>({
+export function StudentsInviteDialog({ open, onOpenChange }: Props) {
+  const form = useForm<studentInviteForm>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: '', role: '', desc: '' },
   })
 
-  const onSubmit = (values: UserInviteForm) => {
+  const onSubmit = (values: studentInviteForm) => {
     form.reset()
     toast({
       title: 'You submitted the following values:',
@@ -53,12 +53,12 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
       <DialogContent className='sm:max-w-md'>
         <DialogHeader className='text-left'>
           <DialogTitle className='flex items-center gap-2'>
-            <IconMailPlus /> Invite User
+            <IconMailPlus /> Invite student
           </DialogTitle>
-          <DialogDescription>Invite new user to join your team by sending them an email invitation. Assign a role to define their access level.</DialogDescription>
+          <DialogDescription>Invite new student to join your team by sending them an email invitation. Assign a role to define their access level.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form id='user-invite-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <form id='student-invite-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <FormField
               control={form.control}
               name='email'
@@ -82,7 +82,7 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
                     defaultValue={field.value}
                     onValueChange={field.onChange}
                     placeholder='Select a role'
-                    items={userTypes.map(({ label, value }) => ({
+                    items={studentTypes.map(({ label, value }) => ({
                       label,
                       value,
                     }))}
@@ -110,7 +110,7 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
           <DialogClose asChild>
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
-          <Button type='submit' form='user-invite-form'>
+          <Button type='submit' form='student-invite-form'>
             Invite <IconSend />
           </Button>
         </DialogFooter>

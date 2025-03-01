@@ -2,9 +2,9 @@
 import { useState } from 'react'
 import { ColumnDef, ColumnFiltersState, RowData, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { User } from '../data/schema'
+import { Student } from '../data/schema'
 import { DataTablePagination } from './table/data-table-pagination'
-import { DataTableToolbar } from './table/data-table-toolbar'
+import { DataTableStudentToolbar } from './table/data-table-toolbar'
 
 // Mở rộng module '@tanstack/react-table' để thêm thuộc tính `className` cho `ColumnMeta`
 declare module '@tanstack/react-table' {
@@ -15,12 +15,12 @@ declare module '@tanstack/react-table' {
 
 // Định nghĩa interface cho `UsersTable`
 interface DataTableProps {
-  columns: ColumnDef<User>[] // Mảng các cột của bảng
-  data: User[] // Dữ liệu hiển thị trong bảng
+  columns: ColumnDef<Student>[] // Mảng các cột của bảng
+  data: Student[] // Dữ liệu hiển thị trong bảng
 }
 
 // Component chính: UsersTable
-export function UsersTable({ columns, data }: DataTableProps) {
+export function StudentsTable({ columns, data }: DataTableProps) {
   // State quản lý các trạng thái của bảng
   const [rowSelection, setRowSelection] = useState({}) // Trạng thái chọn dòng
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({}) // Trạng thái hiển thị cột
@@ -53,7 +53,7 @@ export function UsersTable({ columns, data }: DataTableProps) {
   return (
     <div className='space-y-4'>
       {/* Thanh công cụ của bảng */}
-      <DataTableToolbar table={table} />
+      <DataTableStudentToolbar table={table} />
 
       {/* Bảng dữ liệu */}
       <div className='rounded-md border'>
