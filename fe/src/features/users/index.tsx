@@ -1,9 +1,10 @@
+//path : fe/src/features/users/index.tsx
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { columns } from './components/users-columns'
+import { columns } from './components/table/users-columns'
 import { UsersDialogs } from './components/users-dialogs'
 import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersTable } from './components/users-table'
@@ -28,10 +29,8 @@ export default function Users() {
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>User List</h2>
-            <p className='text-muted-foreground'>
-              Manage your users and their roles here.
-            </p>
+            <h2 className='text-2xl font-bold tracking-tight'>DS người dùng</h2>
+            <p className='text-muted-foreground'>Quản lý thông tin các tài khoản người dùng trong hệ thống.</p>
           </div>
           <UsersPrimaryButtons />
         </div>
