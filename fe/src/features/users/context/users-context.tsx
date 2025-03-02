@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { User } from '../data/schema'
 
-// Định nghĩa các loại dialog có thể mở trong tính năng Users
+// Định nghĩa các loại dialog có thể mở trong tính năng Users - Thêm 1 cái view details
 type UsersDialogType = 'import' | 'add' | 'edit' | 'delete' | 'invite'
 
 // Định nghĩa cấu trúc context sẽ được chia sẻ qua Provider

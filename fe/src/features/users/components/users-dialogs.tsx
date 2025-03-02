@@ -1,9 +1,9 @@
 //path : fe/src/features/users/components/users-dialogs.tsx
 import { useUsers } from '../context/users-context'
-import { UsersActionDialog } from './users-action-dialog'
-import { UsersDeleteDialog } from './users-delete-dialog'
-import { UsersImportDialog } from './users-import-excel-dialog'
-import { UsersInviteDialog } from './users-invite-dialog'
+import { UsersActionDialog } from './dialog/users-action-dialog'
+import { UsersDeleteDialog } from './dialog/users-delete-dialog'
+import { UsersImportDialog } from './dialog/users-import-excel-dialog'
+import { UsersInviteDialog } from './dialog/users-invite-dialog'
 
 export function UsersDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useUsers()
