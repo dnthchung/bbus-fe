@@ -1,15 +1,19 @@
 //path : src/hooks/use-auth.ts
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { getUserIdFromToken } from '@/helpers/jwt-decode'
 import { API_SERVICES } from '@/api/api-services'
 import { useAuthStore } from '@/stores/authStore'
-
-// ✅ Import API gộp
 
 export const useAuthQuery = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
+
+  localStorage.getItem('accessToken')
+  // Extract userId from JWT token
+  const userId = getUserIdFromToken('accessToken')
+  console.log('Decoded userId (use-auth):', userId)
 
   // Fetch user từ API `/auth/user`
   const {
@@ -20,7 +24,7 @@ export const useAuthQuery = () => {
     queryKey: ['authUser'],
     queryFn: async () => {
       console.log('Fetching user from API /auth/user... (use-auth hook)')
-      const { data } = await API_SERVICES.auth.fetchUser()
+      const { data } = await API_SERVICES.auth.fetchUser(userId)
       console.log('Fetched user data:', data)
 
       return data

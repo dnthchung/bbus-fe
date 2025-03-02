@@ -17,32 +17,6 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // const handleLogin = async (credentials: LoginCredentials) => {
-  //   setLoading(true)
-  //   setError(null)
-  //   try {
-  //     // Gọi API login
-  //     const { data } = await API_SERVICES.auth.login(credentials)
-  //     console.log('login - index.tsx - response', data.access_token)
-  //     // Lưu accessToken vào localStorage (nếu cần)
-  //     localStorage.setItem('accessToken', data.access_token)
-  //     localStorage.setItem('isAuthenticated', 'true')
-  //     // Gọi API lấy thông tin user ngay sau khi login
-  //     const { data: user } = await API_SERVICES.auth.fetchUser()
-  //     console.log('login - index.tsx - fetched user', user)
-  //     // Cập nhật React Query Cache
-  //     queryClient.setQueryData(['authUser'], user)
-  //     // Cập nhật Zustand store
-  //     useAuthStore.setState({ user, isAuthenticated: true })
-  //     // Điều hướng về trang chủ
-  //     navigate({ to: '/' })
-  //   } catch (err) {
-  //     setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.')
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
   const handleLogin = async (credentials: LoginCredentials) => {
     setLoading(true)
     setError(null)
@@ -56,7 +30,7 @@ export default function SignIn() {
       localStorage.setItem('isAuthenticated', 'true')
 
       // Extract userId from JWT token
-      const userId = getUserIdFromToken(data.access_token)
+      const userId = getUserIdFromToken('accessToken')
       console.log('Decoded userId:', userId)
 
       // Fetch user info immediately after login

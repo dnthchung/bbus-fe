@@ -1,4 +1,5 @@
 // src/stores/authStore.ts
+import { getUserIdFromToken } from '@/helpers/jwt-decode'
 import { create } from 'zustand'
 import { API_SERVICES } from '@/api/api-services'
 
@@ -39,6 +40,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // await apiClient.get('/auth/logout')
     await API_SERVICES.auth.logout() // ✅ Gửi request để logout
     set({ user: null, isAuthenticated: false })
+    console.log('logout authStore.ts')
     localStorage.removeItem('accessToken') // Xóa token
     localStorage.removeItem('isAuthenticated') // ✅ Xóa trạng thái
     window.location.href = '/sign-in'
@@ -48,9 +50,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 // ✅ Tự động fetch user sau khi reload
 if (localStorage.getItem('isAuthenticated') === 'true') {
+  localStorage.getItem('accessToken')
+  // Extract userId from JWT token
+  const userId = getUserIdFromToken('accessToken')
+  console.log('Decoded userId - (authStore):', userId)
   // useAuthStore.getState().fetchUser()
   API_SERVICES.auth
-    .fetchUser()
+    .fetchUser(userId)
     .then(({ data }) => {
       useAuthStore.setState({ user: data, isAuthenticated: true })
     })
