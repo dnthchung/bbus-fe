@@ -14,9 +14,6 @@ interface ApiServices {
   users: {
     getAll: () => Promise<any>
     getOne: (id: string) => Promise<any>
-    // create: (userData: any) => Promise<any>
-    // update: (id: string, userData: any) => Promise<any>
-    // delete: (id: string) => Promise<any>
   }
 }
 
@@ -33,37 +30,19 @@ export const API_SERVICES: ApiServices = {
       return apiClient.post(API_ENDPOINTS.AUTH.LOGIN, payload)
     },
     logout: () => apiClient.get(API_ENDPOINTS.AUTH.LOGOUT),
-    refresh: () => apiClient.get(API_ENDPOINTS.AUTH.REFRESH),
-    fetchUser: (userId: string) =>
-      apiClient.get(API_ENDPOINTS.AUTH.USER(userId)),
+    refresh: () => {
+      const refreshToken = localStorage.getItem('refreshToken')
+      if (!refreshToken) {
+        return Promise.reject(new Error('No refresh token available'))
+      }
+      // Gửi refreshToken trong body của POST request
+      return apiClient.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken })
+    },
+    fetchUser: (userId: string) => apiClient.get(API_ENDPOINTS.AUTH.USER(userId)),
   },
   // 🔹 USER API
   users: {
     getAll: () => apiClient.get(API_ENDPOINTS.USERS.GET_ALL),
     getOne: (id: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(id)),
-    // create: (userData: any) =>
-    //   apiClient.post(API_ENDPOINTS.USERS.CREATE, userData),
-    // update: (id: string, userData: any) =>
-    //   apiClient.put(API_ENDPOINTS.USERS.UPDATE(id), userData),
-    // delete: (id: string) => apiClient.delete(API_ENDPOINTS.USERS.DELETE(id)),
   },
 }
-
-//2.2. Sử dụng generic types cho response
-// Thay vì trả về Promise<any>, bạn có thể sử dụng generic types để định nghĩa kiểu dữ liệu cụ thể cho response của mỗi API.
-// Định nghĩa kiểu dữ liệu cho API_SERVICES với generic types
-// interface ApiServices {
-//   auth: {
-//     login: (credentials: LoginCredentials) => Promise<AuthResponse>;
-//     logout: () => Promise<void>;
-//     refresh: () => Promise<AuthResponse>;
-//     fetchUser: () => Promise<UserProfile>;
-//   };
-//   users: {
-//     getAll: () => Promise<User[]>;
-//     getOne: (id: string) => Promise<User>;
-//     create: (userData: CreateUserInput) => Promise<User>;
-//     update: (id: string, userData: UpdateUserInput) => Promise<User>;
-//     delete: (id: string) => Promise<void>;
-//   };
-// }

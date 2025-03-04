@@ -14,6 +14,7 @@ import { students } from './data/students'
 
 export default function Students() {
   const studentList = studentListSchema.parse(students)
+  //localhost:8080/user/list?page=1&size=20
 
   return (
     <StudentsProvider>

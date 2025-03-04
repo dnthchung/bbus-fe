@@ -2,14 +2,10 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { handleServerError } from '@/helpers/handle-server-error'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthQuery } from '@/hooks/use-auth'
 import { toast } from '@/hooks/use-toast'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
@@ -27,10 +23,7 @@ const queryClient = new QueryClient({
         if (failureCount >= 0 && import.meta.env.DEV) return false
         if (failureCount > 3 && import.meta.env.PROD) return false
 
-        return !(
-          error instanceof AxiosError &&
-          [401, 403].includes(error.response?.status ?? 0)
-        )
+        return !(error instanceof AxiosError && [401, 403].includes(error.response?.status ?? 0))
       },
       refetchOnWindowFocus: import.meta.env.PROD,
       staleTime: 10 * 1000, // 10s
@@ -59,7 +52,8 @@ const queryClient = new QueryClient({
             title: 'Session expired!',
           })
           // useAuthStore.getState().auth.reset()
-          useAuthStore.getState().logout()
+          // useAuthStore.getState().logout()
+          useAuthQuery().logout()
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in', search: { redirect } })
         }
