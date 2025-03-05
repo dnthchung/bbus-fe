@@ -6,14 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/common/password-input'
 
@@ -25,27 +18,17 @@ const formSchema = z.object({
     .regex(/^0\d{9}$/, {
       message: 'Số điện thoại không hợp lệ (bắt đầu bằng 0 và có 10 số)',
     }),
-  password: z
-    .string()
-    .min(1, { message: 'Vui lòng nhập mật khẩu' })
-    .min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' }),
+  password: z.string().min(1, { message: 'Vui lòng nhập mật khẩu' }).min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' }),
 })
 
 // ✅ Omit the native onSubmit from HTMLAttributes to avoid type conflicts
-export interface UserAuthFormProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'onSubmit'> {
+export interface UserAuthFormProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSubmit'> {
   onSubmit?: (data: z.infer<typeof formSchema>) => void
   isLoading?: boolean
   error?: string | null
 }
 
-export function UserAuthForm({
-  className,
-  onSubmit,
-  isLoading = false,
-  error,
-  ...props
-}: UserAuthFormProps) {
+export function UserAuthForm({ className, onSubmit, isLoading = false, error, ...props }: UserAuthFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,11 +59,7 @@ export function UserAuthForm({
                 <FormItem className='space-y-1'>
                   <FormLabel>Số điện thoại</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder='0123456789'
-                      {...field}
-                      aria-label='phone'
-                    />
+                    <Input placeholder='0123456789' {...field} aria-label='phone' autoComplete='current-password' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -95,19 +74,12 @@ export function UserAuthForm({
                 <FormItem className='space-y-1'>
                   <div className='flex items-center justify-between'>
                     <FormLabel>Mật khẩu</FormLabel>
-                    <Link
-                      to='/forgot-password'
-                      className='text-sm font-medium text-muted-foreground hover:opacity-75'
-                    >
+                    <Link to='/forgot-password' className='text-sm font-medium text-muted-foreground hover:opacity-75'>
                       Quên mật khẩu?
                     </Link>
                   </div>
                   <FormControl>
-                    <PasswordInput
-                      placeholder='*****'
-                      {...field}
-                      aria-label='password'
-                    />
+                    <PasswordInput placeholder='*****' {...field} aria-label='password' autoComplete='current-password' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

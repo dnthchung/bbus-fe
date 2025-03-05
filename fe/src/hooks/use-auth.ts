@@ -102,12 +102,12 @@ export const useAuthQuery = () => {
     localStorage.removeItem('isAuthenticated')
     navigate({ to: '/sign-in' })
   }
-  console.log('Decoded userId (use-auth):', userId)
+  // console.log('Decoded userId (use-auth):', userId)
 
   // Declare logout before use
   const logout = async () => {
     try {
-      await API_SERVICES.auth.logout()
+      // await API_SERVICES.auth.logout()
       queryClient.setQueryData(['authUser'], null)
       queryClient.cancelQueries({ queryKey: ['authUser'] })
       localStorage.removeItem('accessToken')
@@ -128,9 +128,9 @@ export const useAuthQuery = () => {
     queryKey: ['authUser'],
     queryFn: async () => {
       if (!userId) throw new Error('No valid user ID')
-      console.log('Fetching user from API /auth/user... (use-auth hook)')
+      // console.log('Fetching user from API /auth/user... (use-auth hook)')
       const response: FetchUserResponse = await API_SERVICES.auth.fetchUser(userId)
-      console.log('Fetched user data:', response)
+      // console.log('Fetched user data:', response)
       return response.data
     },
     enabled: isAuthenticated && !!userId,
@@ -141,7 +141,8 @@ export const useAuthQuery = () => {
   // Handle token expiration error
   if (isError && error instanceof Error && error.message.includes('JWT expired')) {
     console.error('JWT expired detected in useAuthQuery, logging out...')
-    logout() // Now logout is available
+
+    // logout()
   }
 
   return { user, isAuthenticated, isLoading, isError, logout }
