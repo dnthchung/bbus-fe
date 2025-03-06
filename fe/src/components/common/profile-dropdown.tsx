@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 export function ProfileDropdown() {
   const { user, isLoading, logout } = useAuthQuery()
   // console.log('ProfileDropdown - call 1')
-  console.log(user)
+  // console.log(user)
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
