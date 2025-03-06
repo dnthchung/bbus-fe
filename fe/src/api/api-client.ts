@@ -157,7 +157,7 @@
 // export default apiClient
 // src/lib/api-client.ts
 import axios, { AxiosError } from 'axios'
-import { ErrorResponse } from '@/types/response/error-response'
+// import { ErrorResponse } from '@/types/response/error-response'
 import { API_SERVICES } from './api-services'
 
 // 1) Create Axios instance
@@ -189,22 +189,97 @@ declare module 'axios' {
 }
 
 // 4) Response interceptor
+// apiClient.interceptors.response.use(
+//   // --- SUCCESS CASE ---
+//   (response) => {
+//     /*
+//       Because the backend sometimes returns HTTP 200 but the body itself has:
+//         {
+//           status: 403,
+//           message: "Access denied: JWT expired...",
+//           ...
+//         }
+//       we treat this as an error by throwing.
+//     */
+//     const data = response.data
+//     if (data?.status >= 400) {
+//       const customError = new Error(data.message || 'Unknown error')
+//       // Attach the status and data on the error, so the error interceptor sees them
+//       ;(customError as any).response = {
+//         status: data.status,
+//         data: data,
+//       }
+//       throw customError
+//     }
+
+//     // If data.status < 400, treat as success
+//     return response
+//   },
+
+//   // --- ERROR CASE ---
+//   async (error: AxiosError<ErrorResponse>) => {
+//     const originalRequest = error.config
+//     const errorStatus = error.response?.status
+//     const errorData = error.response?.data
+//     console.log('Original Request:', originalRequest)
+//     console.log('Error Status:', errorStatus)
+//     console.log('Error Data:', errorData)
+
+//     // Example: If we detect "JWT expired" (403) in the "body-level" error
+//     if (errorStatus === 403 && originalRequest && !originalRequest._retry && errorData?.message?.includes('JWT expired')) {
+//       originalRequest._retry = true
+//       try {
+//         // Attempt refresh
+//         const { data } = await API_SERVICES.auth.refresh()
+//         const newAccessToken = data.accessToken
+//         const newRefreshToken = data.refreshToken
+
+//         // Update localStorage
+//         localStorage.setItem('accessToken', newAccessToken)
+//         localStorage.setItem('refreshToken', newRefreshToken)
+
+//         // Retry original request with new token
+//         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+//         return apiClient(originalRequest)
+//       } catch (refreshError) {
+//         // Refresh failed -> remove tokens + redirect
+//         console.error('Refresh token failed:', refreshError)
+//         localStorage.removeItem('accessToken')
+//         localStorage.removeItem('refreshToken')
+//         localStorage.removeItem('isAuthenticated')
+//         window.location.href = '/sign-in'
+//         return Promise.reject(refreshError)
+//       }
+//     }
+
+//     // If not a token-expiration case, reject normally
+//     return Promise.reject(error)
+//   }
+// )
+
 apiClient.interceptors.response.use(
-  // --- SUCCESS CASE ---
+  // ---------------------------
+  //          SUCCESS
+  // ---------------------------
   (response) => {
-    /*
-      Because the backend sometimes returns HTTP 200 but the body itself has:
-        {
-          status: 403,
-          message: "Access denied: JWT expired...",
-          ...
-        }
-      we treat this as an error by throwing.
-    */
     const data = response.data
+
+    // 1) Nếu BE trả về HTTP 200, nhưng body `status = 403` + "JWT expired"
+    if (data?.status === 403 && data?.message?.includes('JWT expired')) {
+      // 2) Giả lập lỗi 403 để ném sang khối error
+      // const customError = new Error(data.message || 'JWT expired - Giả lập lỗi 403 để ném sang khối error')
+      const customError = new Error('=== JWT expired - Giả lập lỗi 403 để ném sang khối error ===')
+
+      ;(customError as any).response = {
+        status: 403,
+        data: data,
+      }
+      throw customError
+    }
+
+    // 3) Hoặc, bạn vẫn có trường hợp status >= 400 => ném lỗi
     if (data?.status >= 400) {
       const customError = new Error(data.message || 'Unknown error')
-      // Attach the status and data on the error, so the error interceptor sees them
       ;(customError as any).response = {
         status: data.status,
         data: data,
@@ -212,37 +287,35 @@ apiClient.interceptors.response.use(
       throw customError
     }
 
-    // If data.status < 400, treat as success
+    // Nếu không có vấn đề gì => trả về response bình thường
     return response
   },
 
-  // --- ERROR CASE ---
-  async (error: AxiosError<ErrorResponse>) => {
+  // ---------------------------
+  //          ERROR
+  // ---------------------------
+  async (error: AxiosError) => {
     const originalRequest = error.config
     const errorStatus = error.response?.status
     const errorData = error.response?.data
-    console.log('Original Request:', originalRequest)
+
     console.log('Error Status:', errorStatus)
     console.log('Error Data:', errorData)
 
-    // Example: If we detect "JWT expired" (403) in the "body-level" error
-    if (errorStatus === 403 && originalRequest && !originalRequest._retry && errorData?.message?.includes('JWT expired')) {
+    // 4) Tại đây, nếu status=403 + "JWT expired", bạn gọi refresh
+    if (errorStatus === 403 && originalRequest && !originalRequest._retry && (errorData as any)?.message?.includes('JWT expired')) {
       originalRequest._retry = true
       try {
-        // Attempt refresh
         const { data } = await API_SERVICES.auth.refresh()
-        const newAccessToken = data.accessToken
-        const newRefreshToken = data.refreshToken
+        const newAccessToken = data.access_token
+        const newRefreshToken = data.refresh_token
 
-        // Update localStorage
         localStorage.setItem('accessToken', newAccessToken)
         localStorage.setItem('refreshToken', newRefreshToken)
 
-        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
         return apiClient(originalRequest)
       } catch (refreshError) {
-        // Refresh failed -> remove tokens + redirect
         console.error('Refresh token failed:', refreshError)
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
@@ -252,9 +325,8 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // If not a token-expiration case, reject normally
+    // Nếu không phải lỗi 403 token expired => reject thông thường
     return Promise.reject(error)
   }
 )
-
 export default apiClient

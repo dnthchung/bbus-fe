@@ -113,7 +113,9 @@ export const useAuthQuery = () => {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('isAuthenticated')
-      navigate({ to: '/sign-in' })
+      // navigate({ to: '/sign-in' })
+      // window.location.href = '/sign-in' // Reload the
+      console.log('Logging out...')
     } catch (error) {
       console.error('Logout error:', error)
     }
@@ -142,7 +144,7 @@ export const useAuthQuery = () => {
   if (isError && error instanceof Error && error.message.includes('JWT expired')) {
     console.error('JWT expired detected in useAuthQuery, logging out...')
 
-    // logout()
+    logout()
   }
 
   return { user, isAuthenticated, isLoading, isError, logout }

@@ -1,9 +1,10 @@
-// src/hooks/api-services.ts
+// fe/src/api/api-services.ts
 import { LoginCredentials } from '@/types'
 import apiClient from '@/api/api-client'
-import { API_ENDPOINTS } from '@/api/api-endpoint'
+import { API_ENDPOINTS } from './api-endpoint'
 
-// Định nghĩa kiểu dữ liệu cho API_SERVICES
+// Gợi ý: Định nghĩa type chung cho cấu trúc trả về,
+// tùy logic BE (có thể tuỳ biến, đây chỉ là ví dụ).
 interface ApiServices {
   auth: {
     login: (credentials: LoginCredentials) => Promise<any>
@@ -14,18 +15,21 @@ interface ApiServices {
   users: {
     getAll: () => Promise<any>
     getOne: (id: string) => Promise<any>
+    list: () => Promise<any>
   }
 }
 
 export const API_SERVICES: ApiServices = {
-  // 🔹 AUTH API
+  // -------------------------
+  // 1) AUTH
+  // -------------------------
   auth: {
     login: (credentials: LoginCredentials) => {
       const payload = {
         ...credentials,
-        platform: 'WEB', // Fixed value
-        deviceToken: 'x-token', // Fixed value
-        versionApp: 'v1.2.9', // Fixed value
+        platform: 'WEB',
+        deviceToken: 'x-token',
+        versionApp: 'v1.2.9',
       }
       return apiClient.post(API_ENDPOINTS.AUTH.LOGIN, payload)
     },
@@ -35,14 +39,17 @@ export const API_SERVICES: ApiServices = {
       if (!refreshToken) {
         return Promise.reject(new Error('No refresh token available'))
       }
-      // Gửi refreshToken trong body của POST request
       return apiClient.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken })
     },
     fetchUser: (userId: string) => apiClient.get(API_ENDPOINTS.AUTH.USER(userId)),
   },
-  // 🔹 USER API
+
+  // -------------------------
+  // 2) USERS
+  // -------------------------
   users: {
     getAll: () => apiClient.get(API_ENDPOINTS.USERS.GET_ALL),
     getOne: (id: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(id)),
+    list: () => apiClient.get(API_ENDPOINTS.USERS.LIST),
   },
 }
