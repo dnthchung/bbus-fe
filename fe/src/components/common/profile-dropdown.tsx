@@ -75,9 +75,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 export function ProfileDropdown() {
   const { user, isLoading, logout } = useAuthQuery()
 
-  // Bạn có thể kiểm tra theo nhiều cách khác nhau:
-
-  // Cách 1: Trả về sớm một số trạng thái:
   if (isLoading) {
     return (
       <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
@@ -89,7 +86,6 @@ export function ProfileDropdown() {
   }
 
   if (!user) {
-    // Trường hợp fetch xong nhưng không có user (chưa đăng nhập hoặc token sai)
     return (
       <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
         <Avatar className='h-8 w-8'>
@@ -100,15 +96,13 @@ export function ProfileDropdown() {
     )
   }
 
-  // Cách 2: Giữ cấu trúc dropdown, chỉ render label khác nhau khi chưa có user.
-  // Tại đây user chắc chắn tồn tại, nên có thể đọc user.email thoải mái
+  // Khi có user, hiển thị thông tin đầy đủ
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
-            {/* Thay đổi ảnh user nếu bạn có url avatar thực tế, ở đây chỉ demo */}
-            <AvatarImage src='/avatars/01.png' alt='@user' />
+            <AvatarImage src={user.avatar || '/avatars/01.png'} alt={user.username || '@user'} />
             <AvatarFallback>{extractUsername(user.email).charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
