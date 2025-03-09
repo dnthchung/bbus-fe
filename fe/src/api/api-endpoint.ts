@@ -9,5 +9,6 @@ export const API_ENDPOINTS = {
   USERS: {
     GET_ALL: '/user',
     GET_ONE: (id: string) => `/user/${id}`,
+    LIST: '/user/list',
   },
 } as const

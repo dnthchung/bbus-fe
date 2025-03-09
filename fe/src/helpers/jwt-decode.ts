@@ -1,11 +1,19 @@
+//path : src/helpers/jwt-decode.ts
+// src/helpers/jwt-decode.ts
 import { jwtDecode } from 'jwt-decode'
 
-export const getUserIdFromToken = (token: string): string => {
+export const getUserIdFromToken = (token: string | null): string => {
+  if (!token) {
+    throw new Error('No token provided')
+  }
+
   try {
     const decodedToken: any = jwtDecode(token)
-    return decodedToken?.userId ? String(decodedToken.userId) : '1'
+    if (!decodedToken?.userId) {
+      throw new Error('User ID not found in token')
+    }
+    return String(decodedToken.userId)
   } catch (error) {
-    console.error('Error decoding JWT token:', error)
-    return '1'
+    throw new Error(`Error decoding JWT token: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }

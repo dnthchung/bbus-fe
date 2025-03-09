@@ -1,50 +1,93 @@
-//path : src/hooks/use-auth.ts
+// src/hooks/use-auth.ts
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { getUserIdFromToken } from '@/helpers/jwt-decode'
 import { API_SERVICES } from '@/api/api-services'
-import { useAuthStore } from '@/stores/authStore'
+
+// Định nghĩa kiểu AuthUser dựa trên cấu trúc trả về từ API
+interface AuthUser {
+  id: number
+  name: string
+  email: string
+  phone: string
+  address: string
+  avatar: string
+  dob: string
+  gender: string
+  roles: string[] | null
+  status: string | null
+  username: string | null
+}
+
+// Định nghĩa kiểu trả về đầy đủ của API
+interface FetchUserResponse {
+  data: {
+    status: number
+    message: string
+    data: AuthUser
+  }
+}
 
 export const useAuthQuery = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuthStore()
 
-  localStorage.getItem('accessToken')
-  // Extract userId from JWT token
-  const userId = getUserIdFromToken('accessToken')
-  console.log('Decoded userId (use-auth):', userId)
+  // Lấy thông tin từ localStorage
+  const isAuthenticated = !!localStorage.getItem('isAuthenticated')
+  const token = localStorage.getItem('accessToken')
+  let userId: string | null = null
 
-  // Fetch user từ API `/auth/user`
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['authUser'],
-    queryFn: async () => {
-      console.log('Fetching user from API /auth/user... (use-auth hook)')
-      const { data } = await API_SERVICES.auth.fetchUser(userId)
-      console.log('Fetched user data:', data)
+  try {
+    userId = token ? getUserIdFromToken(token) : null
+  } catch (error) {
+    console.error('Failed to decode token in useAuthQuery:', error)
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('isAuthenticated')
+    navigate({ to: '/sign-in' })
+  }
 
-      return data
-    },
-    enabled: isAuthenticated, // Chỉ fetch khi user đã login
-    retry: false, // Không tự động retry nếu request fail
-    staleTime: 5 * 60 * 1000, // Giữ dữ liệu 5 phút trước khi fetch lại
-  })
-
-  // Hàm logout → Gọi API và xóa cache user
+  // Hàm logout
   const logout = async () => {
     try {
-      await API_SERVICES.auth.logout()
-      queryClient.setQueryData(['authUser'], null) // Xóa cache user
-      queryClient.cancelQueries({ queryKey: ['authUser'] }) // Hủy request đang chờ
-      navigate({ to: '/sign-in' })
+      queryClient.setQueryData(['authUser'], null)
+      queryClient.cancelQueries({ queryKey: ['authUser'] })
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('isAuthenticated')
+      // navigate({ to: '/sign-in' })
+      window.location.href = '/sign-in'
     } catch (error) {
       console.error('Logout error:', error)
     }
   }
 
-  return { user, isLoading, isError, logout }
+  // Fetch user với React Query
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<AuthUser>({
+    queryKey: ['authUser', userId], // Thêm userId vào queryKey để đảm bảo tính duy nhất
+    queryFn: async () => {
+      if (!userId) {
+        throw new Error('No valid user ID')
+      }
+      const response: FetchUserResponse = await API_SERVICES.auth.fetchUser(userId)
+      console.log('Fetched user data:', response.data.data)
+      return response.data.data
+    },
+    enabled: isAuthenticated && !!userId, // Chỉ fetch khi đã xác thực và có userId
+    retry: false,
+    staleTime: 5 * 60 * 1000, // Dữ liệu "tươi" trong 5 phút
+  })
+
+  // Xử lý lỗi token hết hạn
+  if (isError && error instanceof Error && error.message.includes('JWT expired')) {
+    // console.error('JWT expired detected, logging out...')
+    logout()
+  }
+
+  return { user, isAuthenticated, isLoading, isError, logout }
 }
