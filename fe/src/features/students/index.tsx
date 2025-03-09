@@ -1,5 +1,5 @@
 //path : fe/src/features/students/index.tsx
-import { Search } from 'lucide-react'
+// import { Search } from 'lucide-react'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
@@ -19,7 +19,7 @@ export default function Students() {
   return (
     <StudentsProvider>
       <Header fixed>
-        <Search />
+        {/* <Search /> */}
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />
