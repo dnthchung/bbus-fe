@@ -118,7 +118,7 @@ export const sidebarData: SidebarData = {
           items: [
             { title: 'DS tuyến đường', url: '/transportation/routes', icon: MapPinPlus },
             { title: 'Lịch trình', url: '/transportation/schedules', icon: CalendarCheck },
-            { title: 'Điểm check point', url: '/transportation/checkpoints', icon: IconBusStop },
+            { title: 'DS các điểm dừng', url: '/transportation/checkpoints', icon: IconBusStop },
           ],
         },
         // thêm quản lý danh sách xe bus

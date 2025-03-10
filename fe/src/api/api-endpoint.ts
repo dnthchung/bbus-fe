@@ -11,4 +11,7 @@ export const API_ENDPOINTS = {
     GET_ONE: (id: string) => `/user/${id}`,
     LIST: '/user/list',
   },
+  CHECKPOINTS: {
+    GET_ALL: '/checkpoints/list',
+  },
 } as const
