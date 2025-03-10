@@ -116,7 +116,7 @@ export const sidebarData: SidebarData = {
           // icon: IconBusStop,
           icon: Route,
           items: [
-            { title: 'Danh sách tuyến đường', url: '/transportation/routes', icon: MapPinPlus },
+            { title: 'DS tuyến đường', url: '/transportation/routes', icon: MapPinPlus },
             { title: 'Lịch trình', url: '/transportation/schedules', icon: CalendarCheck },
             { title: 'Điểm check point', url: '/transportation/checkpoints', icon: IconBusStop },
           ],
@@ -127,7 +127,7 @@ export const sidebarData: SidebarData = {
           title: 'Quản lý báo cáo', // code sau
           icon: IconReport,
           items: [
-            { title: 'Danh sách báo cáo', url: '/401', icon: IconFlag },
+            { title: 'DS báo cáo', url: '/401', icon: IconFlag },
             { title: 'Báo cáo điểm danh', url: '/403', icon: IconUserOff },
           ],
         },
