@@ -2,6 +2,7 @@ import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import BusRoutePlanner from './components/map/BusRoutePlanner'
 
 export default function Routes() {
   return (
@@ -14,7 +15,9 @@ export default function Routes() {
       </Header>
 
       <Main>
-        <div>hi</div>
+        <div>
+          <BusRoutePlanner />
+        </div>
       </Main>
     </>
   )
