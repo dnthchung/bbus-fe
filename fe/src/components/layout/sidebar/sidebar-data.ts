@@ -87,7 +87,7 @@
 // }
 //path : fe/src/components/layout/data/sidebar-data.ts
 import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconTool, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification } from '@tabler/icons-react'
-import { Bus, MapPinPlus } from 'lucide-react'
+import { Bus, CalendarCheck, MapPinPlus, Route } from 'lucide-react'
 import { type SidebarData } from '@/components/layout/sidebar/sidebar-type'
 
 export const sidebarData: SidebarData = {
@@ -112,13 +112,17 @@ export const sidebarData: SidebarData = {
         { title: 'Quản lý TK người dùng', url: '/users', icon: IconLockAccess },
         { title: 'Quản lý học sinh', url: '/students', icon: IconUsers },
         {
-          title: 'Quản lý đưa đón',
-          icon: IconBusStop,
+          title: 'Quản lý tuyến đường',
+          // icon: IconBusStop,
+          icon: Route,
           items: [
-            { title: 'Xe bus', url: '/transportation/bus', icon: IconBus },
-            { title: 'Tuyến đường', url: '/transportation/routes', icon: MapPinPlus },
+            { title: 'Danh sách tuyến đường', url: '/transportation/routes', icon: MapPinPlus },
+            { title: 'Lịch trình', url: '/transportation/schedules', icon: CalendarCheck },
+            { title: 'Điểm check point', url: '/transportation/checkpoints', icon: IconBusStop },
           ],
         },
+        // thêm quản lý danh sách xe bus
+        { title: 'Quản lý xe bus', url: '/buses', icon: IconBus },
         {
           title: 'Quản lý báo cáo', // code sau
           icon: IconReport,

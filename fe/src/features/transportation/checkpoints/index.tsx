@@ -3,7 +3,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 
-export default function Routes() {
+export default function Checkpoints() {
   return (
     <>
       <Header fixed>
@@ -15,7 +15,7 @@ export default function Routes() {
 
       <Main>
         <div>
-          <p>routes</p>
+          <p>checkpoints</p>
         </div>
       </Main>
     </>

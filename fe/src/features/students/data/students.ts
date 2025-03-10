@@ -17,4 +17,4 @@ export const students = Array.from({ length: 20 }, () => {
   }
 })
 
-console.log(students)
+// console.log(students)

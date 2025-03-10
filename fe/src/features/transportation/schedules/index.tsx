@@ -2,8 +2,9 @@ import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import BusRoutePlanner from './components/map/BusRoutePlanner'
 
-export default function Routes() {
+export default function Schedules() {
   return (
     <>
       <Header fixed>
@@ -13,9 +14,9 @@ export default function Routes() {
         </div>
       </Header>
 
-      <Main>
+      <Main className='overflow-y-auto pt-[80px]'>
         <div>
-          <p>routes</p>
+          <BusRoutePlanner />
         </div>
       </Main>
     </>
