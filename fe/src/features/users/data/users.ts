@@ -37,9 +37,10 @@ export async function getAllUsers(): Promise<User[]> {
     // Phản hồi của Axios thường nằm ở response.data
     // Ví dụ: response.data = { status: 200, message: "user list", data: {...} }
     const rawData = response.data
+    console.log('rawData', rawData)
     // Mảng user có thể ở rawData.data.users
     const rawUsers = rawData?.data?.users
-
+    console.log('rawUsers', rawUsers)
     if (!rawUsers) {
       // Nếu không có dữ liệu users, trả về mảng rỗng
       return []

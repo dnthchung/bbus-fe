@@ -235,24 +235,19 @@ export const columns: ColumnDef<User>[] = [
   //   enableHiding: false,
   // },
   {
-    // Định nghĩa cột "role"
-    // Lấy vai trò đầu tiên từ mảng roles
     id: 'role',
-    accessorFn: (row) => row.roles[0] ?? 'N/A', // fallback nếu array rỗng
+    accessorFn: (row) => row.role ?? 'N/A', // Lấy role trực tiếp
     header: ({ column }) => <DataTableColumnHeader column={column} title='Vai trò' />,
     cell: ({ getValue }) => {
-      const singleRole = getValue() as string // ví dụ "TEACHER" / "ADMIN"
-
-      if (!singleRole || singleRole === 'N/A') {
+      const roleValue = getValue() as string // Ví dụ "TEACHER" hoặc "ADMIN"
+      if (!roleValue || roleValue === 'N/A') {
         return <span className='text-sm'>N/A</span>
       }
-
-      // Tìm userType tương ứng
-      const userType = userTypes.find((t) => t.value === singleRole)
+      // Tìm userType tương ứng để hiển thị tên tiếng Việt
+      const userType = userTypes.find((t) => t.value === roleValue)
       if (!userType) {
-        return <span className='text-sm'>{singleRole}</span>
+        return <span className='text-sm'>{roleValue}</span> // Nếu không tìm thấy, hiển thị role gốc
       }
-
       return (
         <div className='flex items-center gap-x-2'>
           {userType.icon && <userType.icon size={16} className='text-muted-foreground' />}
@@ -260,10 +255,7 @@ export const columns: ColumnDef<User>[] = [
         </div>
       )
     },
-    // Cho phép filter
     filterFn: (row, id, filterValues) => {
-      // filterValues là một array do FacetedFilter cung cấp
-      // Bên trong row, getValue(id) sẽ trả về singleRole
       const rowValue = row.getValue(id) as string
       return filterValues.includes(rowValue)
     },
