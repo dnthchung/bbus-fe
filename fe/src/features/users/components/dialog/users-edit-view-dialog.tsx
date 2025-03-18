@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,61 +10,32 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { PasswordInput } from '@/components/common/password-input'
 import { SelectDropdown } from '@/components/common/select-dropdown'
 import { userTypes } from '../../data/data'
 import { User } from '../../data/schema'
 
-const formSchema = z
-  .object({
-    name: z.string().min(1, { message: 'Họ và tên không được để trống.' }),
-    username: z.string().min(1, { message: 'Tên đăng nhập không được để trống.' }),
-    phone: z.string().min(1, { message: 'Số điện thoại không được để trống.' }),
-    email: z.string().min(1, { message: 'Email không được để trống.' }).email({ message: 'Email không hợp lệ.' }),
-    password: z.string().transform((pwd) => pwd.trim()),
-    role: z.string().min(1, { message: 'Vai trò không được để trống.' }),
-    confirmPassword: z.string().transform((pwd) => pwd.trim()),
-    isEdit: z.boolean(),
-  })
-  .superRefine(({ isEdit, password, confirmPassword }, ctx) => {
-    if (!isEdit || (isEdit && password !== '')) {
-      if (password === '') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Mật khẩu không được để trống.',
-          path: ['password'],
-        })
-      }
-      if (password.length < 8) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Mật khẩu phải có ít nhất 8 ký tự.',
-          path: ['password'],
-        })
-      }
-      if (!password.match(/[a-z]/)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Mật khẩu phải chứa ít nhất một chữ cái thường.',
-          path: ['password'],
-        })
-      }
-      if (!password.match(/\d/)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Mật khẩu phải chứa ít nhất một số.',
-          path: ['password'],
-        })
-      }
-      if (password !== confirmPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Mật khẩu nhập lại không khớp.',
-          path: ['confirmPassword'],
-        })
-      }
-    }
-  })
+// Mock data nếu không có API
+const mockUser: User = {
+  id: '24c66ef2-4950-4ecf-a24b-6821631d7f0f',
+  username: 'parent',
+  name: 'parent',
+  gender: 'MALE',
+  dob: new Date('2025-02-16'),
+  email: 'parent@gmail.com',
+  avatar: 'image_url',
+  phone: '0912345672',
+  address: '74 An Dương',
+  status: 'ACTIVE',
+  role: 'PARENT',
+}
+
+const formSchema = z.object({
+  name: z.string().min(1, { message: 'Họ và tên không được để trống.' }),
+  username: z.string().min(1, { message: 'Tên đăng nhập không được để trống.' }),
+  phone: z.string().min(1, { message: 'Số điện thoại không được để trống.' }),
+  email: z.string().min(1, { message: 'Email không được để trống.' }).email({ message: 'Email không hợp lệ.' }),
+  role: z.string().min(1, { message: 'Vai trò không được để trống.' }),
+})
 
 type UserForm = z.infer<typeof formSchema>
 
@@ -73,26 +45,18 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
-export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
-  const isEdit = !!currentRow
+export function UsersEditViewDialog({ currentRow, open, onOpenChange }: Props) {
+  const [isEditing, setIsEditing] = useState(false)
+
+  // Use provided data or fallback to mock data
+  const userData = currentRow || mockUser
+
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
-    defaultValues: isEdit
-      ? { ...currentRow, password: '', confirmPassword: '', isEdit }
-      : {
-          name: '',
-          username: '',
-          email: '',
-          role: '',
-          phone: '',
-          password: '',
-          confirmPassword: '',
-          isEdit,
-        },
+    defaultValues: userData,
   })
 
   const onSubmit = (values: UserForm) => {
-    form.reset()
     toast({
       title: 'Dữ liệu đã gửi:',
       description: (
@@ -101,27 +65,35 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
         </pre>
       ),
     })
-    onOpenChange(false)
+    setIsEditing(false)
   }
 
-  const isPasswordTouched = !!form.formState.dirtyFields.password
+  // Hàm hủy bỏ khi đang edit
+  const onCancelEdit = () => {
+    // Reset form về defaultValues (tức là userData)
+    form.reset()
+    setIsEditing(false)
+  }
 
   return (
     <Dialog
       open={open}
       onOpenChange={(state) => {
         form.reset()
+        setIsEditing(false)
         onOpenChange(state)
       }}
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-left'>
-          <DialogTitle>{isEdit ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}</DialogTitle>
-          <DialogDescription>{isEdit ? 'Cập nhật thông tin người dùng.' : 'Nhập thông tin để tạo tài khoản mới.'} Nhấn lưu khi hoàn tất.</DialogDescription>
+          <DialogTitle>{isEditing ? 'Chỉnh sửa người dùng' : 'Thông tin người dùng'}</DialogTitle>
+          <DialogDescription>{isEditing ? 'Cập nhật thông tin người dùng.' : 'Xem thông tin chi tiết người dùng.'}</DialogDescription>
         </DialogHeader>
+
         <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
           <Form {...form}>
             <form id='user-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
+              {/* Họ và tên */}
               <FormField
                 control={form.control}
                 name='name'
@@ -129,12 +101,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Họ và tên</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nguyễn Văn A' {...field} />
+                      <Input placeholder='Nguyễn Văn A' {...field} disabled={!isEditing} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* Tên đăng nhập */}
               <FormField
                 control={form.control}
                 name='username'
@@ -142,12 +114,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Tên đăng nhập</FormLabel>
                     <FormControl>
-                      <Input placeholder='nguyenvana' {...field} />
+                      <Input placeholder='nguyenvana' {...field} disabled />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* Email */}
               <FormField
                 control={form.control}
                 name='email'
@@ -155,12 +127,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder='example@gmail.com' {...field} />
+                      <Input placeholder='example@gmail.com' {...field} disabled={!isEditing} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* Số điện thoại */}
               <FormField
                 control={form.control}
                 name='phone'
@@ -168,12 +140,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>Số điện thoại</FormLabel>
                     <FormControl>
-                      <Input placeholder='+84123456789' {...field} />
+                      <Input placeholder='+84123456789' {...field} disabled={!isEditing} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* Vai trò */}
               <FormField
                 control={form.control}
                 name='role'
@@ -188,31 +160,33 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                         label: labelVi,
                         value,
                       }))}
+                      disabled={!isEditing}
                     />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='password'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mật khẩu</FormLabel>
-                    <FormControl>
-                      <PasswordInput placeholder='Nhập mật khẩu' {...field} autoComplete='current-password' />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </form>
           </Form>
         </ScrollArea>
+
         <DialogFooter>
-          <Button type='submit' form='user-form'>
-            Lưu thay đổi
-          </Button>
+          {!isEditing ? (
+            // Nút "Chỉnh sửa" -> type="button"
+            <Button type='button' onClick={() => setIsEditing(true)}>
+              Chỉnh sửa
+            </Button>
+          ) : (
+            <>
+              {/* Nút "Hủy" -> type="button" */}
+              <Button type='button' onClick={onCancelEdit}>
+                Hủy
+              </Button>
+              {/* Nút "Lưu thay đổi" -> type="submit" */}
+              <Button type='submit' form='user-form'>
+                Lưu thay đổi
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

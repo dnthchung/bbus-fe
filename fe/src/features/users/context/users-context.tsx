@@ -5,7 +5,7 @@ import useDialogState from '@/hooks/use-dialog-state'
 import { User } from '../data/schema'
 
 // Định nghĩa các loại dialog có thể mở trong tính năng Users - Thêm 1 cái view details
-type UsersDialogType = 'import' | 'add' | 'edit' | 'delete' | 'invite'
+type UsersDialogType = 'import' | 'add' | 'edit' | 'delete' | 'invite' | 'view-edit-details'
 
 // Định nghĩa cấu trúc context sẽ được chia sẻ qua Provider
 interface UsersContextType {

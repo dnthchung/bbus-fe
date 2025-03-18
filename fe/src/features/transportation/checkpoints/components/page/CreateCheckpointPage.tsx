@@ -4,13 +4,21 @@ import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { X, Navigation, Search, MapPin } from 'lucide-react'
+import { X, Navigation, Search } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
+
+const existingCheckpoints = [
+  { id: 1, name: 'Trường Tiểu Học A', latitude: '21.0285', longitude: '105.8542' },
+  { id: 2, name: 'Trường THPT B', latitude: '21.0352', longitude: '105.8451' },
+  { id: 3, name: 'Khu Dân Cư C', latitude: '21.0423', longitude: '105.8320' },
+  { id: 3, name: 'Khu Dân Cư C', latitude: '21.0423', longitude: '105.8320' },
+  { id: 3, name: 'Khu Dân Cư C', latitude: '21.0423', longitude: '105.8320' },
+]
 
 // Component để cập nhật vị trí và zoom của bản đồ từ xa
 const MapController = ({ center, zoom }: { center?: [number, number]; zoom?: number }) => {
@@ -42,6 +50,7 @@ export default function CreateCheckpointPage() {
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const mapRef = useRef(null)
+  const [checkpoints, setCheckpoints] = useState(existingCheckpoints)
 
   // Lấy vị trí hiện tại và zoom đến vị trí đó
   const getCurrentLocation = () => {
@@ -195,6 +204,32 @@ export default function CreateCheckpointPage() {
         <div className='col-span-1'>
           {/* Nội dung cột phải */}
           <p>Nội dung cột phải</p>
+          {/*
+            Đây sẽ là 1 table hoặc 1 list hiển thị danh sách các tên điẻm dường có sẵn trong hệ thống (mục đích đe ẻkhi tạo mới có thể xem là có những điểm nào rồi, trnahs tạo trùng)
+          */}
+          <div className='col-span-1 rounded-lg border p-4 shadow-md'>
+            <h3 className='mb-2 text-lg font-bold'>📌 Danh sách điểm dừng</h3>
+            <table className='w-full border-collapse border border-gray-300 text-sm'>
+              <thead>
+                <tr className=''>
+                  <th className='border p-2'>#</th>
+                  <th className='border p-2'>Tên điểm dừng</th>
+                  <th className='border p-2'>Toạ độ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {checkpoints.map((cp, index) => (
+                  <tr key={cp.id} className='text-center'>
+                    <td className='border p-2'>{index + 1}</td>
+                    <td className='border p-2'>{cp.name}</td>
+                    <td className='border p-2'>
+                      {cp.latitude}, {cp.longitude}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

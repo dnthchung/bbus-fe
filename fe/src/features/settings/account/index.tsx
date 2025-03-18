@@ -1,14 +1,17 @@
-import ContentSection from '../components/content-section'
-import { AccountForm } from './account-form'
+// import ContentSection from '../components/content-section'
+// import { AccountForm } from './account-form'
+// export default function SettingsAccount() {
+//   return (
+//     <ContentSection title='Tài khoản' desc='Quản lý thông tin tài khoản của bạn'>
+//       <AccountForm />
+//     </ContentSection>
+//   )
+// }
 
 export default function SettingsAccount() {
   return (
-    <ContentSection
-      title='Account'
-      desc='Update your account settings. Set your preferred language and
-          timezone.'
-    >
-      <AccountForm />
-    </ContentSection>
+    <>
+      <p>loại bỏ account, hợp vào profile</p>
+    </>
   )
 }

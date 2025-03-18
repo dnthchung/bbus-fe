@@ -65,31 +65,22 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
 type ForgotFormProps = HTMLAttributes<HTMLDivElement>
 
 // Cập nhật schema validation để dùng số điện thoại thay vì email
 const formSchema = z.object({
-  phone: z
-    .string()
-    .min(10, { message: 'Số điện thoại phải có ít nhất 10 chữ số' })
-    .max(15, { message: 'Số điện thoại không được vượt quá 15 chữ số' })
-    .regex(/^\d+$/, { message: 'Số điện thoại chỉ được chứa chữ số' }),
+  phone: z.string().min(10, { message: 'Số điện thoại phải có ít nhất 10 chữ số' }).max(15, { message: 'Số điện thoại không được vượt quá 15 chữ số' }).regex(/^\d+$/, { message: 'Số điện thoại chỉ được chứa chữ số' }),
 })
 
 export function ForgotForm({ className, ...props }: ForgotFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -103,6 +94,7 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
     console.log(data)
     setTimeout(() => {
       setIsLoading(false)
+      navigate({ to: '/otp' })
     }, 3000)
   }
 

@@ -8,6 +8,12 @@ export const callTypes = new Map<UserStatus, string>([
   ['INACTIVE', 'bg-neutral-300/40 border-neutral-300'],
 ])
 
+// Map tiếng Việt cho status
+export const statusLabels: Record<UserStatus, string> = {
+  ACTIVE: 'Đang hoạt động',
+  INACTIVE: 'Không hoạt động',
+}
+
 // User roles with corresponding labels (English for logic, Vietnamese for UI)
 export const userTypes = [
   {
@@ -28,7 +34,12 @@ export const userTypes = [
     value: 'TEACHER',
     icon: IconSchool,
   },
-  { label: 'Parent', labelVi: 'Phụ huynh', value: 'PARENT', icon: IconUser },
+  {
+    label: 'Parent',
+    labelVi: 'Phụ huynh',
+    value: 'PARENT',
+    icon: IconUser,
+  },
   {
     label: 'Assistant Driver',
     labelVi: 'Phụ tá tài xế',

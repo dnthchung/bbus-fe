@@ -24,10 +24,6 @@ export default function Checkpoints() {
         </div>
       </Header>
       <Main>
-        {/* <div className='mb-2 flex items-center justify-between space-y-2'>
-          <h1 className='text-2xl font-bold tracking-tight'>Quản lý điểm dừng xe bus</h1>
-          <div className='flex items-center space-x-2'></div>
-        </div> */}
         <Tabs orientation='vertical' defaultValue='list' className='space-y-4'>
           <div className='w-full overflow-x-auto pb-2'>
             <TabsList>

@@ -32,6 +32,9 @@ const authSignIn2LazyImport = createFileRoute('/(auth)/sign-in-2')()
 const authForgotPasswordLazyImport = createFileRoute(
   '/(auth)/forgot-password',
 )()
+const authChangePasswordLazyImport = createFileRoute(
+  '/(auth)/change-password',
+)()
 const AuthenticatedSettingsRouteLazyImport = createFileRoute(
   '/_authenticated/settings',
 )()
@@ -152,6 +155,16 @@ const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   } as any)
   .lazy(() =>
     import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route),
+  )
+
+const authChangePasswordLazyRoute = authChangePasswordLazyImport
+  .update({
+    id: '/(auth)/change-password',
+    path: '/change-password',
+    getParentRoute: () => rootRoute,
+  } as any)
+  .lazy(() =>
+    import('./routes/(auth)/change-password.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedSettingsRouteLazyRoute =
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteLazyImport
       parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/(auth)/change-password': {
+      id: '/(auth)/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof authChangePasswordLazyImport
+      parentRoute: typeof rootRoute
     }
     '/(auth)/forgot-password': {
       id: '/(auth)/forgot-password'
@@ -592,6 +612,7 @@ export interface FileRoutesByFullPath {
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
   '/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
+  '/change-password': typeof authChangePasswordLazyRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/sign-in-2': typeof authSignIn2LazyRoute
   '/sign-up': typeof authSignUpLazyRoute
@@ -620,6 +641,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500LazyRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
+  '/change-password': typeof authChangePasswordLazyRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/sign-in-2': typeof authSignIn2LazyRoute
   '/sign-up': typeof authSignUpLazyRoute
@@ -651,6 +673,7 @@ export interface FileRoutesById {
   '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
+  '/(auth)/change-password': typeof authChangePasswordLazyRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(auth)/sign-in-2': typeof authSignIn2LazyRoute
   '/(auth)/sign-up': typeof authSignUpLazyRoute
@@ -684,6 +707,7 @@ export interface FileRouteTypes {
     | '/otp'
     | '/sign-in'
     | '/settings'
+    | '/change-password'
     | '/forgot-password'
     | '/sign-in-2'
     | '/sign-up'
@@ -711,6 +735,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/otp'
     | '/sign-in'
+    | '/change-password'
     | '/forgot-password'
     | '/sign-in-2'
     | '/sign-up'
@@ -740,6 +765,7 @@ export interface FileRouteTypes {
     | '/(auth)/otp'
     | '/(auth)/sign-in'
     | '/_authenticated/settings'
+    | '/(auth)/change-password'
     | '/(auth)/forgot-password'
     | '/(auth)/sign-in-2'
     | '/(auth)/sign-up'
@@ -771,6 +797,7 @@ export interface RootRouteChildren {
   auth500Route: typeof auth500Route
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
+  authChangePasswordLazyRoute: typeof authChangePasswordLazyRoute
   authForgotPasswordLazyRoute: typeof authForgotPasswordLazyRoute
   authSignIn2LazyRoute: typeof authSignIn2LazyRoute
   authSignUpLazyRoute: typeof authSignUpLazyRoute
@@ -786,6 +813,7 @@ const rootRouteChildren: RootRouteChildren = {
   auth500Route: auth500Route,
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
+  authChangePasswordLazyRoute: authChangePasswordLazyRoute,
   authForgotPasswordLazyRoute: authForgotPasswordLazyRoute,
   authSignIn2LazyRoute: authSignIn2LazyRoute,
   authSignUpLazyRoute: authSignUpLazyRoute,
@@ -810,6 +838,7 @@ export const routeTree = rootRoute
         "/(auth)/500",
         "/(auth)/otp",
         "/(auth)/sign-in",
+        "/(auth)/change-password",
         "/(auth)/forgot-password",
         "/(auth)/sign-in-2",
         "/(auth)/sign-up",
@@ -855,6 +884,9 @@ export const routeTree = rootRoute
         "/_authenticated/settings/notifications",
         "/_authenticated/settings/"
       ]
+    },
+    "/(auth)/change-password": {
+      "filePath": "(auth)/change-password.lazy.tsx"
     },
     "/(auth)/forgot-password": {
       "filePath": "(auth)/forgot-password.lazy.tsx"

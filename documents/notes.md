@@ -1,4 +1,5 @@
 - side bar được import trong // src/routes/_authenticated/route.tsx
+- <PasswordInput placeholder='Nhập mật khẩu mới' {...field} aria-label='password' autoComplete='current-password' />
 
 
 Phần 1 : giới thiệu về hệ thống và chức năng

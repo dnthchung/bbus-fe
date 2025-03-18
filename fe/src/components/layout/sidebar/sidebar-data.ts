@@ -54,7 +54,7 @@ export const sidebarData: SidebarData = {
           icon: IconSettings,
           items: [
             { title: 'Hồ sơ', url: '/settings', icon: IconUserCog },
-            { title: 'Tài khoản', url: '/settings/account', icon: IconTool },
+            // { title: 'Tài khoản', url: '/settings/account', icon: IconTool },
             {
               title: 'Giao diện',
               url: '/settings/appearance',
