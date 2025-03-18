@@ -6,11 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AvatarThumbnail } from '@/features/students/components/avatar-thumbnail'
 import { DataTableColumnHeader } from '@/features/students/components/table/data-table-column-header'
 import { genderLabels, statusLabels, studentStatusClasses } from '../../data/data'
-// Import your Student type + supporting data/maps
 import { Student, StudentStatus } from '../../data/schema'
 import { StudentsDataTableRowActions } from './data-table-row-actions'
 
-// A small helper to format an ISO date string into DD/MM/YYYY
+// Hàm tiện ích format ngày dạng ISO -> DD/MM/YYYY
 function formatDate(dateStr: string) {
   const date = new Date(dateStr)
   return new Intl.DateTimeFormat('vi-VN', {
@@ -21,7 +20,7 @@ function formatDate(dateStr: string) {
 }
 
 export const columns: ColumnDef<Student>[] = [
-  // Checkbox column for row selection
+  // --- Cột Checkbox chọn dòng ---
   {
     id: 'select',
     header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
@@ -29,8 +28,7 @@ export const columns: ColumnDef<Student>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
-  // Avatar
+  // --- Hình ảnh (avatar) ---
   {
     accessorKey: 'avatar',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Hình ảnh' />,
@@ -40,25 +38,14 @@ export const columns: ColumnDef<Student>[] = [
         <AvatarThumbnail
           url={avatarUrl}
           alt='student-avatar'
-          // Tuỳ chỉnh kích thước ảnh
+          // Tuỳ chỉnh kích thước
           className='h-16 w-16'
         />
       )
     },
     enableSorting: false,
   },
-
-  // Mã học sinh
-  // {
-  //   accessorKey: 'rollNumber',
-  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Mã học sinh' />,
-  //   cell: ({ row }) => {
-  //     const rollNumber = row.getValue('rollNumber') as string
-  //     return <div className='font-medium'>{rollNumber}</div>
-  //   },
-  // },
-
-  // Tên học sinh
+  // --- Họ và tên ---
   {
     accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Họ và tên' />,
@@ -67,8 +54,7 @@ export const columns: ColumnDef<Student>[] = [
       return <div className='max-w-[150px] truncate'>{name}</div>
     },
   },
-
-  // Ngày sinh
+  // --- Ngày sinh ---
   {
     accessorKey: 'dob',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Ngày sinh' />,
@@ -77,8 +63,7 @@ export const columns: ColumnDef<Student>[] = [
       return <span>{formatDate(dob)}</span>
     },
   },
-
-  // Giới tính
+  // --- Giới tính ---
   {
     accessorKey: 'gender',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Giới tính' />,
@@ -87,8 +72,7 @@ export const columns: ColumnDef<Student>[] = [
       return <span>{genderLabels[gender]}</span>
     },
   },
-
-  // Trạng thái sử dụng xe
+  // --- Trạng thái sử dụng xe ---
   {
     accessorKey: 'status',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái' />,
@@ -107,8 +91,7 @@ export const columns: ColumnDef<Student>[] = [
       return value.includes(row.getValue(id))
     },
   },
-
-  // Địa chỉ
+  // --- Địa chỉ ---
   {
     accessorKey: 'address',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Địa chỉ' />,
@@ -117,44 +100,27 @@ export const columns: ColumnDef<Student>[] = [
       return <div className='max-w-[200px] truncate'>{address}</div>
     },
   },
-
-  // Phụ huynh
+  // --- Tên phụ huynh ---
   {
-    accessorKey: 'parentName',
+    id: 'parentName', // Đặt id tùy ý, tránh trùng các cột khác
+    accessorFn: (row) => row.parent?.name || '',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tên phụ huynh' />,
     cell: ({ row }) => {
-      const parentName = row.getValue('parentName') as string
-      return <span>{parentName}</span>
+      const value = row.getValue('parentName') as string
+      return <span>{value}</span>
     },
   },
+  // --- SĐT phụ huynh ---
   {
-    accessorKey: 'parentPhone',
+    id: 'parentPhone',
+    accessorFn: (row) => row.parent?.phone || '',
     header: ({ column }) => <DataTableColumnHeader column={column} title='SĐT phụ huynh' />,
     cell: ({ row }) => {
-      const parentPhone = row.getValue('parentPhone') as string
-      return <span>{parentPhone}</span>
+      const value = row.getValue('parentPhone') as string
+      return <span>{value}</span>
     },
   },
-
-  // Checkpoint
-  // {
-  //   accessorKey: 'checkpointName',
-  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Điểm dừng' />,
-  //   cell: ({ row }) => {
-  //     const checkpointName = row.getValue('checkpointName') as string
-  //     return <span>{checkpointName}</span>
-  //   },
-  // },
-  // {
-  //   accessorKey: 'checkpointDescription',
-  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Mô tả điểm dừng' />,
-  //   cell: ({ row }) => {
-  //     const checkpointDescription = row.getValue('checkpointDescription') as string
-  //     return <div className='max-w-[200px] truncate'>{checkpointDescription}</div>
-  //   },
-  // },
-
-  // Row actions (edit/delete etc.)
+  // --- Row actions (sửa/xoá) ---
   {
     id: 'actions',
     cell: StudentsDataTableRowActions,

@@ -106,19 +106,6 @@ export function UsersEditViewDialog({ currentRow, open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-              {/* Tên đăng nhập */}
-              <FormField
-                control={form.control}
-                name='username'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tên đăng nhập</FormLabel>
-                    <FormControl>
-                      <Input placeholder='nguyenvana' {...field} disabled />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
               {/* Email */}
               <FormField
                 control={form.control}

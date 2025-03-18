@@ -9,8 +9,8 @@ export const studentStatusClasses = new Map<StudentStatus, string>([
 
 // Map tiếng Việt cho trạng thái học sinh
 export const statusLabels: Record<StudentStatus, string> = {
-  ACTIVE: 'Đang hoạt động',
-  INACTIVE: 'Không hoạt động',
+  ACTIVE: 'Đang sử dụng',
+  INACTIVE: 'Dừng sử dụng',
 }
 
 // Map giới tính
