@@ -5,13 +5,14 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AvatarThumbnail } from '@/features/students/components/avatar-thumbnail'
 import { DataTableColumnHeader } from '@/features/students/components/table/data-table-column-header'
-import { busServiceStatuses } from '../../data/data'
-// Import the Student type and the busServiceStatuses map
-import { Student, BusServiceStatus } from '../../data/schema'
+import { genderLabels, statusLabels, studentStatusClasses } from '../../data/data'
+// Import your Student type + supporting data/maps
+import { Student, StudentStatus } from '../../data/schema'
 import { StudentsDataTableRowActions } from './data-table-row-actions'
 
-// A small date formatter for birthDate column
-const formatDate = (date: Date) => {
+// A small helper to format an ISO date string into DD/MM/YYYY
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr)
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
     month: '2-digit',
@@ -23,101 +24,135 @@ export const columns: ColumnDef<Student>[] = [
   // Checkbox column for row selection
   {
     id: 'select',
-    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Select all' className='translate-y-[2px]' />,
-    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Select row' className='translate-y-[2px]' />,
+    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
+    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
     enableSorting: false,
     enableHiding: false,
   },
 
-  // Student ID (UUID)
-  // {
-  //   accessorKey: 'studentId',
-  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Mã học sinh' />,
-  //   cell: ({ row }) => {
-  //     const studentId = row.getValue('studentId') as string
-  //     return <div className='font-mono text-xs'>{studentId}</div>
-  //   },
-  //   enableSorting: false,
-  //   enableHiding: true,
-  // },
-
   // Avatar
   {
     accessorKey: 'avatar',
-    header: 'Hình ảnh',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Hình ảnh' />,
     cell: ({ row }) => {
       const avatarUrl = row.getValue('avatar') as string
-
       return (
         <AvatarThumbnail
           url={avatarUrl}
           alt='student-avatar'
-          // Ở đây tuỳ biến kích thước thumbnail: 16x16 (Tailwind: h-16 w-16)
-          className='h-48 w-48'
+          // Tuỳ chỉnh kích thước ảnh
+          className='h-16 w-16'
         />
       )
     },
     enableSorting: false,
   },
 
-  // Full name
+  // Mã học sinh
+  // {
+  //   accessorKey: 'rollNumber',
+  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Mã học sinh' />,
+  //   cell: ({ row }) => {
+  //     const rollNumber = row.getValue('rollNumber') as string
+  //     return <div className='font-medium'>{rollNumber}</div>
+  //   },
+  // },
+
+  // Tên học sinh
   {
-    accessorKey: 'fullName',
+    accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Họ và tên' />,
     cell: ({ row }) => {
-      const fullName = row.getValue('fullName') as string
-      return <div className='max-w-[150px] truncate'>{fullName}</div>
+      const name = row.getValue('name') as string
+      return <div className='max-w-[150px] truncate'>{name}</div>
     },
   },
 
-  // Birth date
+  // Ngày sinh
   {
-    accessorKey: 'birthDate',
+    accessorKey: 'dob',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Ngày sinh' />,
     cell: ({ row }) => {
-      const date = row.getValue('birthDate') as Date
-      return <span>{formatDate(date)}</span>
+      const dob = row.getValue('dob') as string
+      return <span>{formatDate(dob)}</span>
     },
   },
 
-  // Grade (1-9)
+  // Giới tính
   {
-    accessorKey: 'grade',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Khối' />,
+    accessorKey: 'gender',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Giới tính' />,
     cell: ({ row }) => {
-      const grade = row.getValue('grade') as number
-      return <span>{grade}</span>
+      const gender = row.getValue('gender') as keyof typeof genderLabels
+      return <span>{genderLabels[gender]}</span>
     },
   },
 
-  // Class (e.g. 1A, 5D, 9J)
+  // Trạng thái sử dụng xe
   {
-    accessorKey: 'class',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Lớp' />,
-    cell: ({ row }) => {
-      const className = row.getValue('class') as string
-      return <span>{className}</span>
-    },
-  },
-
-  // Bus service status (e.g. Đang sử dụng / Tạm ngừng sử dụng)
-  {
-    accessorKey: 'busServiceStatus',
+    accessorKey: 'status',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái' />,
     cell: ({ row }) => {
-      const busStatus = row.getValue('busServiceStatus') as BusServiceStatus
-      const badgeColor = busServiceStatuses.get(busStatus)
+      const status = row.getValue('status') as StudentStatus
+      const label = statusLabels[status]
+      const className = studentStatusClasses.get(status) ?? ''
       return (
-        <Badge variant='outline' className={cn('capitalize', badgeColor)}>
-          {busStatus}
+        <Badge variant='outline' className={cn(className)}>
+          {label}
         </Badge>
       )
     },
     filterFn: (row, id, value) => {
-      // example filter: we check if the row's status is in the selected filters
+      // Cho phép lọc theo trạng thái
       return value.includes(row.getValue(id))
     },
   },
+
+  // Địa chỉ
+  {
+    accessorKey: 'address',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Địa chỉ' />,
+    cell: ({ row }) => {
+      const address = row.getValue('address') as string
+      return <div className='max-w-[200px] truncate'>{address}</div>
+    },
+  },
+
+  // Phụ huynh
+  {
+    accessorKey: 'parentName',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Tên phụ huynh' />,
+    cell: ({ row }) => {
+      const parentName = row.getValue('parentName') as string
+      return <span>{parentName}</span>
+    },
+  },
+  {
+    accessorKey: 'parentPhone',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='SĐT phụ huynh' />,
+    cell: ({ row }) => {
+      const parentPhone = row.getValue('parentPhone') as string
+      return <span>{parentPhone}</span>
+    },
+  },
+
+  // Checkpoint
+  // {
+  //   accessorKey: 'checkpointName',
+  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Điểm dừng' />,
+  //   cell: ({ row }) => {
+  //     const checkpointName = row.getValue('checkpointName') as string
+  //     return <span>{checkpointName}</span>
+  //   },
+  // },
+  // {
+  //   accessorKey: 'checkpointDescription',
+  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Mô tả điểm dừng' />,
+  //   cell: ({ row }) => {
+  //     const checkpointDescription = row.getValue('checkpointDescription') as string
+  //     return <div className='max-w-[200px] truncate'>{checkpointDescription}</div>
+  //   },
+  // },
 
   // Row actions (edit/delete etc.)
   {

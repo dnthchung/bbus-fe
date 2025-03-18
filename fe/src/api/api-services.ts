@@ -20,6 +20,9 @@ interface ApiServices {
   checkpoints: {
     getAll: () => Promise<any>
   }
+  students: {
+    list: () => Promise<any>
+  }
 }
 
 export const API_SERVICES: ApiServices = {
@@ -60,5 +63,11 @@ export const API_SERVICES: ApiServices = {
   // -------------------------
   checkpoints: {
     getAll: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+  },
+  //-------------------------
+  // 4) STUDENTS
+  //-------------------------
+  students: {
+    list: () => apiClient.get(API_ENDPOINTS.STUDENTS.LIST),
   },
 }

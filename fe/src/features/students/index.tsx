@@ -1,5 +1,5 @@
-//path : fe/src/features/students/index.tsx
-// import { Search } from 'lucide-react'
+// path : fe/src/features/students/index.tsx
+import { useEffect, useState } from 'react'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
@@ -9,17 +9,34 @@ import { StudentsPrimaryButtons } from '@/features/students/components/students-
 import { StudentsTable } from '@/features/students/components/students-table'
 import { columns } from './components/table/students-columns'
 import StudentsProvider from './context/students-context'
-import { studentListSchema } from './data/schema'
-import { students } from './data/students'
+import { Student } from './data/schema'
+// Import the function that calls your API
+import { getAllStudents } from './data/students'
 
 export default function Students() {
-  const studentList = studentListSchema.parse(students)
-  //localhost:8080/user/list?page=1&size=20
+  // 1) Keep local state for your list of students
+  const [studentList, setStudentList] = useState<Student[]>([])
 
+  // 2) Fetch students on mount, parse & store in state
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const parsedStudents = await getAllStudents()
+        console.log('Parsed students:', parsedStudents)
+        setStudentList(parsedStudents)
+      } catch (error) {
+        console.error('Error fetching students in index.tsx:', error)
+      }
+    }
+
+    fetchStudents()
+  }, [])
+
+  // 3) Render
   return (
     <StudentsProvider>
       <Header fixed>
-        {/* <Search /> */}
+        {/* Any other icons/elements here */}
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />
@@ -34,11 +51,14 @@ export default function Students() {
           </div>
           <StudentsPrimaryButtons />
         </div>
+
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
+          {/* Pass the fetched studentList and your columns to the table */}
           <StudentsTable data={studentList} columns={columns} />
         </div>
       </Main>
 
+      {/* Include modals/dialogs that interact with the table */}
       <StudentsDialogs />
     </StudentsProvider>
   )

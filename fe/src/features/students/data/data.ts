@@ -1,25 +1,21 @@
 //path : fe/src/features/students/data/data.ts
-import { IconSchool, IconId } from '@tabler/icons-react'
-import { BusServiceStatus } from './schema'
+import { StudentStatus } from './schema'
 
-// Map trạng thái xe buýt với Tailwind classes
-export const busServiceStatuses = new Map<BusServiceStatus, string>([
-  ['Đang sử dụng', 'bg-green-100/30 text-green-900 dark:text-green-200 border-green-200'],
-  ['Tạm ngừng sử dụng', 'bg-yellow-200/40 text-yellow-900 dark:text-yellow-100 border-yellow-300'],
+// Map trạng thái học sinh với Tailwind classes
+export const studentStatusClasses = new Map<StudentStatus, string>([
+  ['ACTIVE', 'bg-green-100/30 text-green-900 dark:text-green-200 border-green-200'],
+  ['INACTIVE', 'bg-red-200/40 text-red-900 dark:text-red-100 border-red-300'],
 ])
 
-// Các loại học sinh với nhãn tiếng Việt cho UI
-export const studentTypes = [
-  {
-    label: 'Primary Student',
-    labelVi: 'Học sinh tiểu học',
-    value: 'primary-student',
-    icon: IconSchool,
-  },
-  {
-    label: 'Secondary Student',
-    labelVi: 'Học sinh trung học cơ sở',
-    value: 'secondary-student',
-    icon: IconId,
-  },
-] as const
+// Map tiếng Việt cho trạng thái học sinh
+export const statusLabels: Record<StudentStatus, string> = {
+  ACTIVE: 'Đang hoạt động',
+  INACTIVE: 'Không hoạt động',
+}
+
+// Map giới tính
+export const genderLabels = {
+  MALE: 'Nam',
+  FEMALE: 'Nữ',
+  OTHER: 'Khác',
+}

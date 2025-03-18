@@ -1,5 +1,6 @@
 'use client'
 
+// path: fe/src/features/students/components/dialog/students-delete-dialog.tsx
 import { useState } from 'react'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { toast } from '@/hooks/use-toast'
@@ -16,19 +17,28 @@ interface Props {
 }
 
 export function StudentsDeleteDialog({ open, onOpenChange, currentRow }: Props) {
+  // We want user to type in the student's name to confirm
+  // because "fullName" -> "name" in the new schema
   const [value, setValue] = useState('')
 
   const handleDelete = () => {
-    if (value.trim() !== currentRow.fullName) return onOpenChange(false)
+    // Only delete if user typed exactly the student's name
+    if (value.trim() !== currentRow.name) {
+      return onOpenChange(false)
+    }
 
+    // Do your delete logic here, e.g. call API...
     toast({
-      title: 'The following student has been deleted:',
+      title: 'Học sinh đã bị xóa:',
       description: (
         <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
           <code className='text-white'>{JSON.stringify(currentRow, null, 2)}</code>
         </pre>
       ),
     })
+
+    // Close the dialog
+    onOpenChange(false)
   }
 
   return (
@@ -36,32 +46,32 @@ export function StudentsDeleteDialog({ open, onOpenChange, currentRow }: Props) 
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== currentRow.fullName}
+      // Disable "Delete" button unless typed name matches
+      disabled={value.trim() !== currentRow.name}
       title={
         <span className='text-destructive'>
           <IconAlertTriangle className='mr-1 inline-block stroke-destructive' size={18} />
-          Delete Student
+          Xóa học sinh
         </span>
       }
       desc={
         <div className='space-y-4'>
           <p className='mb-2'>
-            Are you sure you want to delete <span className='font-bold'>{currentRow.fullName}</span>? <br />
-            This action will permanently remove the student from the system. This cannot be undone.
+            Bạn có chắc muốn xóa <span className='font-bold'>{currentRow.name}</span>?
+            <br />
+            Hành động này sẽ xóa vĩnh viễn học sinh khỏi hệ thống và không thể hoàn tác.
           </p>
-
           <Label className='my-2'>
-            Full Name:
-            <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Enter full name to confirm deletion.' />
+            Nhập chính xác tên học sinh để xác nhận:
+            <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Nhập lại tên học sinh...' />
           </Label>
-
           <Alert variant='destructive'>
-            <AlertTitle>Warning!</AlertTitle>
-            <AlertDescription>Please be careful, this operation cannot be undone.</AlertDescription>
+            <AlertTitle>Cảnh báo!</AlertTitle>
+            <AlertDescription>Thao tác này sẽ không thể hoàn tác, vui lòng cẩn thận.</AlertDescription>
           </Alert>
         </div>
       }
-      confirmText='Delete'
+      confirmText='Xóa'
       destructive
     />
   )

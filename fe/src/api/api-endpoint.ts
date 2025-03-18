@@ -14,4 +14,7 @@ export const API_ENDPOINTS = {
   CHECKPOINTS: {
     GET_ALL: '/checkpoints/list',
   },
+  STUDENTS: {
+    LIST: '/student/list',
+  },
 } as const

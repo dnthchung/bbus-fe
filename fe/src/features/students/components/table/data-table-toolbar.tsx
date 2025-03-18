@@ -1,5 +1,4 @@
-//path : fe/src/features/users/components/data-table-toolbar.tsx
-// fe/src/features/students/components/data-table-student-toolbar.tsx
+// path : fe/src/features/students/components/data-table-student-toolbar.tsx
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -8,7 +7,7 @@ import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
 
 /**
- * The props for DataTableStudentToolbar:
+ * Props for DataTableStudentToolbar:
  * @table - The table instance from @tanstack/react-table
  */
 interface DataTableStudentToolbarProps<TData> {
@@ -16,7 +15,7 @@ interface DataTableStudentToolbarProps<TData> {
 }
 
 /**
- * A toolbar to filter/search by columns: fullName, grade, class, busServiceStatus
+ * A toolbar to filter/search by columns: name, gender, status
  */
 export function DataTableStudentToolbar<TData>({ table }: DataTableStudentToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
@@ -25,47 +24,31 @@ export function DataTableStudentToolbar<TData>({ table }: DataTableStudentToolba
     <div className='flex items-center justify-between'>
       {/* Left side: search input & filters */}
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-        {/* Search by fullName */}
-        <Input placeholder='Tìm kiếm tên...' value={(table.getColumn('fullName')?.getFilterValue() as string) ?? ''} onChange={(event) => table.getColumn('fullName')?.setFilterValue(event.target.value)} className='h-8 w-[150px] lg:w-[250px]' />
+        {/* Search by name */}
+        <Input placeholder='Tìm kiếm tên...' value={(table.getColumn('name')?.getFilterValue() as string) ?? ''} onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)} className='h-8 w-[150px] lg:w-[250px]' />
 
-        {/* Faceted filters */}
         <div className='flex gap-x-2'>
-          {/* Filter by grade (1 -> 9) */}
-          {table.getColumn('grade') && (
+          {/* Filter by gender: MALE, FEMALE, OTHER */}
+          {table.getColumn('gender') && (
             <DataTableFacetedFilter
-              column={table.getColumn('grade')}
-              title='Khối'
-              options={Array.from({ length: 9 }, (_, i) => {
-                const val = i + 1
-                return { label: `Khối ${val}`, value: val.toString() }
-              })}
+              column={table.getColumn('gender')}
+              title='Giới tính'
+              options={[
+                { label: 'Nam', value: 'MALE' },
+                { label: 'Nữ', value: 'FEMALE' },
+                { label: 'Khác', value: 'OTHER' },
+              ]}
             />
           )}
 
-          {/* Filter by class, e.g. "1A", "1B", "2C" ... */}
-          {table.getColumn('class') && (
+          {/* Filter by status: ACTIVE, INACTIVE */}
+          {table.getColumn('status') && (
             <DataTableFacetedFilter
-              column={table.getColumn('class')}
-              title='Lớp'
-              // Hardcode or dynamically generate a list of classes here
-              // For demo, let's just show all combos from 1..9 with A..J
-              options={Array.from({ length: 9 }, (_, i) => i + 1).flatMap((g) =>
-                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map((suffix) => {
-                  const cls = `${g}${suffix}`
-                  return { label: cls, value: cls }
-                })
-              )}
-            />
-          )}
-
-          {/* Filter by busServiceStatus: "Đang sử dụng" / "Tạm ngừng sử dụng" */}
-          {table.getColumn('busServiceStatus') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('busServiceStatus')}
+              column={table.getColumn('status')}
               title='Trạng thái'
               options={[
-                { label: 'Đang sử dụng', value: 'Đang sử dụng' },
-                { label: 'Tạm ngừng sử dụng', value: 'Tạm ngừng sử dụng' },
+                { label: 'Đang hoạt động', value: 'ACTIVE' },
+                { label: 'Không hoạt động', value: 'INACTIVE' },
               ]}
             />
           )}
