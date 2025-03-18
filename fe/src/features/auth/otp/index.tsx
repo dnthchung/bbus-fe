@@ -9,21 +9,15 @@ export default function Otp() {
     <AuthLayout>
       <Card className='p-6'>
         <div className='mb-2 flex flex-col space-y-2 text-left'>
-          <h1 className='text-md font-semibold tracking-tight'>
-            Xác thực hai yếu tố
-          </h1>
+          <h1 className='text-md font-semibold tracking-tight'>Xác thực hai yếu tố</h1>
           <p className='text-sm text-muted-foreground'>
-            Vui lòng nhập mã xác thực. <br /> Chúng tôi đã gửi mã xác thực đến
-            Zalo của bạn.
+            Vui lòng nhập mã xác thực. <br /> Chúng tôi đã gửi mã xác thực đến số điện thoại của bạn.
           </p>
         </div>
         <OtpForm />
         <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
           Bạn chưa nhận được?{' '}
-          <Link
-            to='/sign-in'
-            className='underline underline-offset-4 hover:text-primary'
-          >
+          <Link to='/sign-in' className='underline underline-offset-4 hover:text-primary'>
             Gửi lại mã mới.
           </Link>
           .

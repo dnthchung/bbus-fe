@@ -1,6 +1,5 @@
 'use client'
 
-//path : fe/src/features/users/components/dialog/users-action-dialog.tsx
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,13 +16,12 @@ import { User } from '../../data/schema'
 
 const formSchema = z
   .object({
-    firstName: z.string().min(1, { message: 'First Name is required.' }),
-    lastName: z.string().min(1, { message: 'Last Name is required.' }),
-    username: z.string().min(1, { message: 'Username is required.' }),
-    phoneNumber: z.string().min(1, { message: 'Phone number is required.' }),
-    email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Email is invalid.' }),
+    name: z.string().min(1, { message: 'Họ và tên không được để trống.' }),
+    username: z.string().min(1, { message: 'Tên đăng nhập không được để trống.' }),
+    phone: z.string().min(1, { message: 'Số điện thoại không được để trống.' }),
+    email: z.string().min(1, { message: 'Email không được để trống.' }).email({ message: 'Email không hợp lệ.' }),
     password: z.string().transform((pwd) => pwd.trim()),
-    role: z.string().min(1, { message: 'Role is required.' }),
+    role: z.string().min(1, { message: 'Vai trò không được để trống.' }),
     confirmPassword: z.string().transform((pwd) => pwd.trim()),
     isEdit: z.boolean(),
   })
@@ -32,44 +30,41 @@ const formSchema = z
       if (password === '') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Password is required.',
+          message: 'Mật khẩu không được để trống.',
           path: ['password'],
         })
       }
-
       if (password.length < 8) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Password must be at least 8 characters long.',
+          message: 'Mật khẩu phải có ít nhất 8 ký tự.',
           path: ['password'],
         })
       }
-
       if (!password.match(/[a-z]/)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Password must contain at least one lowercase letter.',
+          message: 'Mật khẩu phải chứa ít nhất một chữ cái thường.',
           path: ['password'],
         })
       }
-
       if (!password.match(/\d/)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Password must contain at least one number.',
+          message: 'Mật khẩu phải chứa ít nhất một số.',
           path: ['password'],
         })
       }
-
       if (password !== confirmPassword) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Passwords don't match.",
+          message: 'Mật khẩu nhập lại không khớp.',
           path: ['confirmPassword'],
         })
       }
     }
   })
+
 type UserForm = z.infer<typeof formSchema>
 
 interface Props {
@@ -83,19 +78,13 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
     defaultValues: isEdit
-      ? {
-          ...currentRow,
-          password: '',
-          confirmPassword: '',
-          isEdit,
-        }
+      ? { ...currentRow, password: '', confirmPassword: '', isEdit }
       : {
-          firstName: '',
-          lastName: '',
+          name: '',
           username: '',
           email: '',
           role: '',
-          phoneNumber: '',
+          phone: '',
           password: '',
           confirmPassword: '',
           isEdit,
@@ -105,7 +94,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const onSubmit = (values: UserForm) => {
     form.reset()
     toast({
-      title: 'You submitted the following values:',
+      title: 'Dữ liệu đã gửi:',
       description: (
         <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
           <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
@@ -127,38 +116,22 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-left'>
-          <DialogTitle>{isEdit ? 'Edit User' : 'Add New User'}</DialogTitle>
-          <DialogDescription>
-            {isEdit ? 'Update the user here. ' : 'Create new user here. '}
-            Click save when you&apos;re done.
-          </DialogDescription>
+          <DialogTitle>{isEdit ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}</DialogTitle>
+          <DialogDescription>{isEdit ? 'Cập nhật thông tin người dùng.' : 'Nhập thông tin để tạo tài khoản mới.'} Nhấn lưu khi hoàn tất.</DialogDescription>
         </DialogHeader>
         <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
           <Form {...form}>
             <form id='user-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
               <FormField
                 control={form.control}
-                name='firstName'
+                name='name'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>First Name</FormLabel>
+                  <FormItem>
+                    <FormLabel>Họ và tên</FormLabel>
                     <FormControl>
-                      <Input placeholder='John' className='col-span-4' autoComplete='off' {...field} />
+                      <Input placeholder='Nguyễn Văn A' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='lastName'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Last Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Doe' className='col-span-4' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -166,12 +139,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                 control={form.control}
                 name='username'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Username</FormLabel>
+                  <FormItem>
+                    <FormLabel>Tên đăng nhập</FormLabel>
                     <FormControl>
-                      <Input placeholder='john_doe' className='col-span-4' {...field} />
+                      <Input placeholder='nguyenvana' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -179,25 +152,25 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                 control={form.control}
                 name='email'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Email</FormLabel>
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder='john.doe@gmail.com' className='col-span-4' {...field} />
+                      <Input placeholder='example@gmail.com' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name='phoneNumber'
+                name='phone'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Phone Number</FormLabel>
+                  <FormItem>
+                    <FormLabel>Số điện thoại</FormLabel>
                     <FormControl>
-                      <Input placeholder='+123456789' className='col-span-4' {...field} />
+                      <Input placeholder='+84123456789' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -205,19 +178,18 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                 control={form.control}
                 name='role'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Role</FormLabel>
+                  <FormItem>
+                    <FormLabel>Vai trò</FormLabel>
                     <SelectDropdown
                       defaultValue={field.value}
                       onValueChange={field.onChange}
-                      placeholder='Select a role'
-                      className='col-span-4'
-                      items={userTypes.map(({ label, value }) => ({
-                        label,
+                      placeholder='Chọn vai trò'
+                      items={userTypes.map(({ labelVi, value }) => ({
+                        label: labelVi,
                         value,
                       }))}
                     />
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -225,25 +197,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                 control={form.control}
                 name='password'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Password</FormLabel>
+                  <FormItem>
+                    <FormLabel>Mật khẩu</FormLabel>
                     <FormControl>
-                      <PasswordInput placeholder='e.g., S3cur3P@ssw0rd' className='col-span-4' {...field} />
+                      <PasswordInput placeholder='Nhập mật khẩu' {...field} autoComplete='current-password' />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='confirmPassword'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Confirm Password</FormLabel>
-                    <FormControl>
-                      <PasswordInput disabled={!isPasswordTouched} placeholder='e.g., S3cur3P@ssw0rd' className='col-span-4' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -252,7 +211,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
         </ScrollArea>
         <DialogFooter>
           <Button type='submit' form='user-form'>
-            Save changes
+            Lưu thay đổi
           </Button>
         </DialogFooter>
       </DialogContent>

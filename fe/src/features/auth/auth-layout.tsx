@@ -10,11 +10,11 @@ export default function AuthLayout({ children }: Props) {
   return (
     <div
       className='container grid h-svh flex-col items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0'
-      style={{
-        backgroundImage: `url(${BackGroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      // style={{
+      //   backgroundImage: `url(${BackGroundImage})`,
+      //   backgroundSize: 'cover',
+      //   backgroundPosition: 'center',
+      // }}
     >
       <div className='mx-auto flex w-full flex-col justify-center space-y-2 p-6 sm:w-[480px] lg:p-8'>
         {/* <div className='mx-auto flex w-full flex-col justify-center space-y-2 rounded-lg bg-white/80 p-6 shadow-lg sm:w-[480px] lg:p-8'> */}

@@ -9,12 +9,9 @@ export default function ForgotPassword() {
     <AuthLayout>
       <Card className='p-6'>
         <div className='mb-2 flex flex-col space-y-2 text-left'>
-          <h1 className='text-md font-semibold tracking-tight'>
-            Quên mật khẩu
-          </h1>
+          <h1 className='text-md font-semibold tracking-tight'>Quên mật khẩu</h1>
           <p className='text-sm text-muted-foreground'>
-            Nhập số điện thoại đã đăng ký của bạn và <br /> chúng tôi sẽ gửi cho
-            bạn một mã OTP thông qua Zalo.
+            Nhập số điện thoại đã đăng ký của bạn và <br /> chúng tôi sẽ gửi cho bạn một mã OTP thông qua số điện thoại.
           </p>
         </div>
         <ForgotForm />

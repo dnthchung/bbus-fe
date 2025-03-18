@@ -6,13 +6,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { PinInput, PinInputField } from '@/components/common/pin-input'
@@ -46,7 +40,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
     })
     setTimeout(() => {
       setIsLoading(false)
-      navigate({ to: '/' })
+      navigate({ to: '/change-password' })
     }, 1000)
   }
 
@@ -61,26 +55,10 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
               render={({ field }) => (
                 <FormItem className='space-y-1'>
                   <FormControl>
-                    <PinInput
-                      {...field}
-                      className='flex h-10 justify-between'
-                      onComplete={() => setDisabledBtn(false)}
-                      onIncomplete={() => setDisabledBtn(true)}
-                    >
+                    <PinInput {...field} className='flex h-10 justify-between' onComplete={() => setDisabledBtn(false)} onIncomplete={() => setDisabledBtn(true)}>
                       {Array.from({ length: 7 }, (_, i) => {
-                        if (i === 3)
-                          return <Separator key={i} orientation='vertical' />
-                        return (
-                          <PinInputField
-                            key={i}
-                            component={Input}
-                            className={`${
-                              form.getFieldState('otp').invalid
-                                ? 'border-red-500'
-                                : ''
-                            }`}
-                          />
-                        )
+                        if (i === 3) return <Separator key={i} orientation='vertical' />
+                        return <PinInputField key={i} component={Input} className={`${form.getFieldState('otp').invalid ? 'border-red-500' : ''}`} />
                       })}
                     </PinInput>
                   </FormControl>

@@ -17,6 +17,9 @@ interface ApiServices {
     getOne: (id: string) => Promise<any>
     list: () => Promise<any>
   }
+  checkpoints: {
+    getAll: () => Promise<any>
+  }
 }
 
 export const API_SERVICES: ApiServices = {
@@ -51,5 +54,11 @@ export const API_SERVICES: ApiServices = {
     getAll: () => apiClient.get(API_ENDPOINTS.USERS.GET_ALL),
     getOne: (id: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(id)),
     list: () => apiClient.get(API_ENDPOINTS.USERS.LIST),
+  },
+  // -------------------------
+  // 3) CHECKPOINTS
+  // -------------------------
+  checkpoints: {
+    getAll: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
   },
 }
