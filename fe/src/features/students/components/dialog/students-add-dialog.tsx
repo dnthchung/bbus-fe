@@ -1,134 +1,131 @@
 'use client'
 
 // path: fe/src/features/students/components/dialog/students-add-dialog.tsx
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { z } from 'zod'
+import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CalendarIcon } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
+import { API_SERVICES } from '@/api/api-services'
+import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Student } from '../../data/schema'
+import { User } from '@/features/users/data/schema'
+// Import the API function and User type for parent users
+import { getAllUsersRoleParent } from '@/features/users/data/users'
+import { useStudents } from '../../context/students-context'
 
-// --------------------
-// 1) Define Zod schema for form
-//    This matches the shape of your "studentSchema," plus .optional() for ID
-//    and an "isEdit" flag to know if we are editing or adding.
+// Schema for adding a new student
 const formSchema = z.object({
-  id: z.string().uuid().optional(),
-  rollNumber: z.string().min(1, 'Vui lòng nhập mã học sinh'),
-  name: z.string().min(1, 'Vui lòng nhập họ và tên'),
-  avatar: z.string().url('Phải là URL hợp lệ').optional(),
-  dob: z.string().datetime('Sai định dạng ngày giờ'),
-  address: z.string().min(1, 'Vui lòng nhập địa chỉ'),
+  name: z.string().min(1, { message: 'Họ và tên không được để trống' }),
+  dob: z.coerce.date({ required_error: 'Vui lòng chọn ngày sinh hợp lệ' }),
+  address: z.string().min(1, { message: 'Địa chỉ không được để trống' }),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
-    errorMap: () => ({ message: 'Giới tính không hợp lệ' }),
+    errorMap: () => ({ message: 'Vui lòng chọn giới tính hợp lệ' }),
   }),
-  status: z.enum(['ACTIVE', 'INACTIVE'], {
-    errorMap: () => ({ message: 'Trạng thái không hợp lệ' }),
-  }),
-  parentId: z.string().uuid().optional(),
-  parentName: z.string().min(1, 'Vui lòng nhập tên phụ huynh'),
-  parentPhone: z.string().min(1, 'Vui lòng nhập số điện thoại'),
-  checkpointId: z.string().uuid().optional(),
-  checkpointName: z.string().min(1, 'Vui lòng nhập điểm dừng'),
-  checkpointDescription: z.string().min(1, 'Vui lòng nhập mô tả điểm dừng'),
-  isEdit: z.boolean().default(false),
+  parentId: z.string().uuid({ message: 'Vui lòng chọn phụ huynh hợp lệ' }).min(1, { message: 'Phụ huynh không được để trống' }),
 })
 
 type StudentForm = z.infer<typeof formSchema>
 
-// --------------------
-// 2) Props for the Add/Edit dialog
+// Props for the add-student dialog
 interface Props {
-  currentRow?: Student
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
 }
 
-// --------------------
-// 3) Component
-export function StudentsAddDialog({ currentRow, open, onOpenChange }: Props) {
-  // Are we editing?
-  const isEdit = !!currentRow
+// Function to generate a rollNumber using uuid prefixed with "HS"
+const generateRollNumber = (): string => {
+  return `HS${uuidv4()}`
+}
 
-  // -------------------------------------------
-  // 4) Setup React Hook Form
-  //    Convert `dob` from ISO string <-> date input
+export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [parentUsers, setParentUsers] = useState<User[]>([])
+  const { refreshStudents } = useStudents()
+
+  // Fetch the list of parent users when the component mounts
+  useEffect(() => {
+    async function fetchParents() {
+      try {
+        const parents = await getAllUsersRoleParent()
+        setParentUsers(parents)
+      } catch (error) {
+        console.error('Error fetching parent users:', error)
+      }
+    }
+    fetchParents()
+  }, [])
+
+  // Setup React Hook Form
   const form = useForm<StudentForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      // If editing, fill in existing data; otherwise use empty or defaults
-      id: currentRow?.id,
-      rollNumber: currentRow?.rollNumber || '',
-      name: currentRow?.name || '',
-      avatar: currentRow?.avatar || '',
-      dob: currentRow?.dob || new Date().toISOString(), // fallback to "now"
-      address: currentRow?.address || '',
-      gender: currentRow?.gender || 'OTHER',
-      status: currentRow?.status || 'ACTIVE',
-      parentId: currentRow?.parentId,
-      parentName: currentRow?.parentName || '',
-      parentPhone: currentRow?.parentPhone || '',
-      checkpointId: currentRow?.checkpointId,
-      checkpointName: currentRow?.checkpointName || '',
-      checkpointDescription: currentRow?.checkpointDescription || '',
-      isEdit,
+      name: '',
+      dob: undefined,
+      address: '',
+      gender: 'OTHER',
+      parentId: '',
     },
   })
 
-  const { control, handleSubmit, reset, watch, setValue } = form
+  const { control, handleSubmit, reset } = form
 
-  // -------------------------------------------
-  // 5) Handle submit
-  const onSubmit = (values: StudentForm) => {
-    toast({
-      title: isEdit ? 'Đã cập nhật học sinh:' : 'Đã thêm học sinh mới:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      ),
-    })
-
-    // reset form & close dialog
-    reset()
-    onOpenChange(false)
-  }
-
-  // -------------------------------------------
-  // 6) Convert `dob` from string -> date for input (and back)
-  //    Because we stored `dob` as a string in form, let's show it in the <input type="date" />
-  const dobVal = watch('dob')
-  useEffect(() => {
-    if (!dobVal) {
-      setValue('dob', new Date().toISOString())
-    }
-  }, [dobVal, setValue])
-
-  // We'll make a small helper to safely get "yyyy-MM-dd"
-  const dobSafeValue = (isoString: string) => {
+  // Handle submit with API call
+  const onSubmit = async (values: StudentForm) => {
     try {
-      return new Date(isoString).toISOString().substring(0, 10)
-    } catch {
-      return ''
+      setIsSubmitting(true)
+      const newStudent = {
+        rollNumber: generateRollNumber(),
+        name: values.name,
+        avatar: 'https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Chase',
+        dob: values.dob.toISOString(),
+        address: values.address,
+        gender: values.gender,
+        status: 'ACTIVE',
+        parentId: values.parentId,
+        checkpointId: '',
+      }
+
+      // Call API to add a new student
+      const response = await API_SERVICES.students.addOne(newStudent)
+      console.log('response', response)
+      toast({
+        title: 'Thêm học sinh thành công',
+        description: 'Học sinh mới đã được thêm vào hệ thống',
+      })
+
+      // Close dialog and reset form
+      reset()
+      onOpenChange(false)
+      await refreshStudents()
+
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      }
+    } catch (error) {
+      console.error('Lỗi khi thêm học sinh:', error)
+      toast({
+        title: 'Không thể thêm học sinh',
+        description: 'Đã xảy ra lỗi khi thêm học sinh mới. Vui lòng thử lại sau.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  // -------------------------------------------
-  // 7) Quick preview for avatar
-  const avatarUrl = watch('avatar') || ''
-  const imagePreview = avatarUrl ? (
-    <div className='h-24 w-full overflow-hidden rounded-md bg-gray-200'>
-      <img src={avatarUrl} alt='Avatar Preview' className='h-full w-full object-cover' />
-    </div>
-  ) : null
-
-  // -------------------------------------------
-  // 8) Render
+  // Render
   return (
     <Dialog
       open={open}
@@ -139,92 +136,73 @@ export function StudentsAddDialog({ currentRow, open, onOpenChange }: Props) {
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-left'>
-          <DialogTitle>{isEdit ? 'Chỉnh sửa học sinh' : 'Thêm học sinh mới'}</DialogTitle>
-          <DialogDescription>
-            {isEdit ? 'Cập nhật thông tin học sinh ở đây.' : 'Tạo học sinh mới ở đây.'}
-            {'  '}Nhấn lưu khi hoàn tất.
-          </DialogDescription>
+          <DialogTitle>Thêm học sinh mới</DialogTitle>
+          <DialogDescription>Tạo học sinh mới ở đây. Nhấn lưu khi hoàn tất.</DialogDescription>
         </DialogHeader>
-
         <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
           <Form {...form}>
             <form id='student-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
-              {/* Mã học sinh (rollNumber) */}
-              <FormField
-                control={control}
-                name='rollNumber'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Mã học sinh</FormLabel>
-                    <FormControl>
-                      <Input placeholder='MS001' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Tên học sinh (name) */}
+              {/* Student Name */}
               <FormField
                 control={control}
                 name='name'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
+                  <FormItem>
                     <FormLabel className='col-span-2 text-right'>Họ và tên</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nguyễn Văn A' autoComplete='off' {...field} />
+                      <Input placeholder='Nguyễn Tuấn Hùng' autoComplete='off' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
-
-              {/* Ngày sinh (dob) */}
+              {/* Date of Birth */}
               <FormField
                 control={control}
                 name='dob'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
+                  <FormItem>
                     <FormLabel className='col-span-2 text-right'>Ngày sinh</FormLabel>
                     <FormControl>
-                      <Input
-                        type='date'
-                        value={dobSafeValue(field.value)}
-                        onChange={(e) => {
-                          // convert date pick to ISO string
-                          field.onChange(new Date(e.target.value).toISOString())
-                        }}
-                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant='outline' className={cn('col-span-4 w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
+                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Chọn ngày</span>}
+                            <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className='w-auto p-0' align='start'>
+                          <Calendar mode='single' selected={field.value} onSelect={field.onChange} disabled={(date: Date) => date > new Date() || date < new Date('1900-01-01')} />
+                        </PopoverContent>
+                      </Popover>
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
-
-              {/* Địa chỉ (address) */}
+              {/* Address */}
               <FormField
                 control={control}
                 name='address'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
+                  <FormItem>
                     <FormLabel className='col-span-2 text-right'>Địa chỉ</FormLabel>
                     <FormControl>
-                      <Input placeholder='Hà Nội, Việt Nam' {...field} />
+                      <Input placeholder='Ninh Bình' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
-
-              {/* Giới tính (gender) */}
+              {/* Gender */}
               <FormField
                 control={control}
                 name='gender'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
+                  <FormItem className='grid grid-cols-12 items-center gap-x-4 gap-y-1 space-y-0'>
                     <FormLabel className='col-span-2 text-right'>Giới tính</FormLabel>
                     <FormControl>
-                      <select className='rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
+                      <select className='col-span-4 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
                         <option value='MALE'>Nam</option>
                         <option value='FEMALE'>Nữ</option>
                         <option value='OTHER'>Khác</option>
@@ -234,101 +212,22 @@ export function StudentsAddDialog({ currentRow, open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-
-              {/* Trạng thái (status) */}
+              {/* Parent Selection */}
               <FormField
                 control={control}
-                name='status'
+                name='parentId'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Trạng thái</FormLabel>
+                  <FormItem className='grid grid-cols-10 items-center gap-x-4 gap-y-1 space-y-0'>
+                    <FormLabel className='col-span-2 text-right'>Phụ huynh</FormLabel>
                     <FormControl>
-                      <select className='rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
-                        <option value='ACTIVE'>Đang hoạt động</option>
-                        <option value='INACTIVE'>Không hoạt động</option>
+                      <select className='col-span-4 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
+                        <option value=''>Chọn phụ huynh</option>
+                        {parentUsers.map((parent) => (
+                          <option key={parent.userId} value={parent.userId}>
+                            {parent.name}
+                          </option>
+                        ))}
                       </select>
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Avatar (URL) */}
-              <FormField
-                control={control}
-                name='avatar'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Ảnh đại diện</FormLabel>
-                    <FormControl>
-                      <Input placeholder='https://example.com/image.jpg' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Avatar preview */}
-              <div className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                <div className='col-span-6 flex items-center justify-center'>
-                  <div className='h-auto w-20'>{imagePreview}</div>
-                </div>
-              </div>
-
-              {/* Tên phụ huynh (parentName) */}
-              <FormField
-                control={control}
-                name='parentName'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Tên phụ huynh</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Nguyễn Thị B' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Số điện thoại phụ huynh (parentPhone) */}
-              <FormField
-                control={control}
-                name='parentPhone'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>SĐT phụ huynh</FormLabel>
-                    <FormControl>
-                      <Input placeholder='0912345678' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Điểm dừng (checkpointName) */}
-              <FormField
-                control={control}
-                name='checkpointName'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Điểm dừng</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Đại học Quốc gia' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Mô tả điểm dừng (checkpointDescription) */}
-              <FormField
-                control={control}
-                name='checkpointDescription'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Mô tả điểm dừng</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Điểm dừng trước cổng ĐHQG' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
@@ -337,10 +236,9 @@ export function StudentsAddDialog({ currentRow, open, onOpenChange }: Props) {
             </form>
           </Form>
         </ScrollArea>
-
         <DialogFooter>
-          <Button type='submit' form='student-form'>
-            {isEdit ? 'Lưu thay đổi' : 'Tạo học sinh'}
+          <Button type='submit' form='student-form' disabled={isSubmitting}>
+            {isSubmitting ? 'Đang tạo...' : 'Tạo học sinh'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -7,7 +7,7 @@ export type UserStatus = z.infer<typeof userStatusSchema>
 const roleEnum = z.enum(['ADMIN', 'PARENT', 'TEACHER', 'DRIVER', 'ASSISTANT', 'SYSADMIN'])
 
 export const userSchema = z.object({
-  id: z.string(),
+  userId: z.string(),
   username: z.string(),
   name: z.string(),
   gender: z.enum(['MALE', 'FEMALE']).optional(),

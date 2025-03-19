@@ -35,3 +35,22 @@ export async function getAllUsers(): Promise<User[]> {
     throw error
   }
 }
+
+export async function getAllUsersRoleParent(): Promise<User[]> {
+  try {
+    const response = await API_SERVICES.users.list()
+    const rawData = response.data
+    const rawUsers = rawData?.data?.users
+    if (!rawUsers) {
+      return []
+    }
+
+    // Parse & validate với Zod
+    // Lọc danh sách user có role = "PARENT"
+    const parentUsers = rawUsers.filter((user: User) => user.role === 'PARENT')
+    return parentUsers
+  } catch (error) {
+    console.error('Error getAllUsers in users.ts:', error)
+    throw error
+  }
+}

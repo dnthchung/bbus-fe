@@ -1,5 +1,5 @@
 //path : fe/src/components/layout/data/sidebar-data.ts
-import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconTool, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification } from '@tabler/icons-react'
+import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconUser, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification } from '@tabler/icons-react'
 import { Bus, CalendarCheck, MapPinPlus, Route } from 'lucide-react'
 import { type SidebarData } from '@/components/layout/sidebar/sidebar-type'
 
@@ -23,7 +23,14 @@ export const sidebarData: SidebarData = {
       title: 'Quản lý',
       items: [
         { title: 'Quản lý TK người dùng', url: '/users', icon: IconLockAccess },
-        { title: 'Quản lý học sinh', url: '/students', icon: IconUsers },
+        {
+          title: 'Quản lý học sinh',
+          icon: IconUser,
+          items: [
+            { title: 'DS học sinh', url: '/students', icon: IconUsers },
+            { title: 'Lịch sử điểm danh', url: '/students/attendance', icon: IconUserOff },
+          ],
+        },
         {
           title: 'Quản lý tuyến đường',
           // icon: IconBusStop,

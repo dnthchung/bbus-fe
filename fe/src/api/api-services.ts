@@ -14,14 +14,16 @@ interface ApiServices {
   }
   users: {
     getAll: () => Promise<any>
-    getOne: (id: string) => Promise<any>
+    getOne: (userId: string) => Promise<any>
     list: () => Promise<any>
+    addOne: (user: any) => Promise<any>
   }
   checkpoints: {
     getAll: () => Promise<any>
   }
   students: {
     list: () => Promise<any>
+    addOne: (student: any) => Promise<any>
   }
 }
 
@@ -55,8 +57,9 @@ export const API_SERVICES: ApiServices = {
   // -------------------------
   users: {
     getAll: () => apiClient.get(API_ENDPOINTS.USERS.GET_ALL),
-    getOne: (id: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(id)),
+    getOne: (userId: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(userId)),
     list: () => apiClient.get(API_ENDPOINTS.USERS.LIST),
+    addOne: (user: any) => apiClient.post(API_ENDPOINTS.USERS.ADD_ONE, user),
   },
   // -------------------------
   // 3) CHECKPOINTS
@@ -69,5 +72,6 @@ export const API_SERVICES: ApiServices = {
   //-------------------------
   students: {
     list: () => apiClient.get(API_ENDPOINTS.STUDENTS.LIST),
+    addOne: (student: any) => apiClient.post(API_ENDPOINTS.STUDENTS.ADD_ONE, student),
   },
 }

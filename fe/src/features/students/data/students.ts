@@ -33,3 +33,7 @@ export async function getAllStudents(): Promise<Student[]> {
     throw error
   }
 }
+
+//function api add a new student
+
+// add-student-form-type

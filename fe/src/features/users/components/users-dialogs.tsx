@@ -1,6 +1,7 @@
 //path : fe/src/features/users/components/users-dialogs.tsx
 import { useUsers } from '../context/users-context'
 import { UsersActionDialog } from './dialog/users-action-dialog'
+import { UsersAddDialog } from './dialog/users-add-dialog'
 import { UsersDeleteDialog } from './dialog/users-delete-dialog'
 import { UsersEditViewDialog } from './dialog/users-edit-view-dialog'
 import { UsersImportDialog } from './dialog/users-import-excel-dialog'
@@ -11,14 +12,14 @@ export function UsersDialogs() {
 
   return (
     <>
-      <UsersActionDialog key='user-add' open={open === 'add'} onOpenChange={() => setOpen('add')} />
+      {/* <UsersActionDialog key='user-add' open={open === 'add'} onOpenChange={() => setOpen('add')} /> */}
       <UsersInviteDialog key='user-invite' open={open === 'invite'} onOpenChange={() => setOpen('invite')} />
       <UsersImportDialog key='user-import' open={open === 'import'} onOpenChange={() => setOpen('import')} />
-      <UsersEditViewDialog key='user-view-edit-details' open={open === 'view-edit-details'} onOpenChange={() => setOpen('view-edit-details')} />
+      <UsersAddDialog key='user-add' open={open === 'add'} onOpenChange={() => setOpen('add')} />
       {currentRow && (
         <>
           <UsersEditViewDialog
-            key={`user-edit-view-${currentRow.id}`}
+            key={`user-edit-view-${currentRow.userId}`}
             open={open === 'view-edit-details'}
             onOpenChange={() => {
               setOpen('view-edit-details')
@@ -28,20 +29,8 @@ export function UsersDialogs() {
             }}
             currentRow={currentRow}
           />
-          {/* Commented out because "edit" functionality is now handled by "edit-view" */}
-          {/* <UsersActionDialog
-            key={`user-edit-${currentRow.id}`}
-            open={open === 'edit'}
-            onOpenChange={() => {
-              setOpen('edit');
-              setTimeout(() => {
-                setCurrentRow(null);
-              }, 500);
-            }}
-            currentRow={currentRow}
-          /> */}
           <UsersDeleteDialog
-            key={`user-delete-${currentRow.id}`}
+            key={`user-delete-${currentRow.userId}`}
             open={open === 'delete'}
             onOpenChange={() => {
               setOpen('delete')

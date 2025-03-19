@@ -8,13 +8,15 @@ export const API_ENDPOINTS = {
   },
   USERS: {
     GET_ALL: '/user',
-    GET_ONE: (id: string) => `/user/${id}`,
+    GET_ONE: (userId: string) => `/user/${userId}`,
     LIST: '/user/list',
+    ADD_ONE: '/user/add',
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoints/list',
   },
   STUDENTS: {
     LIST: '/student/list',
+    ADD_ONE: '/student/add',
   },
 } as const
