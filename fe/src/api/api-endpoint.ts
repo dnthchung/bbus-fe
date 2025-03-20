@@ -18,5 +18,7 @@ export const API_ENDPOINTS = {
   STUDENTS: {
     LIST: '/student/list',
     ADD_ONE: '/student/add',
+    UPDATE_ONE: (studentId: string) => `/student/${studentId}`,
+    GET_ONE: (studentId: string) => `/student/${studentId}`,
   },
 } as const

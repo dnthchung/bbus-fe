@@ -55,7 +55,7 @@
 //path : fe/src/features/students/components/data-table-row-actions.tsx
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
+import { IconEdit, IconEye, IconTrash } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useStudents } from '../../context/students-context'
@@ -83,12 +83,12 @@ export function StudentsDataTableRowActions({ row }: DataTableRowActionsProps) {
           <DropdownMenuItem
             onClick={() => {
               setCurrentRow(row.original)
-              setOpen('edit')
+              setOpen('edit-view')
             }}
           >
-            Chỉnh sửa
+            Xem chi tiết
             <DropdownMenuShortcut>
-              <IconEdit size={16} />
+              <IconEye size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
 

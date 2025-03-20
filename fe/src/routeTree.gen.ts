@@ -68,6 +68,9 @@ const AuthenticatedTransportationSchedulesLazyImport = createFileRoute(
 const AuthenticatedTransportationCheckpointsLazyImport = createFileRoute(
   '/_authenticated/transportation/checkpoints',
 )()
+const AuthenticatedStudentsStudentDetailsLazyImport = createFileRoute(
+  '/_authenticated/students/student-details',
+)()
 const AuthenticatedStudentsAttendanceLazyImport = createFileRoute(
   '/_authenticated/students/attendance',
 )()
@@ -296,6 +299,17 @@ const AuthenticatedTransportationCheckpointsLazyRoute =
     ),
   )
 
+const AuthenticatedStudentsStudentDetailsLazyRoute =
+  AuthenticatedStudentsStudentDetailsLazyImport.update({
+    id: '/students/student-details',
+    path: '/students/student-details',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/students/student-details.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedStudentsAttendanceLazyRoute =
   AuthenticatedStudentsAttendanceLazyImport.update({
     id: '/students/attendance',
@@ -491,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudentsAttendanceLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/students/student-details': {
+      id: '/_authenticated/students/student-details'
+      path: '/students/student-details'
+      fullPath: '/students/student-details'
+      preLoaderRoute: typeof AuthenticatedStudentsStudentDetailsLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/transportation/checkpoints': {
       id: '/_authenticated/transportation/checkpoints'
       path: '/transportation/checkpoints'
@@ -594,6 +615,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedTransportationRoutesRoute: typeof AuthenticatedTransportationRoutesRoute
   AuthenticatedStudentsAttendanceLazyRoute: typeof AuthenticatedStudentsAttendanceLazyRoute
+  AuthenticatedStudentsStudentDetailsLazyRoute: typeof AuthenticatedStudentsStudentDetailsLazyRoute
   AuthenticatedTransportationCheckpointsLazyRoute: typeof AuthenticatedTransportationCheckpointsLazyRoute
   AuthenticatedTransportationSchedulesLazyRoute: typeof AuthenticatedTransportationSchedulesLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
@@ -613,6 +635,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedTransportationRoutesRoute,
   AuthenticatedStudentsAttendanceLazyRoute:
     AuthenticatedStudentsAttendanceLazyRoute,
+  AuthenticatedStudentsStudentDetailsLazyRoute:
+    AuthenticatedStudentsStudentDetailsLazyRoute,
   AuthenticatedTransportationCheckpointsLazyRoute:
     AuthenticatedTransportationCheckpointsLazyRoute,
   AuthenticatedTransportationSchedulesLazyRoute:
@@ -650,6 +674,7 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/students/attendance': typeof AuthenticatedStudentsAttendanceLazyRoute
+  '/students/student-details': typeof AuthenticatedStudentsStudentDetailsLazyRoute
   '/transportation/checkpoints': typeof AuthenticatedTransportationCheckpointsLazyRoute
   '/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
@@ -680,6 +705,7 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/students/attendance': typeof AuthenticatedStudentsAttendanceLazyRoute
+  '/students/student-details': typeof AuthenticatedStudentsStudentDetailsLazyRoute
   '/transportation/checkpoints': typeof AuthenticatedTransportationCheckpointsLazyRoute
   '/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
@@ -714,6 +740,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/students/attendance': typeof AuthenticatedStudentsAttendanceLazyRoute
+  '/_authenticated/students/student-details': typeof AuthenticatedStudentsStudentDetailsLazyRoute
   '/_authenticated/transportation/checkpoints': typeof AuthenticatedTransportationCheckpointsLazyRoute
   '/_authenticated/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
@@ -748,6 +775,7 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/notifications'
     | '/students/attendance'
+    | '/students/student-details'
     | '/transportation/checkpoints'
     | '/transportation/schedules'
     | '/apps'
@@ -777,6 +805,7 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/notifications'
     | '/students/attendance'
+    | '/students/student-details'
     | '/transportation/checkpoints'
     | '/transportation/schedules'
     | '/apps'
@@ -809,6 +838,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/students/attendance'
+    | '/_authenticated/students/student-details'
     | '/_authenticated/transportation/checkpoints'
     | '/_authenticated/transportation/schedules'
     | '/_authenticated/apps/'
@@ -886,6 +916,7 @@ export const routeTree = rootRoute
         "/_authenticated/",
         "/_authenticated/transportation/routes",
         "/_authenticated/students/attendance",
+        "/_authenticated/students/student-details",
         "/_authenticated/transportation/checkpoints",
         "/_authenticated/transportation/schedules",
         "/_authenticated/apps/",
@@ -965,6 +996,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/students/attendance": {
       "filePath": "_authenticated/students/attendance.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/students/student-details": {
+      "filePath": "_authenticated/students/student-details.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/transportation/checkpoints": {

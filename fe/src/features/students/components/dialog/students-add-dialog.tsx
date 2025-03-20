@@ -1,6 +1,5 @@
 'use client'
 
-// path: fe/src/features/students/components/dialog/students-add-dialog.tsx
 import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { format } from 'date-fns'
@@ -18,12 +17,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { User } from '@/features/users/data/schema'
-// Import the API function and User type for parent users
 import { getAllUsersRoleParent } from '@/features/users/data/users'
 import { useStudents } from '../../context/students-context'
 
-// Schema for adding a new student
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Họ và tên không được để trống' }),
   dob: z.coerce.date({ required_error: 'Vui lòng chọn ngày sinh hợp lệ' }),
@@ -36,14 +34,12 @@ const formSchema = z.object({
 
 type StudentForm = z.infer<typeof formSchema>
 
-// Props for the add-student dialog
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
 }
 
-// Function to generate a rollNumber using uuid prefixed with "HS"
 const generateRollNumber = (): string => {
   return `HS${uuidv4()}`
 }
@@ -51,9 +47,11 @@ const generateRollNumber = (): string => {
 export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [parentUsers, setParentUsers] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+
   const { refreshStudents } = useStudents()
 
-  // Fetch the list of parent users when the component mounts
+  // Lấy danh sách phụ huynh khi dialog mở
   useEffect(() => {
     async function fetchParents() {
       try {
@@ -63,8 +61,10 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
         console.error('Error fetching parent users:', error)
       }
     }
-    fetchParents()
-  }, [])
+    if (open) {
+      fetchParents()
+    }
+  }, [open])
 
   // Setup React Hook Form
   const form = useForm<StudentForm>({
@@ -77,13 +77,32 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
       parentId: '',
     },
   })
+  const { control, handleSubmit, reset, watch, setValue } = form
 
-  const { control, handleSubmit, reset } = form
+  // Lọc danh sách phụ huynh theo searchTerm
+  const filteredParentUsers = parentUsers.filter((parent) => {
+    const lower = searchTerm.toLowerCase()
+    return parent.name.toLowerCase().includes(lower) || (parent.phone && parent.phone.includes(searchTerm))
+  })
 
-  // Handle submit with API call
+  // Lấy parentId từ form
+  const watchParentId = watch('parentId')
+
+  // Tìm phụ huynh tương ứng
+  const selectedParent = parentUsers.find((p) => p.userId === watchParentId)
+  // Nếu tìm thấy, hiển thị "Tên - SĐT", nếu không có phone thì "N/A"
+  const displayParentText = selectedParent ? `${selectedParent.name} - ${selectedParent.phone ?? 'N/A'}` : ''
+
+  // Chọn phụ huynh => set parentId vào form
+  const handleSelectParent = (parentId: string) => {
+    setValue('parentId', parentId)
+  }
+
+  // Submit
   const onSubmit = async (values: StudentForm) => {
     try {
       setIsSubmitting(true)
+
       const newStudent = {
         rollNumber: generateRollNumber(),
         name: values.name,
@@ -95,28 +114,27 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
         parentId: values.parentId,
         checkpointId: '',
       }
+      console.log('newStudent', newStudent)
 
-      // Call API to add a new student
       const response = await API_SERVICES.students.addOne(newStudent)
       console.log('response', response)
+
       toast({
         title: 'Thêm học sinh thành công',
         description: 'Học sinh mới đã được thêm vào hệ thống',
       })
 
-      // Close dialog and reset form
       reset()
       onOpenChange(false)
       await refreshStudents()
 
-      // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess()
       }
     } catch (error) {
       console.error('Lỗi khi thêm học sinh:', error)
       toast({
-        title: 'Không thể thêm học sinh',
+        title: `${error || 'Không thể thêm học sinh'}`,
         description: 'Đã xảy ra lỗi khi thêm học sinh mới. Vui lòng thử lại sau.',
         variant: 'destructive',
       })
@@ -125,119 +143,177 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
     }
   }
 
-  // Render
   return (
     <Dialog
       open={open}
       onOpenChange={(state) => {
-        if (!state) reset()
+        if (!state) {
+          reset()
+          setSearchTerm('')
+        }
         onOpenChange(state)
       }}
     >
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='max-w-5xl'>
         <DialogHeader className='text-left'>
           <DialogTitle>Thêm học sinh mới</DialogTitle>
           <DialogDescription>Tạo học sinh mới ở đây. Nhấn lưu khi hoàn tất.</DialogDescription>
         </DialogHeader>
-        <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
-          <Form {...form}>
-            <form id='student-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
-              {/* Student Name */}
-              <FormField
-                control={control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Họ và tên</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Nguyễn Tuấn Hùng' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              {/* Date of Birth */}
-              <FormField
-                control={control}
-                name='dob'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Ngày sinh</FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant='outline' className={cn('col-span-4 w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Chọn ngày</span>}
-                            <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className='w-auto p-0' align='start'>
-                          <Calendar mode='single' selected={field.value} onSelect={field.onChange} disabled={(date: Date) => date > new Date() || date < new Date('1900-01-01')} />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              {/* Address */}
-              <FormField
-                control={control}
-                name='address'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Địa chỉ</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Ninh Bình' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              {/* Gender */}
-              <FormField
-                control={control}
-                name='gender'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-12 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Giới tính</FormLabel>
-                    <FormControl>
-                      <select className='col-span-4 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
-                        <option value='MALE'>Nam</option>
-                        <option value='FEMALE'>Nữ</option>
-                        <option value='OTHER'>Khác</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              {/* Parent Selection */}
-              <FormField
-                control={control}
-                name='parentId'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-10 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Phụ huynh</FormLabel>
-                    <FormControl>
-                      <select className='col-span-4 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
-                        <option value=''>Chọn phụ huynh</option>
-                        {parentUsers.map((parent) => (
-                          <option key={parent.userId} value={parent.userId}>
-                            {parent.name}
-                          </option>
-                        ))}
-                      </select>
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </ScrollArea>
+
+        <div className='mt-4 flex gap-4'>
+          {/* CỘT TRÁI: FORM */}
+          <div className='w-1/2 border-r pr-4'>
+            <ScrollArea className='h-[450px] pr-4'>
+              <Form {...form}>
+                <form id='student-form' onSubmit={handleSubmit(onSubmit)}>
+                  {/* Name */}
+                  <FormField
+                    control={control}
+                    name='name'
+                    render={({ field }) => (
+                      <FormItem className='mb-4'>
+                        <FormLabel>Họ và tên</FormLabel>
+                        <FormControl>
+                          <Input placeholder='Nguyễn Tuấn Hùng' autoComplete='off' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Ngày sinh */}
+                  <FormField
+                    control={control}
+                    name='dob'
+                    render={({ field }) => (
+                      <FormItem className='mb-4'>
+                        <FormLabel>Ngày sinh</FormLabel>
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant='outline' className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
+                                {field.value ? format(field.value, 'dd/MM/yyyy') : 'Chọn ngày'}
+                                <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className='w-auto p-0' align='start'>
+                              <Calendar mode='single' selected={field.value} onSelect={field.onChange} disabled={(date: Date) => date > new Date() || date < new Date('1900-01-01')} />
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Địa chỉ */}
+                  <FormField
+                    control={control}
+                    name='address'
+                    render={({ field }) => (
+                      <FormItem className='mb-4'>
+                        <FormLabel>Địa chỉ</FormLabel>
+                        <FormControl>
+                          <Input placeholder='VD: Ninh Bình' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Giới tính */}
+                  <FormField
+                    control={control}
+                    name='gender'
+                    render={({ field }) => (
+                      <FormItem className='mb-4'>
+                        <FormLabel>Giới tính</FormLabel>
+                        <FormControl>
+                          {/* <select className='rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
+                            <option value='MALE'>Nam</option>
+                            <option value='FEMALE'>Nữ</option>
+                          </select> */}
+
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger className='w-[180px]'>
+                              <SelectValue placeholder='Lựa chọn giới tính' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Giới tính</SelectLabel>
+                                <SelectItem value='MALE'>Nam</SelectItem>
+                                <SelectItem value='FEMALE'>Nữ</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Ẩn parentId, nhưng hiển thị tên + sdt (selectedParent) */}
+                  <FormField
+                    control={control}
+                    name='parentId'
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Phụ huynh đã chọn</FormLabel>
+                        <FormControl>
+                          {/* Hiển thị text: "Tên - SĐT" */}
+                          <Input disabled value={displayParentText} placeholder='Chọn phụ huynh ở bảng bên phải' />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </ScrollArea>
+          </div>
+
+          {/* CỘT PHẢI: DANH SÁCH PHỤ HUYNH (TABLE + SEARCH) */}
+          <div className='w-1/2 pl-4'>
+            <div className='mb-2 flex items-center'>
+              <Input placeholder='Tìm phụ huynh theo tên/điện thoại' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className='mr-2' />
+            </div>
+
+            <ScrollArea className='h-[400px] rounded border'>
+              <table className='w-full text-sm'>
+                <thead className='sticky top-0 bg-gray-50'>
+                  <tr>
+                    <th className='px-3 py-2 text-left'>Tên</th>
+                    <th className='px-3 py-2 text-left'>SĐT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredParentUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={2} className='p-3 text-center'>
+                        Không tìm thấy kết quả
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredParentUsers.map((parent) => (
+                      <tr key={parent.userId} className='cursor-pointer hover:bg-gray-100' onClick={() => handleSelectParent(parent.userId)}>
+                        <td className='px-3 py-2'>{parent.name}</td>
+                        <td className='px-3 py-2'>{parent.phone || 'N/A'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </ScrollArea>
+          </div>
+        </div>
+
+        {/* Footer => Submit button */}
         <DialogFooter>
-          <Button type='submit' form='student-form' disabled={isSubmitting}>
+          <Button
+            type='submit'
+            form='student-form' // submit form cột trái
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'Đang tạo...' : 'Tạo học sinh'}
           </Button>
         </DialogFooter>

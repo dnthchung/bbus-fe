@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import LongText from '@/components/common/long-text'
 import { AvatarThumbnail } from '@/features/users/components/avatar-thumbnail'
-import { callTypes, userTypes, statusLabels } from '../../data/data'
-import { User } from '../../data/schema'
-import { DataTableColumnHeader } from './data-table-column-header'
-import { DataTableRowActions } from './data-table-row-actions'
+import { callTypes, userTypes, statusLabels } from '../data/data'
+import { User } from '../data/schema'
+import { DataTableColumnHeader } from './table/data-table-column-header'
+import { DataTableRowActions } from './table/data-table-row-actions'
 
 export const columns: ColumnDef<User>[] = [
   // -- CỘT CHỌN ROW --
@@ -32,18 +32,6 @@ export const columns: ColumnDef<User>[] = [
     },
     enableSorting: false,
   },
-
-  // -- CỘT TÀI KHOẢN --
-  // {
-  //   accessorKey: 'username',
-  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Tài khoản' />,
-  //   cell: ({ row }) => <LongText className='max-w-36'>{row.getValue('username')}</LongText>,
-  //   meta: {
-  //     className: cn('drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)] lg:drop-shadow-none', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted', 'sticky left-6 md:table-cell'),
-  //   },
-  //   enableHiding: true,
-  // },
-
   // -- CỘT HỌ VÀ TÊN --
   {
     accessorKey: 'name',

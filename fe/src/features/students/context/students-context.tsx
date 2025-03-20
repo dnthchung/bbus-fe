@@ -31,7 +31,7 @@ import useDialogState from '@/hooks/use-dialog-state'
 import { Student } from '../data/schema'
 import { getAllStudents } from '../data/students'
 
-type StudentsDialogType = 'add' | 'edit' | 'delete' | 'import' | 'export'
+type StudentsDialogType = 'add' | 'edit' | 'delete' | 'import' | 'export' | 'edit-view'
 
 interface StudentsContextType {
   // Dialog state

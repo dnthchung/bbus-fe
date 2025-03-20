@@ -24,6 +24,8 @@ interface ApiServices {
   students: {
     list: () => Promise<any>
     addOne: (student: any) => Promise<any>
+    updateOne: (studentId: string, student: any) => Promise<any>
+    getOne: (studentId: string) => Promise<any>
   }
 }
 
@@ -73,5 +75,7 @@ export const API_SERVICES: ApiServices = {
   students: {
     list: () => apiClient.get(API_ENDPOINTS.STUDENTS.LIST),
     addOne: (student: any) => apiClient.post(API_ENDPOINTS.STUDENTS.ADD_ONE, student),
+    updateOne: (studentId: string, student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE_ONE(studentId), student),
+    getOne: (studentId: string) => apiClient.get(API_ENDPOINTS.STUDENTS.GET_ONE(studentId)),
   },
 }
