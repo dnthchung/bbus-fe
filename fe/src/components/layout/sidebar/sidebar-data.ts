@@ -42,7 +42,14 @@ export const sidebarData: SidebarData = {
           ],
         },
         // thêm quản lý danh sách xe bus
-        { title: 'Quản lý xe bus', url: '/buses', icon: IconBus },
+        {
+          title: 'Quản lý xe bus',
+          icon: IconBus,
+          items: [
+            { title: 'DS xe bus', url: '/buses', icon: IconBus },
+            // { title: 'Lịch trình xe bus', url: '/transportation/bus-schedules', icon: CalendarCheck },
+          ],
+        },
         {
           title: 'Quản lý báo cáo', // code sau
           icon: IconReport,

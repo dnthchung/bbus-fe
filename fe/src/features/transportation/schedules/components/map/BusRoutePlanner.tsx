@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/transportation/schedules/components/map/BusRoutePlanner.tsx
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import L from 'leaflet'
@@ -128,7 +129,7 @@ export default function BusRoutePlanner() {
 
       {/* Map */}
       <div className='mb-6 overflow-hidden rounded-lg border'>
-        <MapContainer center={DEFAULT_POSITION} zoom={13} className='h-96 w-full' scrollWheelZoom={true} ref={mapRef}>
+        <MapContainer center={DEFAULT_POSITION} zoom={13} className='h-96 w-full' scrollWheelZoom={true} zoomControl={false} ref={mapRef}>
           <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
           <MapController center={mapCenter} zoom={14} />
           <MapClickHandler />

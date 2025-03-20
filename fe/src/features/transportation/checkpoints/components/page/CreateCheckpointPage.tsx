@@ -4,20 +4,92 @@ import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { X, Navigation, Search } from 'lucide-react'
+import { X, Navigation, Search, MapPin, Plus } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
+import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
-
 const existingCheckpoints = [
-  { id: 1, name: 'Trường Tiểu Học A', latitude: '21.0285', longitude: '105.8542' },
-  { id: 2, name: 'Trường THPT B', latitude: '21.0352', longitude: '105.8451' },
-  { id: 3, name: 'Khu Dân Cư C', latitude: '21.0423', longitude: '105.8320' },
-  { id: 3, name: 'Khu Dân Cư C', latitude: '21.0423', longitude: '105.8320' },
-  { id: 3, name: 'Khu Dân Cư C', latitude: '21.0423', longitude: '105.8320' },
+  {
+    id: '346b48c3-912f-456f-b2e2-4469260962e6',
+    name: 'Cầu Chương Dương',
+    description: 'Trạm xe buýt ở đầu cầu Chương Dương',
+    latitude: '21.033028',
+    longitude: '105.863672',
+    status: 'INACTIVE',
+  },
+  {
+    id: '40c64531-8e7a-4294-9e48-e41f02f57e3b',
+    name: 'Công viên Thống Nhất',
+    description: 'Điểm dừng xe gần Công viên Thống Nhất',
+    latitude: '21.017111',
+    longitude: '105.847450',
+    status: 'INACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
+  {
+    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
+    name: 'Royal City',
+    description: 'Điểm đón xe trước cổng Royal City',
+    latitude: '21.003653',
+    longitude: '105.815528',
+    status: 'ACTIVE',
+  },
 ]
 
 // Component để cập nhật vị trí và zoom của bản đồ từ xa
@@ -73,7 +145,7 @@ export default function CreateCheckpointPage() {
       const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&limit=5`)
       setSearchResults(response.data)
       if (response.data.length > 0) {
-        const coords: [number, number] = [parseFloat(response.data[0].lat), parseFloat(response.data[0].lon)]
+        const coords: [number, number] = [Number.parseFloat(response.data[0].lat), Number.parseFloat(response.data[0].lon)]
         setCheckpoint(coords)
         setMapCenter(coords) // Cập nhật vị trí trung tâm bản đồ
       }
@@ -86,7 +158,7 @@ export default function CreateCheckpointPage() {
 
   // Chọn địa điểm từ kết quả tìm kiếm
   const selectLocation = (location: any) => {
-    const coords: [number, number] = [parseFloat(location.lat), parseFloat(location.lon)]
+    const coords: [number, number] = [Number.parseFloat(location.lat), Number.parseFloat(location.lon)]
     setCheckpoint(coords)
     setMapCenter(coords) // Zoom tới vị trí
     setSearchResults([])
@@ -99,6 +171,7 @@ export default function CreateCheckpointPage() {
       alert('Vui lòng nhập đầy đủ thông tin điểm dừng.')
       return
     }
+
     const newCheckpoint = {
       id: crypto.randomUUID(),
       name: checkpointName,
@@ -109,127 +182,181 @@ export default function CreateCheckpointPage() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
+
     console.log('Đã lưu điểm dừng:', newCheckpoint)
+    // Add to local state for demo purposes
+    setCheckpoints([...checkpoints, newCheckpoint])
+    // Reset form
+    setCheckpointName('')
+    setDescription('')
+    setCheckpoint(null)
     alert('Điểm dừng đã được tạo thành công!')
   }
 
   return (
-    <div className=''>
-      {/* Bản đồ */}
-      <div className='relative mb-6 overflow-hidden rounded-lg border'>
-        <MapContainer center={DEFAULT_POSITION} zoom={13} className='h-96 w-full' scrollWheelZoom={true} ref={mapRef}>
-          <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-          <MapController center={mapCenter} zoom={15} />
-          <MapClickHandler setCheckpoint={setCheckpoint} />
-          {checkpoint && (
-            <Marker
-              position={checkpoint}
-              icon={L.divIcon({
-                html: `<div class="bg-blue-500 p-1 rounded-full border-2 border-white shadow-lg"></div>`,
-                className: 'custom-div-icon',
-              })}
-            />
-          )}
-        </MapContainer>
-
-        {/* Thanh tìm kiếm - Đặt ở góc dưới bên trái của bản đồ */}
-        <div className='absolute bottom-4 left-4 z-[1000] w-64 space-y-2 rounded-md bg-white p-2 shadow-lg'>
-          <Label htmlFor='location-search' className='block text-sm'>
-            Tìm kiếm địa điểm
-          </Label>
-          <div className='flex gap-2'>
-            <Input id='location-search' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder='Nhập địa chỉ hoặc địa điểm' className='h-8 flex-1' onKeyDown={(e) => e.key === 'Enter' && searchLocation()} />
-            <Button onClick={searchLocation} disabled={isLoading} className='h-8 px-3'>
-              {isLoading ? 'Đang tìm...' : <Search className='h-4 w-4' />}
-            </Button>
-          </div>
-          {searchResults.length > 0 && (
-            <div className='mt-2 max-h-40 overflow-y-auto rounded-md border bg-white'>
-              {searchResults.map((result, index) => (
-                <div key={index} className='cursor-pointer border-b p-1 last:border-b-0 hover:bg-slate-100' onClick={() => selectLocation(result)}>
-                  <p className='text-sm'>{result.display_name}</p>
+    <div className='space-y-6'>
+      <div className='flex flex-col gap-4 md:flex-row'>
+        {/* Map and Form Section */}
+        <div className='w-full space-y-4 md:w-3/5'>
+          <Card className='relative border-border'>
+            <CardHeader className='pb-2'>
+              <CardTitle className='flex items-center gap-2'>
+                <MapPin className='h-5 w-5 text-primary' />
+                Bản đồ điểm dừng
+              </CardTitle>
+              <CardDescription>Chọn vị trí trên bản đồ hoặc tìm kiếm địa điểm</CardDescription>
+            </CardHeader>
+            <CardContent className='p-0'>
+              <div className='relative z-[1] h-[400px] overflow-hidden rounded-b-lg'>
+                <MapContainer center={DEFAULT_POSITION} zoom={13} className='h-full w-full' scrollWheelZoom={true} ref={mapRef}>
+                  <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+                  <MapController center={mapCenter} zoom={15} />
+                  <MapClickHandler setCheckpoint={setCheckpoint} />
+                  {checkpoint && (
+                    <Marker
+                      position={checkpoint}
+                      icon={L.divIcon({
+                        html: `<div class="bg-primary p-1 rounded-full border-2 border-background shadow-lg w-4 h-4"></div>`,
+                        className: 'custom-div-icon',
+                      })}
+                    />
+                  )}
+                  {/* Existing checkpoints */}
+                  {checkpoints.map((cp) => (
+                    <Marker
+                      key={cp.id}
+                      position={[Number.parseFloat(cp.latitude), Number.parseFloat(cp.longitude)]}
+                      icon={L.divIcon({
+                        html: `<div class="${cp.status === 'ACTIVE' ? 'bg-green-500' : 'bg-gray-400'} p-1 rounded-full border-2 border-background shadow-lg w-3 h-3"></div>`,
+                        className: 'custom-div-icon',
+                      })}
+                    />
+                  ))}
+                </MapContainer>
+                {/* Search bar */}
+                <div className='absolute right-4 top-4 z-[10] w-64 space-y-2 rounded-md border border-border bg-card p-3 shadow-lg'>
+                  <div className='flex gap-2'>
+                    <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder='Tìm kiếm địa điểm...' className='h-9 flex-1' onKeyDown={(e) => e.key === 'Enter' && searchLocation()} />
+                    <Button onClick={searchLocation} disabled={isLoading} size='icon' variant='secondary' className='h-9 w-9'>
+                      {isLoading ? <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' /> : <Search className='h-4 w-4' />}
+                    </Button>
+                  </div>
+                  {searchResults.length > 0 && (
+                    <ScrollArea className='mt-2 max-h-40 rounded-md border bg-card'>
+                      {searchResults.map((result, index) => (
+                        <div key={index} className='cursor-pointer border-b p-2 last:border-b-0 hover:bg-accent' onClick={() => selectLocation(result)}>
+                          <p className='text-sm'>{result.display_name}</p>
+                        </div>
+                      ))}
+                    </ScrollArea>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className='mt-4 grid grid-cols-2 gap-4 border-t pt-4 text-sm text-gray-500'>
-        {/* left */}
-        <div className='col-span-1'>
-          {/* Nội dung cột trái */}
-          {/* Thông tin điểm dừng */}
-          <div className='space-y-4'>
-            {/* Tên điểm dừng */}
-            <div>
-              <Label htmlFor='checkpoint-name' className='block text-sm'>
-                Tên điểm dừng
-              </Label>
-              <Input id='checkpoint-name' value={checkpointName} onChange={(e) => setCheckpointName(e.target.value)} placeholder='Nhập tên điểm dừng' className='mt-1 h-8' />
-            </div>
-
-            {/* Mô tả điểm dừng */}
-            <div>
-              <Label htmlFor='checkpoint-description' className='block text-sm'>
-                Mô tả
-              </Label>
-              <Input id='checkpoint-description' value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Nhập mô tả ngắn gọn' className='mt-1 h-8' />
-            </div>
-
-            {/* Tọa độ điểm dừng */}
-            <div>
-              <Label className='block text-sm'>Vị trí</Label>
-              <div className='flex items-center gap-2'>
-                <Input value={checkpoint ? `${checkpoint[0].toFixed(5)}, ${checkpoint[1].toFixed(5)}` : ''} readOnly placeholder='Chọn điểm trên bản đồ hoặc tìm kiếm' className='mt-1 h-8 flex-1' />
-                <Button variant='outline' onClick={getCurrentLocation} title='Sử dụng vị trí hiện tại' className='h-8 px-3'>
-                  <Navigation className='h-4 w-4' />
+                {/* Current location button */}
+                <Button variant='secondary' onClick={getCurrentLocation} title='Sử dụng vị trí hiện tại' className='absolute bottom-4 left-4 z-[10] h-9 px-3 shadow-lg'>
+                  <Navigation className='mr-2 h-4 w-4' />
+                  Vị trí hiện tại
                 </Button>
-                {checkpoint && (
-                  <Button variant='ghost' className='h-8 w-8 p-0 text-red-500' onClick={() => setCheckpoint(null)}>
-                    <X className='h-4 w-4' />
-                  </Button>
-                )}
               </div>
-            </div>
-
-            {/* Nút lưu điểm dừng */}
-            <Button onClick={saveCheckpoint} className='h-8 w-full' disabled={!checkpoint}>
-              Lưu điểm dừng
-            </Button>
-          </div>
+            </CardContent>
+          </Card>
+          {/* Checkpoint Form */}
+          <Card className='border-border'>
+            <CardHeader className='pb-2'>
+              <CardTitle className='flex items-center gap-2'>
+                <Plus className='h-5 w-5 text-primary' />
+                Thông tin điểm dừng
+              </CardTitle>
+              <CardDescription>Nhập thông tin chi tiết cho điểm dừng mới</CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-1 gap-4'>
+                {/* Tên điểm dừng */}
+                <div className='space-y-2'>
+                  <Label htmlFor='checkpoint-name'>Tên điểm dừng</Label>
+                  <Input id='checkpoint-name' value={checkpointName} onChange={(e) => setCheckpointName(e.target.value)} placeholder='Nhập tên điểm dừng' />
+                </div>
+                {/* Mô tả điểm dừng */}
+                <div className='space-y-2'>
+                  <Label htmlFor='checkpoint-description'>Mô tả</Label>
+                  <Textarea id='checkpoint-description' value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Nhập mô tả ngắn gọn' rows={3} />
+                </div>
+                {/* Tọa độ điểm dừng - Separated as requested */}
+                <div className='space-y-2'>
+                  <Label>Vị trí</Label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='space-y-1'>
+                      <Label htmlFor='latitude' className='text-xs text-muted-foreground'>
+                        Latitude
+                      </Label>
+                      <Input id='latitude' value={checkpoint ? checkpoint[0].toFixed(6) : ''} readOnly placeholder='Chọn điểm trên bản đồ' />
+                    </div>
+                    <div className='space-y-1'>
+                      <Label htmlFor='longitude' className='text-xs text-muted-foreground'>
+                        Longitude
+                      </Label>
+                      <Input id='longitude' value={checkpoint ? checkpoint[1].toFixed(6) : ''} readOnly placeholder='Chọn điểm trên bản đồ' />
+                    </div>
+                  </div>
+                  {checkpoint && (
+                    <div className='flex justify-end'>
+                      <Button variant='ghost' size='sm' className='h-8 text-destructive' onClick={() => setCheckpoint(null)}>
+                        <X className='mr-1 h-4 w-4' />
+                        Xóa vị trí
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Separator />
+              {/* Nút lưu điểm dừng */}
+              <Button onClick={saveCheckpoint} className='w-full' disabled={!checkpoint || !checkpointName.trim() || !description.trim()}>
+                Lưu điểm dừng
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* right */}
-        <div className='col-span-1'>
-          {/* Nội dung cột phải */}
-          <p>Nội dung cột phải</p>
-          {/*
-            Đây sẽ là 1 table hoặc 1 list hiển thị danh sách các tên điẻm dường có sẵn trong hệ thống (mục đích đe ẻkhi tạo mới có thể xem là có những điểm nào rồi, trnahs tạo trùng)
-          */}
-          <div className='col-span-1 rounded-lg border p-4 shadow-md'>
-            <h3 className='mb-2 text-lg font-bold'>📌 Danh sách điểm dừng</h3>
-            <table className='w-full border-collapse border border-gray-300 text-sm'>
-              <thead>
-                <tr className=''>
-                  <th className='border p-2'>#</th>
-                  <th className='border p-2'>Tên điểm dừng</th>
-                  <th className='border p-2'>Toạ độ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {checkpoints.map((cp, index) => (
-                  <tr key={cp.id} className='text-center'>
-                    <td className='border p-2'>{index + 1}</td>
-                    <td className='border p-2'>{cp.name}</td>
-                    <td className='border p-2'>
-                      {cp.latitude}, {cp.longitude}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* Checkpoint List */}
+        <div className='w-full md:w-2/5'>
+          <Card className='h-full border-border'>
+            <CardHeader className='pb-2'>
+              <CardTitle className='flex items-center gap-2'>
+                <MapPin className='h-5 w-5 text-primary' />
+                Danh sách điểm dừng
+              </CardTitle>
+              <CardDescription>Các điểm dừng hiện có trong hệ thống</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className='h-[850px] pr-4'>
+                <div className='space-y-3'>
+                  {checkpoints.map((cp, index) => (
+                    <Card key={cp.id} className={cn('overflow-hidden transition-all hover:shadow-md', cp.status === 'ACTIVE' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-gray-400')}>
+                      <CardContent className='p-4'>
+                        <div className='flex items-start justify-between'>
+                          <div className='space-y-1'>
+                            <div className='flex items-center gap-2'>
+                              <h3 className='font-medium'>{cp.name}</h3>
+                              <Badge variant={cp.status === 'ACTIVE' ? 'default' : 'secondary'} className='text-xs'>
+                                {cp.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                              </Badge>
+                            </div>
+                            <p className='text-sm text-muted-foreground'>{cp.description}</p>
+                          </div>
+                        </div>
+                        <div className='mt-2 grid grid-cols-2 gap-1 text-xs text-muted-foreground'>
+                          <div>
+                            <span className='font-medium'>Latitude:</span> {cp.latitude}
+                          </div>
+                          <div>
+                            <span className='font-medium'>Longitude:</span> {cp.longitude}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
