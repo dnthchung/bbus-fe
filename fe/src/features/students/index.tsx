@@ -81,7 +81,7 @@ function StudentsContent() {
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>DS học sinh</h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Danh sách học sinh</h2>
             <p className='text-muted-foreground'>Quản lý thông tin học sinh đăng ký sử dụng dịch vụ xe bus.</p>
           </div>
           <StudentsPrimaryButtons />

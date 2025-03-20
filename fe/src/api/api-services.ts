@@ -17,6 +17,7 @@ interface ApiServices {
     getOne: (userId: string) => Promise<any>
     list: () => Promise<any>
     addOne: (user: any) => Promise<any>
+    deleteOne: (userId: string) => Promise<any>
   }
   checkpoints: {
     getAll: () => Promise<any>
@@ -26,6 +27,7 @@ interface ApiServices {
     addOne: (student: any) => Promise<any>
     updateOne: (studentId: string, student: any) => Promise<any>
     getOne: (studentId: string) => Promise<any>
+    deleteOne: (studentId: string) => Promise<any>
   }
 }
 
@@ -62,6 +64,7 @@ export const API_SERVICES: ApiServices = {
     getOne: (userId: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(userId)),
     list: () => apiClient.get(API_ENDPOINTS.USERS.LIST),
     addOne: (user: any) => apiClient.post(API_ENDPOINTS.USERS.ADD_ONE, user),
+    deleteOne: (userId: string) => apiClient.delete(API_ENDPOINTS.USERS.DELETE_ONE(userId)),
   },
   // -------------------------
   // 3) CHECKPOINTS
@@ -77,5 +80,6 @@ export const API_SERVICES: ApiServices = {
     addOne: (student: any) => apiClient.post(API_ENDPOINTS.STUDENTS.ADD_ONE, student),
     updateOne: (studentId: string, student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE_ONE(studentId), student),
     getOne: (studentId: string) => apiClient.get(API_ENDPOINTS.STUDENTS.GET_ONE(studentId)),
+    deleteOne: (studentId: string) => apiClient.delete(API_ENDPOINTS.STUDENTS.DELETE_ONE(studentId)),
   },
 }

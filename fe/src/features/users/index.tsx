@@ -45,7 +45,7 @@ export default function Users() {
         <Main>
           <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
             <div>
-              <h2 className='text-2xl font-bold tracking-tight'>DS người dùng</h2>
+              <h2 className='text-2xl font-bold tracking-tight'>Danh sách người dùng</h2>
               <p className='text-muted-foreground'>Quản lý thông tin các tài khoản người dùng trong hệ thống.</p>
             </div>
             <UsersPrimaryButtons />

@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     GET_ONE: (userId: string) => `/user/${userId}`,
     LIST: '/user/list',
     ADD_ONE: '/user/add',
+    DELETE_ONE: (userId: string) => `/user/del/${userId}`,
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoints/list',
@@ -20,5 +21,6 @@ export const API_ENDPOINTS = {
     ADD_ONE: '/student/add',
     UPDATE_ONE: (studentId: string) => `/student/${studentId}`,
     GET_ONE: (studentId: string) => `/student/${studentId}`,
+    DELETE_ONE: (studentId: string) => `/user/del/${studentId}`,
   },
 } as const
