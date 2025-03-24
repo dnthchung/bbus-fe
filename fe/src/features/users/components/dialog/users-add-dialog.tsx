@@ -264,6 +264,8 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         <option value='PARENT'>Phụ huynh</option>
                         <option value='TEACHER'>Giáo viên</option>
                         <option value='ADMIN'>Quản trị</option>
+                        <option value='DRIVER'>Tài xế xe buýt</option>
+                        <option value='ASSISTANT'>Phụ tá tài xế</option>
                         {/* Thêm các vai trò khác nếu cần */}
                       </select>
                     </FormControl>

@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { userTypes } from '../../data/data'
 import { User } from '../../data/schema'
 
 interface Props {
@@ -23,7 +24,6 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
       onOpenChange(false)
       return
     }
-
     toast({
       title: 'Người dùng sau đã bị xóa:',
       description: (
@@ -32,7 +32,6 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
         </pre>
       ),
     })
-
     onOpenChange(false) // Đóng hộp thoại sau khi xóa
   }
 
@@ -40,6 +39,9 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
   if (!currentRow) {
     return null
   }
+
+  // Tìm vai trò tiếng Việt từ userTypes dựa trên currentRow.role
+  const roleLabelVi = userTypes.find((type) => type.value === currentRow.role)?.labelVi || 'KHÔNG XÁC ĐỊNH'
 
   return (
     <ConfirmDialog
@@ -57,12 +59,15 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
         <div className='space-y-4'>
           <p className='mb-2'>
             Bạn có chắc chắn muốn xóa <span className='font-bold'>{currentRow.name}</span>?<br />
-            Hành động này sẽ xóa vĩnh viễn người dùng có vai trò <span className='font-bold'>{currentRow.role?.toUpperCase() || 'KHÔNG XÁC ĐỊNH'}</span> khỏi hệ thống.
-            <br /> Hành động này không thể hoàn tác.
+            Hành động này sẽ xóa vĩnh viễn người dùng có vai trò <span className='font-bold'>{roleLabelVi.toUpperCase()}</span> khỏi hệ thống. <br />
+            Hành động này không thể hoàn tác.
           </p>
           <Label className='my-2'>
-            Tên:
-            <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Nhập tên để xác nhận xóa.' />
+            <p className='mb-2 mt-5'>
+              Nhập <span className='rounded bg-yellow-200 px-1 font-bold'>"{currentRow.name}"</span> để xác nhận xóa
+            </p>
+
+            <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='abc' />
           </Label>
           <Alert variant='destructive'>
             <AlertTitle>Cảnh báo!</AlertTitle>

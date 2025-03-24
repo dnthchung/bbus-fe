@@ -17,17 +17,15 @@ interface Props {
 }
 
 export function StudentsDeleteDialog({ open, onOpenChange, currentRow }: Props) {
-  // We want user to type in the student's name to confirm
-  // because "fullName" -> "name" in the new schema
   const [value, setValue] = useState('')
 
   const handleDelete = () => {
-    // Only delete if user typed exactly the student's name
     if (value.trim() !== currentRow.name) {
-      return onOpenChange(false)
+      onOpenChange(false)
+      return
     }
 
-    // Do your delete logic here, e.g. call API...
+    // Gọi API hoặc thực hiện xóa tại đây...
     toast({
       title: 'Học sinh đã bị xóa:',
       description: (
@@ -37,8 +35,7 @@ export function StudentsDeleteDialog({ open, onOpenChange, currentRow }: Props) 
       ),
     })
 
-    // Close the dialog
-    onOpenChange(false)
+    onOpenChange(false) // Đóng hộp thoại sau khi xóa
   }
 
   return (
@@ -46,7 +43,6 @@ export function StudentsDeleteDialog({ open, onOpenChange, currentRow }: Props) 
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      // Disable "Delete" button unless typed name matches
       disabled={value.trim() !== currentRow.name}
       title={
         <span className='text-destructive'>
@@ -57,14 +53,17 @@ export function StudentsDeleteDialog({ open, onOpenChange, currentRow }: Props) 
       desc={
         <div className='space-y-4'>
           <p className='mb-2'>
-            Bạn có chắc muốn xóa <span className='font-bold'>{currentRow.name}</span>?
-            <br />
+            Bạn có chắc muốn xóa <span className='font-bold'>{currentRow.name}</span>? <br />
             Hành động này sẽ xóa vĩnh viễn học sinh khỏi hệ thống và không thể hoàn tác.
           </p>
+
           <Label className='my-2'>
-            Nhập chính xác tên học sinh để xác nhận:
+            <p className='mb-2 mt-5'>
+              Nhập <span className='rounded bg-yellow-200 px-1 font-bold'>"{currentRow.name}"</span> để xác nhận xóa:
+            </p>
             <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Nhập lại tên học sinh...' />
           </Label>
+
           <Alert variant='destructive'>
             <AlertTitle>Cảnh báo!</AlertTitle>
             <AlertDescription>Thao tác này sẽ không thể hoàn tác, vui lòng cẩn thận.</AlertDescription>
