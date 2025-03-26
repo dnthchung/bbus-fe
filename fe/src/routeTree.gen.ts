@@ -83,6 +83,9 @@ const AuthenticatedSettingsAppearanceLazyImport = createFileRoute(
 const AuthenticatedSettingsAccountLazyImport = createFileRoute(
   '/_authenticated/settings/account',
 )()
+const AuthenticatedBusesListLazyImport = createFileRoute(
+  '/_authenticated/buses/list',
+)()
 
 // Create/Update Routes
 
@@ -354,6 +357,16 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
+const AuthenticatedBusesListLazyRoute = AuthenticatedBusesListLazyImport.update(
+  {
+    id: '/buses/list',
+    path: '/buses/list',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any,
+).lazy(() =>
+  import('./routes/_authenticated/buses/list.lazy').then((d) => d.Route),
+)
+
 const AuthenticatedTransportationRoutesRoute =
   AuthenticatedTransportationRoutesImport.update({
     id: '/transportation/routes',
@@ -475,6 +488,13 @@ declare module '@tanstack/react-router' {
       path: '/transportation/routes'
       fullPath: '/transportation/routes'
       preLoaderRoute: typeof AuthenticatedTransportationRoutesImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/buses/list': {
+      id: '/_authenticated/buses/list'
+      path: '/buses/list'
+      fullPath: '/buses/list'
+      preLoaderRoute: typeof AuthenticatedBusesListLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/account': {
@@ -614,6 +634,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedTransportationRoutesRoute: typeof AuthenticatedTransportationRoutesRoute
+  AuthenticatedBusesListLazyRoute: typeof AuthenticatedBusesListLazyRoute
   AuthenticatedStudentsAttendanceLazyRoute: typeof AuthenticatedStudentsAttendanceLazyRoute
   AuthenticatedStudentsStudentDetailsLazyRoute: typeof AuthenticatedStudentsStudentDetailsLazyRoute
   AuthenticatedTransportationCheckpointsLazyRoute: typeof AuthenticatedTransportationCheckpointsLazyRoute
@@ -633,6 +654,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedTransportationRoutesRoute:
     AuthenticatedTransportationRoutesRoute,
+  AuthenticatedBusesListLazyRoute: AuthenticatedBusesListLazyRoute,
   AuthenticatedStudentsAttendanceLazyRoute:
     AuthenticatedStudentsAttendanceLazyRoute,
   AuthenticatedStudentsStudentDetailsLazyRoute:
@@ -670,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
+  '/buses/list': typeof AuthenticatedBusesListLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
@@ -701,6 +724,7 @@ export interface FileRoutesByTo {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
+  '/buses/list': typeof AuthenticatedBusesListLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
@@ -736,6 +760,7 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
+  '/_authenticated/buses/list': typeof AuthenticatedBusesListLazyRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
@@ -771,6 +796,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/transportation/routes'
+    | '/buses/list'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/notifications'
@@ -801,6 +827,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/transportation/routes'
+    | '/buses/list'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/notifications'
@@ -834,6 +861,7 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/transportation/routes'
+    | '/_authenticated/buses/list'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/notifications'
@@ -915,6 +943,7 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/",
         "/_authenticated/transportation/routes",
+        "/_authenticated/buses/list",
         "/_authenticated/students/attendance",
         "/_authenticated/students/student-details",
         "/_authenticated/transportation/checkpoints",
@@ -980,6 +1009,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/transportation/routes": {
       "filePath": "_authenticated/transportation/routes.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/buses/list": {
+      "filePath": "_authenticated/buses/list.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/account": {

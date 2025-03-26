@@ -46,7 +46,7 @@ export const sidebarData: SidebarData = {
           title: 'Quản lý xe bus',
           icon: IconBus,
           items: [
-            { title: 'DS xe bus', url: '/buses', icon: IconBus },
+            { title: 'DS xe bus', url: '/buses/list', icon: IconBus },
             // { title: 'Lịch trình xe bus', url: '/transportation/bus-schedules', icon: CalendarCheck },
           ],
         },
