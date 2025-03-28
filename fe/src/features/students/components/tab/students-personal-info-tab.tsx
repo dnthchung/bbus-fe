@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/students/components/tab/students-personal-info-tab.tsx
 import { format } from 'date-fns'
 import { useFormContext } from 'react-hook-form'
 import { Calendar, User, CheckCircle } from 'lucide-react'

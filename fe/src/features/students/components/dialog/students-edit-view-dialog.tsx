@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/students/components/dialog/students-edit-view-dialog.tsx
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { format } from 'date-fns'
@@ -19,7 +20,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import type { Student } from '../../data/schema'
-import { StudentsPersonalInfoTab } from '../tab/students-personal-info-tab-2'
+import { StudentsPersonalInfoTab } from '../tab/students-personal-info-tab'
 import { StudentsPickupInfoTab } from '../tab/students-pickup-info-tab'
 
 // Form schema for validation

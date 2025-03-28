@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/students/components/dialog/students-edit-view-dialog.tsx
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { format } from 'date-fns'
@@ -18,8 +19,9 @@ import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { AvatarThumbnail } from '@/features/users/components/avatar-thumbnail'
 import type { Student } from '../../data/schema'
-import { StudentsPersonalInfoTab } from '../tab/students-personal-info-tab-2'
+import { StudentsPersonalInfoTab } from '../tab/students-personal-info-tab'
 import { StudentsPickupInfoTab } from '../tab/students-pickup-info-tab'
 
 // Form schema for validation
@@ -198,18 +200,16 @@ export default function StudentsDetailsContent() {
                 <div className='relative rounded-lg p-6 dark:bg-gray-800'>
                   <div className='flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0'>
                     <div className='flex items-center space-x-4'>
-                      <Avatar className='h-20 w-20 rounded-full border-4 border-white shadow-sm'>
-                        <AvatarImage src={displayData.avatar} alt={displayData.name} />
-                      </Avatar>
-                      <div className='space-y-1'>
+                      <AvatarThumbnail url={displayData.avatar} alt={displayData.name} className='h-36 w-36 rounded-lg border-4 border-white object-cover shadow-sm' />
+                      <div className='space-y-2'>
                         <h1 className='text-2xl font-bold'>{displayData.name}</h1>
-                        <div className='flex items-center space-x-2'>
+                        <div className='flex items-start space-x-2'>
                           <School className='h-4 w-4 text-muted-foreground' />
                           <p className='text-sm text-muted-foreground'>
                             Mã học sinh: <span className='font-medium'>{displayData.rollNumber}</span>
                           </p>
-                          <div className='ml-2'>{renderStatusBadge(displayData.status)}</div>
                         </div>
+                        <div>{renderStatusBadge(displayData.status)}</div>
                       </div>
                     </div>
                     <div className='absolute right-6 top-6'>
