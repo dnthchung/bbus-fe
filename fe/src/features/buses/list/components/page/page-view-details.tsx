@@ -62,24 +62,22 @@ import { Bus } from '@/features/buses/data/schema'
 
 export default function PageViewDetails() {
   const { id } = useParams({ strict: false })
-  const [currentRow, setCurrentRow] = useState<Bus | null>(null)
+  // const [currentRow, setCurrentRow] = useState<Bus | null>(null)
 
-  useEffect(() => {
-    const fetchBus = async () => {
-      const buses = await getAllBuses()
-      const bus = buses.find((b) => b.id === id) || null
-      setCurrentRow(bus)
-    }
-    fetchBus()
-  }, [id])
+  // function PageViewDetails() {
+  //   const { id } = Route.useParams()
+  //   const user = Route.useLoaderData()
+  //   console.log('user', user)
+  //   return <div>Hello "/_authenticated/buses/list/{id}"!</div>
+  // }
 
-  if (!currentRow) {
-    return <div>Không tìm thấy thông tin xe buýt.</div>
-  }
+  // if (!currentRow) {
+  //   return <div>Không tìm thấy thông tin xe buýt.</div>
+  // }
 
   return (
     <div className='mx-auto max-w-2xl p-4'>
-      <h1 className='text-xl font-bold'>Thông tin chi tiết xe buýt</h1>
+      <h1 className='text-xl font-bold'>Thông tin chi tiết xe buýt {id}</h1>
       {/* Hiển thị thông tin chi tiết của xe buýt */}
     </div>
   )

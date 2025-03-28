@@ -5,6 +5,7 @@
     - `https://tanstack.com/start/latest/docs/framework/react/api-routes`
     - `https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing#s-or-s`
     - `https://www.youtube.com/watch?v=xUrbLlcrIXY`
+    - `https://github.com/TanStack/router/tree/main/examples/react/start-basic-react-query/src/routes`
 
 Phần 1 : giới thiệu về hệ thống và chức năng
 

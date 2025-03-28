@@ -1,6 +1,6 @@
 // fe/src/features/users/data/users.ts
 import { API_SERVICES } from '@/api/api-services'
-import { userListSchema, User } from './schema'
+import { userListSchema, User, userSchema } from './schema'
 
 // hoặc đường dẫn tới file khai báo axios
 
@@ -51,6 +51,25 @@ export async function getAllUsersRoleParent(): Promise<User[]> {
     return parentUsers
   } catch (error) {
     console.error('Error getAllUsers in users.ts:', error)
+    throw error
+  }
+}
+
+export async function getUserById(userId: string): Promise<User> {
+  try {
+    const response = await API_SERVICES.users.getOne(userId)
+    const rawData = response.data
+    const userDetails = rawData?.data
+    console.log('rawData', rawData)
+    console.log('rawUser', rawData.data)
+
+    if (!userDetails) {
+      throw new Error('User not found')
+    }
+
+    return userDetails
+  } catch (error) {
+    console.error(`Error get user details by id ${userId} in users.ts:`, error)
     throw error
   }
 }
