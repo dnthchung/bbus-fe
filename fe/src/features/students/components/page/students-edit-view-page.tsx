@@ -1,6 +1,6 @@
 'use client'
 
-//path : fe/src/features/students/components/dialog/students-edit-view-dialog.tsx
+//path : fe/src/features/students/components/page/students-edit-view-page.tsx
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { format } from 'date-fns'
@@ -10,7 +10,6 @@ import { Route } from '@/routes/_authenticated/students/details/$id'
 import { MapPin, User, School, ChevronLeft, Pencil, Save, X } from 'lucide-react'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
@@ -20,12 +19,17 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { AvatarThumbnail } from '@/features/users/components/avatar-thumbnail'
+import { getParentIdByGetEntityByUserId } from '@/features/users/data/users'
 import type { Student } from '../../data/schema'
 import { StudentsPersonalInfoTab } from '../tab/students-personal-info-tab'
 import { StudentsPickupInfoTab } from '../tab/students-pickup-info-tab'
 
-// Form schema for validation
+// ----- 1. Chỉnh sửa formSchema -----
+// Bổ sung thêm "id" và "rollNumber" để gửi trong body,
+// và đánh dấu chúng không được phép chỉnh sửa (sử dụng disabled/hidden input).
 const formSchema = z.object({
+  id: z.string().uuid('Phải là UUID hợp lệ.'),
+  rollNumber: z.string().min(1, { message: 'Mã học sinh không được để trống.' }),
   name: z.string().min(1, { message: 'Họ và tên không được để trống.' }),
   dob: z.coerce.date({ required_error: 'Ngày sinh không được để trống.' }),
   address: z.string().min(1, { message: 'Địa chỉ không được để trống.' }),
@@ -36,6 +40,8 @@ const formSchema = z.object({
     required_error: 'Trạng thái không được để trống.',
   }),
   parentId: z.string().uuid('Phải là UUID hợp lệ.'),
+  checkpointId: z.string().uuid('Phải là UUID hợp lệ.'),
+  avatar: z.string().optional(),
 })
 
 export type StudentForm = z.infer<typeof formSchema>
@@ -43,34 +49,38 @@ export type StudentForm = z.infer<typeof formSchema>
 export default function StudentsDetailsContent() {
   const { id } = Route.useParams()
   const initialStudentData = Route.useLoaderData() as Student
+
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('info')
   const [studentData, setStudentData] = useState<Student | null>(null)
 
-  // Initialize form with react-hook-form
+  // ----- 2. Khởi tạo useForm -----
   const form = useForm<StudentForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: '',
+      rollNumber: '',
       name: '',
       dob: undefined,
       address: '',
       gender: 'MALE',
       status: 'ACTIVE',
       parentId: '',
+      checkpointId: '',
+      avatar: '',
     },
   })
 
   const { handleSubmit, reset } = form
 
-  // Fetch student data when component mounts or id changes
+  // ----- 3. Lấy dữ liệu student khi id thay đổi -----
   useEffect(() => {
     if (id) {
       setIsLoading(true)
       API_SERVICES.students
         .getOne(id)
         .then((response) => {
-          console.log('=> API response:', response.data.data)
           setStudentData(response.data.data)
         })
         .catch((error) => {
@@ -80,7 +90,7 @@ export default function StudentsDetailsContent() {
             description: 'Không thể tải thông tin học sinh. Vui lòng thử lại sau.',
             variant: 'destructive',
           })
-          // Use initial data from loader if API fails
+          // Dùng dữ liệu ban đầu từ loader nếu API thất bại
           setStudentData(initialStudentData)
         })
         .finally(() => setIsLoading(false))
@@ -90,70 +100,87 @@ export default function StudentsDetailsContent() {
     }
   }, [id, initialStudentData])
 
-  // Reset form when student data changes
+  // ----- 4. Reset form khi studentData thay đổi -----
   useEffect(() => {
     const displayData = studentData || initialStudentData
     if (displayData && !isLoading) {
-      console.log('Resetting form with:', displayData)
       reset({
+        id: displayData.id,
+        rollNumber: displayData.rollNumber,
         name: displayData.name,
         dob: new Date(displayData.dob),
         address: displayData.address,
         gender: displayData.gender,
         status: displayData.status,
         parentId: displayData.parentId || displayData.parent?.userId || '',
+        checkpointId: displayData.checkpointId || '',
+        avatar: displayData.avatar || '',
       })
     }
   }, [studentData, initialStudentData, reset, isLoading])
 
-  // Form submission handler
-  const onSubmit = (values: StudentForm) => {
+  // ----- 5. Submit form -----
+  const onSubmit = async (values: StudentForm) => {
     setIsLoading(true)
-    // Here you would typically call your API to update the student
-    API_SERVICES.students
-      .update(id, values)
-      .then(() => {
-        toast({
-          title: 'Thành công',
-          description: 'Đã cập nhật thông tin học sinh.',
-        })
-        // Refresh student data
-        return API_SERVICES.students.getOne(id)
+
+    try {
+      // Get the real parentId from the userId
+      const parentId = await getParentIdByGetEntityByUserId(values.parentId)
+
+      // Update the values with the real parentId
+      const updatedValues = {
+        ...values,
+        parentId: parentId, // Or possibly parent.id, depending on your data structure
+      }
+
+      console.log('===> Submitting form with:', updatedValues)
+
+      // Call API to update student
+      await API_SERVICES.students.update(updatedValues)
+
+      toast({
+        title: 'Thành công',
+        description: 'Đã cập nhật thông tin học sinh.',
       })
-      .then((response) => {
-        setStudentData(response.data.data)
+
+      // Refresh student data after update
+      const response = await API_SERVICES.students.getOne(id)
+      setStudentData(response.data.data)
+
+      setIsEditing(false)
+    } catch (error) {
+      console.error('Error updating student:', error)
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật thông tin học sinh. Vui lòng thử lại sau.',
+        variant: 'destructive',
       })
-      .catch((error) => {
-        console.error('Error updating student:', error)
-        toast({
-          title: 'Lỗi',
-          description: 'Không thể cập nhật thông tin học sinh. Vui lòng thử lại sau.',
-          variant: 'destructive',
-        })
-      })
-      .finally(() => {
-        setIsLoading(false)
-        setIsEditing(false)
-      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  // Cancel edit handler
+  // ----- 6. Cancel edit -----
   const onCancelEdit = () => {
     const displayData = studentData || initialStudentData
     if (displayData) {
       reset({
+        id: displayData.id,
+        rollNumber: displayData.rollNumber,
         name: displayData.name,
         dob: new Date(displayData.dob),
         address: displayData.address,
         gender: displayData.gender,
         status: displayData.status,
         parentId: displayData.parentId || displayData.parent?.userId || '',
+        checkpointId: displayData.checkpointId || '',
+        avatar: displayData.avatar || '',
       })
     }
     setIsEditing(false)
   }
 
-  // Format date helper
+  // ----- 7. Hàm format date -----
   const formatDate = (date: Date | string | undefined) => {
     if (!date) return ''
     return format(new Date(date), 'dd/MM/yyyy')
@@ -161,7 +188,7 @@ export default function StudentsDetailsContent() {
 
   const displayData = studentData || initialStudentData
 
-  // Status badge renderer
+  // ----- 8. Badge hiển thị trạng thái -----
   const renderStatusBadge = (status: string) => {
     if (status === 'ACTIVE') {
       return <Badge className='bg-green-100 text-green-800 hover:bg-green-200'>Đang sử dụng</Badge>
@@ -187,6 +214,7 @@ export default function StudentsDetailsContent() {
           <ProfileDropdown />
         </div>
       </Header>
+
       <Main>
         <div>
           {isLoading && !displayData ? (
@@ -195,8 +223,13 @@ export default function StudentsDetailsContent() {
             </div>
           ) : displayData ? (
             <Form {...form}>
-              <form id='student-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-                {/* Profile Banner */}
+              <form id='student-form' onSubmit={handleSubmit(onSubmit)} className='mb-6'>
+                {/* ----- Ẩn các trường không được phép chỉnh sửa ----- */}
+                <input type='hidden' {...form.register('id')} />
+                <input type='hidden' {...form.register('rollNumber')} />
+                <input type='hidden' {...form.register('checkpointId')} />
+                <input type='hidden' {...form.register('avatar')} />
+                {/* ----- Profile Banner ----- */}
                 <div className='relative rounded-lg p-6 dark:bg-gray-800'>
                   <div className='flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0'>
                     <div className='flex items-center space-x-4'>
@@ -209,6 +242,7 @@ export default function StudentsDetailsContent() {
                             Mã học sinh: <span className='font-medium'>{displayData.rollNumber}</span>
                           </p>
                         </div>
+
                         <div>{renderStatusBadge(displayData.status)}</div>
                       </div>
                     </div>
@@ -234,8 +268,8 @@ export default function StudentsDetailsContent() {
                   </div>
                 </div>
 
-                {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
+                {/* ----- Tabs ----- */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className='mt-6 w-full'>
                   <div className='border-none shadow-sm'>
                     <div>
                       <TabsList className='grid w-full max-w-md grid-cols-2'>
@@ -250,12 +284,12 @@ export default function StudentsDetailsContent() {
                       </TabsList>
                     </div>
                     <div>
-                      {/* Tab 1: Thông tin học sinh */}
+                      {/* ----- Tab 1: Thông tin học sinh ----- */}
                       <TabsContent value='info' className='space-y-6 animate-in fade-in-50'>
                         <StudentsPersonalInfoTab displayData={displayData} isEditing={isEditing} formatDate={formatDate} />
                       </TabsContent>
 
-                      {/* Tab 2: Thông tin đưa đón */}
+                      {/* ----- Tab 2: Thông tin đưa đón ----- */}
                       <TabsContent value='pickup' className='space-y-6 animate-in fade-in-50'>
                         <StudentsPickupInfoTab displayData={displayData} isEditing={isEditing} />
                       </TabsContent>

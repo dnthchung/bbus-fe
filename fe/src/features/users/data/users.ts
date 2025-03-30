@@ -73,3 +73,22 @@ export async function getUserById(userId: string): Promise<User> {
     throw error
   }
 }
+
+export async function getParentIdByGetEntityByUserId(userId: string): Promise<User> {
+  try {
+    const response = await API_SERVICES.users.getUserEntity(userId)
+    const rawData = response.data
+    const userDetails = rawData?.data
+    console.log('response', userDetails.id)
+
+    if (!userDetails) {
+      throw new Error('User not found')
+    }
+    const parentRealDetailsId = userDetails.id
+
+    return parentRealDetailsId
+  } catch (error) {
+    console.error(`Error get parent entity by user id ${userId} in users.ts:`, error)
+    throw error
+  }
+}

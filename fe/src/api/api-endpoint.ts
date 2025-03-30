@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     LIST: '/user/list',
     ADD_ONE: '/user/add',
     DELETE_ONE: (userId: string) => `/user/del/${userId}`,
+    GET_ENTITY_BY_USER_ID: (userId: string) => `/user/entity/${userId}`,
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoints/list',
@@ -22,5 +23,6 @@ export const API_ENDPOINTS = {
     UPDATE_ONE: (studentId: string) => `/student/${studentId}`,
     GET_ONE: (studentId: string) => `/student/${studentId}`,
     DELETE_ONE: (studentId: string) => `/user/del/${studentId}`,
+    UPDATE: () => `/student/upd`,
   },
 } as const

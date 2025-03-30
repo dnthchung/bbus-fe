@@ -18,6 +18,7 @@ interface ApiServices {
     list: () => Promise<any>
     addOne: (user: any) => Promise<any>
     deleteOne: (userId: string) => Promise<any>
+    getUserEntity: (userId: string) => Promise<any>
   }
   checkpoints: {
     getAll: () => Promise<any>
@@ -28,7 +29,7 @@ interface ApiServices {
     updateOne: (studentId: string, student: any) => Promise<any>
     getOne: (studentId: string) => Promise<any>
     deleteOne: (studentId: string) => Promise<any>
-    update: (studentId: string, student: any) => Promise<any>
+    update: (student: any) => Promise<any>
   }
 }
 
@@ -66,6 +67,7 @@ export const API_SERVICES: ApiServices = {
     list: () => apiClient.get(API_ENDPOINTS.USERS.LIST),
     addOne: (user: any) => apiClient.post(API_ENDPOINTS.USERS.ADD_ONE, user),
     deleteOne: (userId: string) => apiClient.delete(API_ENDPOINTS.USERS.DELETE_ONE(userId)),
+    getUserEntity: (userId: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ENTITY_BY_USER_ID(userId)),
   },
   // -------------------------
   // 3) CHECKPOINTS
@@ -82,6 +84,6 @@ export const API_SERVICES: ApiServices = {
     updateOne: (studentId: string, student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE_ONE(studentId), student),
     getOne: (studentId: string) => apiClient.get(API_ENDPOINTS.STUDENTS.GET_ONE(studentId)),
     deleteOne: (studentId: string) => apiClient.delete(API_ENDPOINTS.STUDENTS.DELETE_ONE(studentId)),
-    update: (studentId: string, student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE_ONE(studentId), student),
+    update: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
   },
 }
