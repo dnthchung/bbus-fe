@@ -39,8 +39,8 @@ const formSchema = z.object({
   status: z.enum(['ACTIVE', 'INACTIVE'], {
     required_error: 'Trạng thái không được để trống.',
   }),
-  parentId: z.string().uuid('Phải là UUID hợp lệ.'),
-  checkpointId: z.string().uuid('Phải là UUID hợp lệ.'),
+  parentId: z.string().uuid('Phải là UUID hợp lệ.').optional(),
+  checkpointId: z.string().uuid('Phải là UUID hợp lệ.').optional(),
   avatar: z.string().optional(),
 })
 
@@ -120,23 +120,89 @@ export default function StudentsDetailsContent() {
   }, [studentData, initialStudentData, reset, isLoading])
 
   // ----- 5. Submit form -----
+  // const onSubmit = async (values: StudentForm) => {
+  //   setIsLoading(true)
+
+  //   try {
+  //     // Get the real parentId from the userId
+  //     const parentId = await getParentIdByGetEntityByUserId(values.parentId)
+
+  //     // Update the values with the real parentId
+  //     const updatedValues = {
+  //       ...values,
+  //       parentId: parentId, // Or possibly parent.id, depending on your data structure
+  //     }
+
+  //     console.log('===> Submitting form with:', updatedValues)
+
+  //     // Call API to update student
+  //     await API_SERVICES.students.update(updatedValues)
+
+  //     toast({
+  //       title: 'Thành công',
+  //       description: 'Đã cập nhật thông tin học sinh.',
+  //     })
+
+  //     // Refresh student data after update
+  //     const response = await API_SERVICES.students.getOne(id)
+  //     setStudentData(response.data.data)
+
+  //     setIsEditing(false)
+  //   } catch (error) {
+  //     console.error('Error updating student:', error)
+  //     toast({
+  //       title: 'Lỗi',
+  //       description: 'Không thể cập nhật thông tin học sinh. Vui lòng thử lại sau.',
+  //       variant: 'destructive',
+  //     })
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
+
   const onSubmit = async (values: StudentForm) => {
     setIsLoading(true)
-
     try {
-      // Get the real parentId from the userId
-      const parentId = await getParentIdByGetEntityByUserId(values.parentId)
-
-      // Update the values with the real parentId
-      const updatedValues = {
-        ...values,
-        parentId: parentId, // Or possibly parent.id, depending on your data structure
+      // Basic student information for update
+      const studentInfoUpdate = {
+        id: values.id,
+        rollNumber: values.rollNumber,
+        name: values.name,
+        dob: values.dob,
+        address: values.address,
+        gender: values.gender,
+        status: values.status,
+        avatar: values.avatar,
       }
 
-      console.log('===> Submitting form with:', updatedValues)
+      // Update basic student information
+      console.log('===> Updating student basic info:', studentInfoUpdate)
+      await API_SERVICES.students.update(studentInfoUpdate)
 
-      // Call API to update student
-      await API_SERVICES.students.update(updatedValues)
+      // If parentId is provided, update parent separately
+      if (values.parentId) {
+        try {
+          // Get the real parentId from the userId
+          const parentId = await getParentIdByGetEntityByUserId(values.parentId)
+
+          // Update parent assignment in a separate request
+          const parentUpdate = {
+            id: values.id,
+            parentId: parentId,
+          }
+
+          console.log('===> Updating student parent:', parentUpdate)
+          await API_SERVICES.students.updateParent(parentUpdate)
+        } catch (parentError) {
+          console.error('Error updating student parent:', parentError)
+          toast({
+            title: 'Cảnh báo',
+            description: 'Đã cập nhật thông tin học sinh nhưng không thể cập nhật thông tin phụ huynh.',
+            // variant: 'warning',
+          })
+          // Continue with success since the basic info was saved
+        }
+      }
 
       toast({
         title: 'Thành công',
@@ -144,9 +210,8 @@ export default function StudentsDetailsContent() {
       })
 
       // Refresh student data after update
-      const response = await API_SERVICES.students.getOne(id)
+      const response = await API_SERVICES.students.getOne(values.id)
       setStudentData(response.data.data)
-
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating student:', error)

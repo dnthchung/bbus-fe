@@ -33,7 +33,7 @@ export function ParentSelectionTable() {
   const [selectedParent, setSelectedParent] = useState<Parent | null>(null)
 
   const { setValue, watch } = useFormContext<StudentForm>()
-  const currentParentId = watch('parentId')
+  const currentParentId = watch('parentId') || ''
 
   // Fetch parents when dialog opens
   useEffect(() => {

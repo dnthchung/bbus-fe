@@ -30,6 +30,7 @@ interface ApiServices {
     getOne: (studentId: string) => Promise<any>
     deleteOne: (studentId: string) => Promise<any>
     update: (student: any) => Promise<any>
+    updateParent: (student: any) => Promise<any>
   }
 }
 
@@ -85,5 +86,6 @@ export const API_SERVICES: ApiServices = {
     getOne: (studentId: string) => apiClient.get(API_ENDPOINTS.STUDENTS.GET_ONE(studentId)),
     deleteOne: (studentId: string) => apiClient.delete(API_ENDPOINTS.STUDENTS.DELETE_ONE(studentId)),
     update: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
+    updateParent: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
   },
 }
