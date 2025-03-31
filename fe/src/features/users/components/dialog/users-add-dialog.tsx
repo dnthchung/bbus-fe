@@ -68,6 +68,7 @@ const generatePassword = (): string => {
     .split('')
     .sort(() => 0.5 - Math.random())
     .join('')
+
   return password
 }
 
@@ -101,6 +102,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   const onSubmit = async (values: UserForm) => {
     try {
       setIsSubmitting(true)
+
       const newUser = {
         username: generateUsername(),
         password: generatePassword(),
@@ -113,16 +115,21 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
         avatar: generateAvatar(),
         role: values.role,
       }
+
       // Gọi API thêm người dùng mới
       const response = await API_SERVICES.users.addOne(newUser)
       console.log('response', response)
+
       toast({
         title: 'Thêm người dùng thành công',
         description: 'Người dùng mới đã được thêm vào hệ thống',
       })
+
       reset()
       onOpenChange(false)
-      refreshUsers() // Cập nhật danh sách người dùng sau khi thêm mới
+
+      // ✅ Đảm bảo gọi xong refreshUsers trước khi onSuccess
+      await refreshUsers()
 
       if (onSuccess) onSuccess()
     } catch (error) {
@@ -150,6 +157,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
           <DialogTitle>Thêm người dùng mới</DialogTitle>
           <DialogDescription>Tạo người dùng mới.</DialogDescription>
         </DialogHeader>
+
         <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
           <Form {...form}>
             <form id='user-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
@@ -167,6 +175,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                   </FormItem>
                 )}
               />
+
               {/* Email */}
               <FormField
                 control={control}
@@ -181,6 +190,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                   </FormItem>
                 )}
               />
+
               {/* Số điện thoại */}
               <FormField
                 control={control}
@@ -195,6 +205,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                   </FormItem>
                 )}
               />
+
               {/* Địa chỉ */}
               <FormField
                 control={control}
@@ -234,6 +245,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                   </FormItem>
                 )}
               />
+
               {/* Giới tính */}
               <FormField
                 control={control}
@@ -251,6 +263,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                   </FormItem>
                 )}
               />
+
               {/* Vai trò */}
               <FormField
                 control={control}
@@ -276,6 +289,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
             </form>
           </Form>
         </ScrollArea>
+
         <DialogFooter>
           <Button type='submit' form='user-form' disabled={isSubmitting}>
             {isSubmitting ? 'Đang tạo...' : 'Tạo người dùng'}
