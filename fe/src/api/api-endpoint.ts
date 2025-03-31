@@ -25,4 +25,7 @@ export const API_ENDPOINTS = {
     DELETE_ONE: (studentId: string) => `/user/del/${studentId}`,
     UPDATE: () => `/student/upd`,
   },
+  PARENTS: {
+    GET_PARENT_LIST: '/parent/list',
+  },
 } as const

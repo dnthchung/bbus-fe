@@ -1,6 +1,7 @@
 // fe/src/features/users/data/users.ts
 import { API_SERVICES } from '@/api/api-services'
-import { userListSchema, User, userSchema } from './schema'
+import { Parent } from '@/features/users/data/schema'
+import { userListSchema, User, userSchema, parentListSchema } from './schema'
 
 // hoặc đường dẫn tới file khai báo axios
 
@@ -51,6 +52,26 @@ export async function getAllUsersRoleParent(): Promise<User[]> {
     return parentUsers
   } catch (error) {
     console.error('Error getAllUsers in users.ts:', error)
+    throw error
+  }
+}
+
+export async function getParentListFromParentTable(): Promise<Parent[]> {
+  try {
+    const response = await API_SERVICES.parents.getParentList()
+    console.log('response', response)
+    const rawData = response.data.data
+    const rawParents = rawData.parents
+    if (!rawParents) {
+      return []
+    }
+
+    console.log('=== rawParents', rawParents)
+    // Parse & validate with Zod
+    const parsedParents = parentListSchema.parse(rawParents)
+    return parsedParents
+  } catch (error) {
+    console.error('Error getParentListFromParentTable in users.ts:', error)
     throw error
   }
 }

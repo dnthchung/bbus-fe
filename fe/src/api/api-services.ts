@@ -32,6 +32,9 @@ interface ApiServices {
     update: (student: any) => Promise<any>
     updateParent: (student: any) => Promise<any>
   }
+  parents: {
+    getParentList: () => Promise<any>
+  }
 }
 
 export const API_SERVICES: ApiServices = {
@@ -87,5 +90,11 @@ export const API_SERVICES: ApiServices = {
     deleteOne: (studentId: string) => apiClient.delete(API_ENDPOINTS.STUDENTS.DELETE_ONE(studentId)),
     update: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
     updateParent: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
+  },
+  //-------------------------
+  // 5) PARENTS
+  //-------------------------
+  parents: {
+    getParentList: () => apiClient.get(API_ENDPOINTS.PARENTS.GET_PARENT_LIST),
   },
 }

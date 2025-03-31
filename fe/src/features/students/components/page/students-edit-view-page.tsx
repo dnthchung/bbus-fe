@@ -161,6 +161,7 @@ export default function StudentsDetailsContent() {
   // }
 
   const onSubmit = async (values: StudentForm) => {
+    console.log('clicked')
     setIsLoading(true)
     try {
       // Basic student information for update

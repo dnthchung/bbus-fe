@@ -21,7 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { User } from '@/features/users/data/schema'
-import { getAllUsersRoleParent } from '@/features/users/data/users'
+import { getAllUsersRoleParent, getParentListFromParentTable } from '@/features/users/data/users'
 import { useStudents } from '../../context/students-context'
 
 const formSchema = z.object({
@@ -59,8 +59,18 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
   useEffect(() => {
     async function fetchParents() {
       try {
-        const parents = await getAllUsersRoleParent()
-        setParentUsers(parents)
+        // const parentTest = await getParentListFromParentTable()
+        // console.log('parentTest', parentTest)
+        // const parents = await getAllUsersRoleParent()
+
+        const parents = await getParentListFromParentTable()
+        const transformedParents = parents.map((parent) => ({
+          ...parent,
+          userId: parent.id,
+          username: parent.id, // or any default value
+          role: 'PARENT' as const,
+        }))
+        setParentUsers(transformedParents)
       } catch (error) {
         console.error('Error fetching parent users:', error)
         toast({
