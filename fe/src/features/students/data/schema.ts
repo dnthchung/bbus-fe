@@ -1,34 +1,6 @@
-// //path : fe/src/features/students/data/schema.ts
-// import { z } from 'zod'
-// // Định nghĩa schema cho trạng thái học sinh
-// const studentStatusSchema = z.enum(['ACTIVE', 'INACTIVE'])
-// // Định nghĩa schema cho học sinh
-// export const studentSchema = z.object({
-//   id: z.string().uuid(),
-//   rollNumber: z.string(),
-//   name: z.string(),
-//   avatar: z.string().url(),
-//   dob: z.coerce.date(),
-//   address: z.string(),
-//   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
-//   status: studentStatusSchema,
-//   parentId: z.string().uuid(),
-//   parentName: z.string(),
-//   parentPhone: z.string(),
-//   checkpointId: z.string().uuid(),
-//   checkpointName: z.string(),
-//   checkpointDescription: z.string(),
-// })
-// // Định nghĩa schema cho trạng thái học sinh
-// export type StudentStatus = z.infer<typeof studentStatusSchema>
-// // Tạo kiểu TypeScript `Student` từ schema
-// export type Student = z.infer<typeof studentSchema>
-// // Định nghĩa danh sách học sinh là một mảng các đối tượng Student
-// export const studentListSchema = z.array(studentSchema)
-// ======================================================================
-// fe/src/features/students/data/schema.ts
 import { z } from 'zod'
 
+//path  : fe/src/features/students/data/schema.ts
 // Định nghĩa schema cho trạng thái học sinh
 export const studentStatusSchema = z.enum(['ACTIVE', 'INACTIVE'])
 
@@ -44,8 +16,6 @@ const parentSchema = z.object({
   phone: z.string(),
   address: z.string(),
   status: studentStatusSchema,
-  // Nếu biết chắc chỉ có giá trị "PARENT", ta có thể dùng z.literal("PARENT").
-  // Trường hợp tương lai có nhiều role khác, có thể để z.string() hoặc z.enum([...])
   role: z.string(),
 })
 
@@ -54,26 +24,45 @@ export const studentSchema = z.object({
   id: z.string().uuid(),
   rollNumber: z.string(),
   name: z.string(),
-  avatar: z.string(),
+  avatar: z.string().optional(),
   dob: z.coerce.date(),
   address: z.string(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
   status: studentStatusSchema,
 
-  // API trả về parentId và kèm "parent" là object đầy đủ
-  parentId: z.string().uuid(),
+  parentId: z.string().uuid().optional(),
   parent: parentSchema.nullable().optional(),
 
-  // API có trường hợp checkpointId = null
-  checkpointId: z.string().uuid().nullable(),
-  checkpointName: z.string(),
-  checkpointDescription: z.string(),
+  checkpointId: z.string().uuid().nullable().optional(),
+  // Làm cho các trường checkpoint optional vì có thể chưa có điểm đón
+  checkpointName: z.string().optional(),
+  checkpointDescription: z.string().optional(),
+})
+
+// Schema cho form cập nhật học sinh - chỉ bao gồm các trường cần thiết
+export const studentUpdateSchema = z.object({
+  id: z.string().uuid(),
+  rollNumber: z.string().optional(),
+  name: z.string().trim().min(1, { message: 'Tên không được để trống' }).optional(),
+  avatar: z.string().optional(),
+  dob: z.coerce.date().optional(),
+  address: z.string().optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  status: studentStatusSchema.optional(),
+  parentId: z
+    .string()
+    .uuid({
+      message: 'Vui lòng lựa chọn phụ huynh hợp lệ.',
+    })
+    .optional(),
+  checkpointId: z.string().uuid().nullable().optional(),
 })
 
 // Tạo kiểu TypeScript để tái sử dụng
 export type StudentStatus = z.infer<typeof studentStatusSchema>
 export type Parent = z.infer<typeof parentSchema>
 export type Student = z.infer<typeof studentSchema>
+export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 
 // Danh sách học sinh là mảng Student
 export const studentListSchema = z.array(studentSchema)

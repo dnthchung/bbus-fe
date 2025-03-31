@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getAllUsersRoleParent } from '@/features/users/data/users'
-import type { StudentForm } from '../dialog/students-edit-view-dialog'
+import { getParentListFromParentTable } from '@/features/users/data/users'
+import type { StudentForm } from '../page/students-edit-view-page'
 
 // Parent type based on your existing code
 interface Parent {
@@ -31,7 +31,6 @@ export function ParentSelectionTable() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
   const [selectedParent, setSelectedParent] = useState<Parent | null>(null)
-
   const { setValue, watch } = useFormContext<StudentForm>()
   const currentParentId = watch('parentId') || ''
 
@@ -67,13 +66,13 @@ export function ParentSelectionTable() {
   const fetchParents = async () => {
     setIsLoading(true)
     try {
-      // Using the getAllUsersRoleParent function mentioned in your imports
-      const response = await getAllUsersRoleParent()
+      // Using the getParentListFromParentTable function mentioned in your imports
+      const response = await getParentListFromParentTable()
       if (response) {
         console.log('response', response)
         setParents(
           response.map((user) => ({
-            userId: user.userId,
+            userId: user.id,
             name: user.name,
             phone: user.phone,
             email: user.email,
@@ -83,7 +82,7 @@ export function ParentSelectionTable() {
         )
         setFilteredParents(
           response.map((user) => ({
-            userId: user.userId,
+            userId: user.id,
             name: user.name,
             phone: user.phone,
             email: user.email,
@@ -139,12 +138,10 @@ export function ParentSelectionTable() {
               <DialogTitle>Danh sách phụ huynh</DialogTitle>
               <DialogDescription>Vui lòng chọn một phụ huynh từ danh sách bên dưới.</DialogDescription>
             </DialogHeader>
-
             <div className='relative mb-4'>
               <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
               <Input placeholder='Tìm kiếm theo tên hoặc số điện thoại...' className='pl-9' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-
             <ScrollArea className='h-[300px]'>
               <Table>
                 <TableHeader>
@@ -179,7 +176,6 @@ export function ParentSelectionTable() {
                 </TableBody>
               </Table>
             </ScrollArea>
-
             <div className='mt-4 flex justify-end gap-2'>
               <Button variant='outline' onClick={() => setOpen(false)}>
                 Hủy
@@ -190,14 +186,12 @@ export function ParentSelectionTable() {
             </div>
           </DialogContent>
         </Dialog>
-
         {selectedParent && (
           <Button variant='ghost' size='icon' type='button' onClick={handleClearSelection} className='h-9 w-9'>
             <X className='h-4 w-4' />
           </Button>
         )}
       </div>
-
       {selectedParent ? (
         <div className='rounded-md border p-3'>
           <div className='flex flex-col gap-1'>
@@ -206,7 +200,7 @@ export function ParentSelectionTable() {
           </div>
         </div>
       ) : (
-        <Input placeholder='Chưa chọn phụ huynh' value={currentParentId} readOnly disabled />
+        <Input placeholder='Chưa chọn phụ huynh' value='Lựa chọn phụ huynh' readOnly disabled />
       )}
     </div>
   )

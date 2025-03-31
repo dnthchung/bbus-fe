@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/students/components/tab/students-pickup-info-tab.tsx
 import { Card, CardContent } from '@/components/ui/card'
 import type { Student } from '../../data/schema'
 

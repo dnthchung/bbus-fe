@@ -21,7 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { User } from '@/features/users/data/schema'
-import { getAllUsersRoleParent, getParentListFromParentTable } from '@/features/users/data/users'
+import { getParentListFromParentTable } from '@/features/users/data/users'
 import { useStudents } from '../../context/students-context'
 
 const formSchema = z.object({
