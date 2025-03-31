@@ -30,7 +30,7 @@ const formSchema = z.object({
     required_error: 'Vui lòng chọn ngày sinh hợp lệ',
   }),
   address: z.string().min(1, { message: 'Địa chỉ không được để trống' }),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
+  gender: z.enum(['MALE', 'FEMALE'], {
     errorMap: () => ({ message: 'Vui lòng chọn giới tính hợp lệ' }),
   }),
   parentId: z.string().uuid({ message: 'Vui lòng chọn phụ huynh hợp lệ' }).min(1, { message: 'Phụ huynh không được để trống' }),
@@ -59,10 +59,6 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
   useEffect(() => {
     async function fetchParents() {
       try {
-        // const parentTest = await getParentListFromParentTable()
-        // console.log('parentTest', parentTest)
-        // const parents = await getAllUsersRoleParent()
-
         const parents = await getParentListFromParentTable()
         const transformedParents = parents.map((parent) => ({
           ...parent,
@@ -93,7 +89,7 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
       name: '',
       dob: undefined,
       address: '',
-      gender: 'OTHER',
+      gender: 'MALE',
       parentId: '',
     },
   })
@@ -140,9 +136,10 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
         checkpointId: '',
       }
 
-      console.log('newStudent', newStudent)
       const response = await API_SERVICES.students.addOne(newStudent)
-      console.log('response', response)
+
+      // Đảm bảo cập nhật danh sách học sinh trước
+      await refreshStudents()
 
       toast({
         title: 'Thêm học sinh thành công',
@@ -151,7 +148,6 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
 
       reset()
       onOpenChange(false)
-      await refreshStudents()
 
       if (onSuccess) {
         onSuccess()
@@ -182,8 +178,7 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
       <DialogContent className='max-w-4xl overflow-hidden p-0'>
         <DialogHeader className='px-6 pb-2 pt-6'>
           <DialogTitle className='flex items-center gap-2 text-xl'>
-            <UserPlus className='h-5 w-5' />
-            Thêm học sinh mới
+            <UserPlus className='h-5 w-5' /> Thêm học sinh mới
           </DialogTitle>
           <DialogDescription>Tạo học sinh mới ở đây. Nhấn lưu khi hoàn tất.</DialogDescription>
         </DialogHeader>
@@ -204,11 +199,9 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
                     )}
                   </TabsTrigger>
                 </TabsList>
-
                 <TabsContent value='form' className='mt-4'>
                   <StudentFormFields control={control} displayParentText={displayParentText} selectedParent={selectedParent} onSelectParentClick={() => setActiveTab('parents')} />
                 </TabsContent>
-
                 <TabsContent value='parents' className='mt-4'>
                   <ParentSelector searchTerm={searchTerm} setSearchTerm={setSearchTerm} filteredParentUsers={filteredParentUsers} handleSelectParent={handleSelectParent} selectedParentId={watchParentId} />
                 </TabsContent>
@@ -220,7 +213,6 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
               <div className='w-1/2'>
                 <StudentFormFields control={control} displayParentText={displayParentText} selectedParent={selectedParent} />
               </div>
-
               <div className='w-1/2'>
                 <h3 className='mb-2 text-sm font-medium'>Chọn phụ huynh</h3>
                 <ParentSelector searchTerm={searchTerm} setSearchTerm={setSearchTerm} filteredParentUsers={filteredParentUsers} handleSelectParent={handleSelectParent} selectedParentId={watchParentId} />
@@ -328,7 +320,6 @@ function StudentFormFields({ control, displayParentText, selectedParent, onSelec
                       <SelectLabel>Giới tính</SelectLabel>
                       <SelectItem value='MALE'>Nam</SelectItem>
                       <SelectItem value='FEMALE'>Nữ</SelectItem>
-                      <SelectItem value='OTHER'>Khác</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -399,7 +390,6 @@ function ParentSelector({ searchTerm, setSearchTerm, filteredParentUsers, handle
         <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
         <Input placeholder='Tìm phụ huynh theo tên/điện thoại' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className='pl-9' />
       </div>
-
       <ScrollArea className='h-[340px] rounded-md border'>
         {filteredParentUsers.length === 0 ? (
           <div className='p-4 text-center text-muted-foreground'>Không tìm thấy phụ huynh phù hợp</div>
