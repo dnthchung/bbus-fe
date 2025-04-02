@@ -12,7 +12,14 @@ export function BusesDialogs() {
       {/* Optional: <BusesActionDialog ... /> nếu bạn muốn dùng dialog dạng tổng hợp */}
       <BusImportDialog key='bus-import' open={open === 'import'} onOpenChange={() => setOpen('import')} />
       <BusesAddDialog key='bus-add' open={open === 'add'} onOpenChange={() => setOpen('add')} />
-      <BusesEditCapacityDialog key='bus-edit-capacity' open={open === 'change-student-capacity'} onOpenChange={() => setOpen('change-student-capacity')} bus={currentRow!} onSuccess={() => setOpen(null)} />
+      <BusesEditCapacityDialog
+        key='bus-edit-capacity'
+        open={open === 'change-student-capacity'}
+        onOpenChange={() => setOpen('change-student-capacity')}
+        onSubmit={function (value: number): void {
+          throw new Error('Function not implemented.')
+        }}
+      />
       {/* trong table , phần option */}
 
       {currentRow && (
