@@ -28,4 +28,9 @@ export const API_ENDPOINTS = {
   PARENTS: {
     GET_PARENT_LIST: '/parent/list',
   },
+  TRANSPORTATION: {
+    CHECKPOINTS: {
+      GET_ALL: '/checkpoints/list',
+    },
+  },
 } as const

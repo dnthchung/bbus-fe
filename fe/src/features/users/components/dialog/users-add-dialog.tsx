@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { defaultAvatar } from '@/helpers/generate-avatar'
 import { CalendarIcon } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { API_SERVICES } from '@/api/api-services'
@@ -44,8 +45,7 @@ interface Props {
 // Hàm tạo username tự động bằng uuid
 const generateUsername = (): string => uuidv4()
 
-// Hàm tạo password tự động với độ dài ngẫu nhiên từ 8 đến 36 ký tự,
-// đảm bảo có ít nhất 1 chữ hoa, 1 chữ thường và 1 số.
+// Hàm tạo password tự động với độ dài ngẫu nhiên từ 8 đến 36 ký tự, đảm bảo có ít nhất 1 chữ hoa, 1 chữ thường và 1 số.
 const generatePassword = (): string => {
   const length = Math.floor(Math.random() * (36 - 8 + 1)) + 8
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -70,12 +70,6 @@ const generatePassword = (): string => {
     .join('')
 
   return password
-}
-
-// Hàm tạo avatar tự động: random số từ 1 đến 50 được thêm vào URL
-const generateAvatar = (): string => {
-  const randomNumber = Math.floor(Math.random() * 50) + 1
-  return `https://avatar.iran.liara.run/public/${randomNumber}`
 }
 
 export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
@@ -112,7 +106,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
         address: values.address,
         gender: values.gender,
         dob: values.dob.toISOString(),
-        avatar: generateAvatar(),
+        avatar: defaultAvatar(),
         role: values.role,
       }
 
@@ -128,7 +122,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
       reset()
       onOpenChange(false)
 
-      // ✅ Đảm bảo gọi xong refreshUsers trước khi onSuccess
+      // Đảm bảo gọi xong refreshUsers trước khi onSuccess
       await refreshUsers()
 
       if (onSuccess) onSuccess()

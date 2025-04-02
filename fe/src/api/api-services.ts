@@ -35,6 +35,11 @@ interface ApiServices {
   parents: {
     getParentList: () => Promise<any>
   }
+  transportation: {
+    checkpoints: {
+      list: () => Promise<any>
+    }
+  }
 }
 
 export const API_SERVICES: ApiServices = {
@@ -96,5 +101,13 @@ export const API_SERVICES: ApiServices = {
   //-------------------------
   parents: {
     getParentList: () => apiClient.get(API_ENDPOINTS.PARENTS.GET_PARENT_LIST),
+  },
+  //-------------------------
+  // 6) TRANSPORTATION
+  //-------------------------
+  transportation: {
+    checkpoints: {
+      list: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+    },
   },
 }
