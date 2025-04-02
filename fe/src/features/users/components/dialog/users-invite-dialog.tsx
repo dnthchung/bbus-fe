@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { SelectDropdown } from '@/components/common/select-dropdown'
-import { userTypes } from '../../data/data'
+import { userTypes } from '../../data'
 
 const formSchema = z.object({
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Email is invalid.' }),

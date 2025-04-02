@@ -1,12 +1,6 @@
 // fe/src/features/users/data/data.ts
 import { IconShield, IconUserShield, IconUsersGroup, IconSchool, IconUser, IconTruck } from '@tabler/icons-react'
-import { UserStatus } from './schema'
-
-// Map user status with Tailwind classes
-export const callTypes = new Map<UserStatus, string>([
-  ['ACTIVE', 'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200'],
-  ['INACTIVE', 'bg-neutral-300/40 border-neutral-300'],
-])
+import { UserStatus } from '@/features/users/schema'
 
 // Map tiếng Việt cho status
 export const statusLabels: Record<UserStatus, string> = {

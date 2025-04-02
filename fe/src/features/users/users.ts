@@ -1,7 +1,7 @@
 // fe/src/features/users/data/users.ts
 import { API_SERVICES } from '@/api/api-services'
-import { Parent } from '@/features/users/data/schema'
-import { userListSchema, User, parentListSchema } from './schema'
+import { Parent } from '@/features/users/schema'
+import { userListSchema, User, parentListSchema } from '@/features/users/schema'
 
 // hoặc đường dẫn tới file khai báo axios
 

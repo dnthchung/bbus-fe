@@ -1,12 +1,12 @@
 // fe/src/features/users/components/users-columns.tsx
 import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import LongText from '@/components/common/long-text'
+import { Status } from '@/components/mine/status'
 import { AvatarThumbnail } from '@/features/users/components/avatar-thumbnail'
-import { callTypes, userTypes, statusLabels } from '../data/data'
-import { User } from '../data/schema'
+import { userTypes, statusLabels } from '../data'
+import { User } from '../schema'
 import { DataTableColumnHeader } from './table/data-table-column-header'
 import { DataTableRowActions } from './table/data-table-row-actions'
 
@@ -65,15 +65,11 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       // Lấy status gốc, vd "ACTIVE"
       const status = row.original.status
-      // Lấy CSS class dành cho badge (màu sắc) trong callTypes
-      const badgeColor = callTypes.get(status) // callTypes map => "ACTIVE" => 'bg-teal-100...'
       // Lấy nhãn tiếng Việt từ statusLabels
       const statusLabel = statusLabels[status] || status // fallback
       return (
         <div className='flex space-x-2'>
-          <Badge variant='outline' className={cn('capitalize', badgeColor)}>
-            {statusLabel}
-          </Badge>
+          <Status color={status === 'ACTIVE' ? 'green' : 'red'}>{statusLabel}</Status>
         </div>
       )
     },

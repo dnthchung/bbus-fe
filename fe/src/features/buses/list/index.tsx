@@ -4,13 +4,13 @@ import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import BusesProvider from '../context/buses-context'
-import { getAllBuses } from '../data/buses'
-import { Bus } from '../data/schema'
-import { columns } from './components/buses-columns'
-import { BusesDialogs } from './components/buses-dialogs'
-import { BusesPrimaryButtons } from './components/buses-primary-buttons'
-import { BusesTable } from './components/buses-table'
+import BusesProvider from '@/features/buses/context/buses-context'
+import { getAllBuses } from '@/features/buses/function'
+import { columns } from '@/features/buses/list/components/buses-columns'
+import { BusesDialogs } from '@/features/buses/list/components/buses-dialogs'
+import { BusesPrimaryButtons } from '@/features/buses/list/components/buses-primary-buttons'
+import { BusesTable } from '@/features/buses/list/components/buses-table'
+import { Bus } from '@/features/buses/schema'
 
 export default function BusList() {
   const [busList, setBusList] = useState<Bus[]>([])
@@ -42,7 +42,7 @@ export default function BusList() {
             <h2 className='text-2xl font-bold tracking-tight'>Danh sách xe buýt</h2>
             <p className='text-muted-foreground'>Quản lý thông tin các xe buýt trong hệ thống.</p>
           </div>
-          {/* <BusesPrimaryButtons /> */}
+          <BusesPrimaryButtons />
         </div>
 
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
@@ -50,7 +50,7 @@ export default function BusList() {
         </div>
       </Main>
 
-      {/* <BusesDialogs /> */}
+      <BusesDialogs />
     </BusesProvider>
   )
 }

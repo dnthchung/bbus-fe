@@ -1,39 +1,31 @@
 'use client'
 
-// path: fe/src/features/users/components/dialog/users-add-dialog.tsx
+//path  : fe/src/features/buses/components/dialog/buses-add-dialog.tsx
 import { useState } from 'react'
 import { z } from 'zod'
-import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CalendarIcon } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { API_SERVICES } from '@/api/api-services'
-import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useUsers } from '../../context/users-context'
 
-// Schema cho việc thêm mới người dùng
+// Schema riêng cho form thêm xe buýt
 const formSchema = z.object({
-  name: z.string().min(1, 'Vui lòng nhập họ và tên'),
-  email: z.string().email('Email không hợp lệ'),
-  phone: z.string().min(1, 'Vui lòng nhập số điện thoại'),
-  address: z.string().min(1, 'Vui lòng nhập địa chỉ'),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
-    errorMap: () => ({ message: 'Giới tính không hợp lệ' }),
-  }),
-  dob: z.coerce.date({ required_error: 'Vui lòng chọn ngày sinh' }),
-  role: z.string().min(1, 'Vui lòng chọn vai trò'),
+  licensePlate: z.string().min(1, 'Vui lòng nhập biển số xe'),
+  name: z.string().min(1, 'Vui lòng nhập tên xe buýt'),
+  driverId: z.string().uuid('ID tài xế không hợp lệ'),
+  driverName: z.string().min(1, 'Vui lòng nhập tên tài xế'),
+  route: z.string().min(1, 'Vui lòng nhập tuyến đường'),
+  espId: z.string().min(1, 'Vui lòng nhập ID ESP'),
+  cameraFacesluice: z.string().min(1, 'Vui lòng nhập ID camera khuôn mặt'),
 })
 
-type UserForm = z.infer<typeof formSchema>
+type BusForm = z.infer<typeof formSchema>
 
 interface Props {
   open: boolean
@@ -41,95 +33,50 @@ interface Props {
   onSuccess?: () => void
 }
 
-// Hàm tạo username tự động bằng uuid
-const generateUsername = (): string => uuidv4()
-
-// Hàm tạo password tự động với độ dài ngẫu nhiên từ 8 đến 36 ký tự,
-// đảm bảo có ít nhất 1 chữ hoa, 1 chữ thường và 1 số.
-const generatePassword = (): string => {
-  const length = Math.floor(Math.random() * (36 - 8 + 1)) + 8
-  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  const lowercase = 'abcdefghijklmnopqrstuvwxyz'
-  const digits = '0123456789'
-  const allChars = uppercase + lowercase + digits
-
-  let password = ''
-  // Bắt buộc có 1 chữ hoa, 1 chữ thường, 1 số
-  password += uppercase[Math.floor(Math.random() * uppercase.length)]
-  password += lowercase[Math.floor(Math.random() * lowercase.length)]
-  password += digits[Math.floor(Math.random() * digits.length)]
-
-  for (let i = 3; i < length; i++) {
-    password += allChars[Math.floor(Math.random() * allChars.length)]
-  }
-
-  // Trộn các ký tự để tránh mẫu cố định
-  password = password
-    .split('')
-    .sort(() => 0.5 - Math.random())
-    .join('')
-  return password
-}
-
-// Hàm tạo avatar tự động: random số từ 1 đến 50 được thêm vào URL
-const generateAvatar = (): string => {
-  const randomNumber = Math.floor(Math.random() * 50) + 1
-  return `https://avatar.iran.liara.run/public/${randomNumber}`
-}
-
-export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
+export function BusesAddDialog({ open, onOpenChange, onSuccess }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { refreshUsers } = useUsers()
 
-  // Khởi tạo React Hook Form với schema
-  const form = useForm<UserForm>({
+  const form = useForm<BusForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      licensePlate: '',
       name: '',
-      email: '',
-      phone: '',
-      address: '',
-      gender: 'MALE',
-      dob: undefined,
-      role: '',
+      driverId: '',
+      driverName: '',
+      route: '',
+      espId: '',
+      cameraFacesluice: '',
     },
   })
 
   const { control, handleSubmit, reset } = form
 
-  // Xử lý submit: tạo các trường tự động và gọi API thêm người dùng mới
-  const onSubmit = async (values: UserForm) => {
+  const onSubmit = async (values: BusForm) => {
     try {
       setIsSubmitting(true)
-      const newUser = {
-        username: generateUsername(),
-        password: generatePassword(),
-        email: values.email,
-        phone: values.phone,
-        name: values.name,
-        address: values.address,
-        gender: values.gender,
-        dob: values.dob.toISOString(),
-        avatar: generateAvatar(),
-        role: values.role,
+
+      const newBus = {
+        id: uuidv4(),
+        ...values,
       }
-      // Gọi API thêm người dùng mới
-      const response = await API_SERVICES.users.addOne(newUser)
-      console.log('response', response)
+      console.log('newBus', newBus)
+      // const response = await API_SERVICES.buses.addOne(newBus)
+      // console.log('Bus added:', response)
+
       toast({
-        title: 'Thêm người dùng thành công',
-        description: 'Người dùng mới đã được thêm vào hệ thống',
+        title: 'Thêm xe buýt thành công',
+        description: 'Xe buýt mới đã được thêm vào hệ thống',
+        variant: 'success',
       })
+
       reset()
       onOpenChange(false)
-      refreshUsers() // Cập nhật danh sách người dùng sau khi thêm mới
-
       if (onSuccess) onSuccess()
     } catch (error) {
-      console.error('Lỗi khi thêm người dùng:', error)
+      console.error('Lỗi khi thêm xe buýt:', error)
       toast({
-        title: 'Không thể thêm người dùng',
-        description: 'Đã xảy ra lỗi khi thêm người dùng mới. Vui lòng thử lại sau.',
+        title: 'Không thể thêm xe buýt',
+        description: 'Đã xảy ra lỗi khi thêm xe buýt. Vui lòng thử lại.',
         variant: 'destructive',
       })
     } finally {
@@ -147,138 +94,111 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-left'>
-          <DialogTitle>Thêm người dùng mới</DialogTitle>
-          <DialogDescription>Tạo người dùng mới.</DialogDescription>
+          <DialogTitle>Thêm xe buýt mới</DialogTitle>
+          <DialogDescription>Nhập thông tin xe buýt cần thêm.</DialogDescription>
         </DialogHeader>
-        <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
+
+        <ScrollArea className='-mr-4 h-[26rem] w-full py-1 pr-4'>
           <Form {...form}>
-            <form id='user-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
-              {/* Họ và tên */}
+            <form id='bus-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
+              <FormField
+                control={control}
+                name='licensePlate'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Biển số xe</FormLabel>
+                    <FormControl>
+                      <Input placeholder='51B-123.45' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={control}
                 name='name'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Họ và tên</FormLabel>
+                    <FormLabel>Tên xe buýt</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nguyễn Quang Lợi' autoComplete='off' {...field} />
+                      <Input placeholder='Xe buýt số 1' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Email */}
               <FormField
                 control={control}
-                name='email'
+                name='driverId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Email</FormLabel>
+                    <FormLabel>ID Tài xế</FormLabel>
                     <FormControl>
-                      <Input placeholder='loinq@gmail.com' autoComplete='off' {...field} />
+                      <Input placeholder='UUID của tài xế' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Số điện thoại */}
               <FormField
                 control={control}
-                name='phone'
+                name='driverName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Số điện thoại</FormLabel>
+                    <FormLabel>Tên tài xế</FormLabel>
                     <FormControl>
-                      <Input placeholder='0912345000' autoComplete='off' {...field} />
+                      <Input placeholder='Nguyễn Văn A' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Địa chỉ */}
               <FormField
                 control={control}
-                name='address'
+                name='route'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Địa chỉ</FormLabel>
+                    <FormLabel>Tuyến đường</FormLabel>
                     <FormControl>
-                      <Input placeholder='74 An Dương' {...field} />
+                      <Input placeholder='Quận 1 - Quận 5' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Ngày sinh */}
               <FormField
                 control={control}
-                name='dob'
+                name='espId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Ngày sinh</FormLabel>
+                    <FormLabel>ID ESP</FormLabel>
                     <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant='outline' className={cn('col-span-4 w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Chọn ngày</span>}
-                            <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className='w-auto p-0' align='start'>
-                          <Calendar mode='single' selected={field.value} onSelect={field.onChange} disabled={(date: Date) => date > new Date() || date < new Date('1900-01-01')} />
-                        </PopoverContent>
-                      </Popover>
+                      <Input placeholder='esp_001' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Giới tính */}
               <FormField
                 control={control}
-                name='gender'
+                name='cameraFacesluice'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-12 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Giới tính</FormLabel>
+                  <FormItem>
+                    <FormLabel>ID Camera nhận diện khuôn mặt</FormLabel>
                     <FormControl>
-                      <select className='col-span-4 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
-                        <option value='MALE'>Nam</option>
-                        <option value='FEMALE'>Nữ</option>
-                      </select>
+                      <Input placeholder='cam_face_01' {...field} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              {/* Vai trò */}
-              <FormField
-                control={control}
-                name='role'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-12 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Vai trò</FormLabel>
-                    <FormControl>
-                      <select className='col-span-4 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1' value={field.value} onChange={field.onChange}>
-                        <option value=''>Chọn vai trò</option>
-                        <option value='PARENT'>Phụ huynh</option>
-                        <option value='TEACHER'>Giáo viên</option>
-                        <option value='ADMIN'>Quản trị</option>
-                        <option value='DRIVER'>Tài xế xe buýt</option>
-                        <option value='ASSISTANT'>Phụ tá tài xế</option>
-                        {/* Thêm các vai trò khác nếu cần */}
-                      </select>
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </form>
           </Form>
         </ScrollArea>
+
         <DialogFooter>
-          <Button type='submit' form='user-form' disabled={isSubmitting}>
-            {isSubmitting ? 'Đang tạo...' : 'Tạo người dùng'}
+          <Button type='submit' form='bus-form' disabled={isSubmitting}>
+            {isSubmitting ? 'Đang tạo...' : 'Tạo xe buýt'}
           </Button>
         </DialogFooter>
       </DialogContent>

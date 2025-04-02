@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { getAllBuses } from '../data/buses'
-import { Bus } from '../data/schema'
+import { getAllBuses } from '@/features/buses/function'
+import { Bus } from '@/features/buses/schema'
 
 // Hàm giả định để lấy danh sách buses
 
 // Các loại dialog mà chúng ta quản lý
-type BusesDialogType = 'import' | 'add' | 'edit' | 'delete' | 'view-edit-details'
+type BusesDialogType = 'import' | 'add' | 'edit' | 'delete' | 'view-edit-details' | 'change-student-capacity'
 
 // Cấu trúc context cho Buses
 interface BusesContextType {

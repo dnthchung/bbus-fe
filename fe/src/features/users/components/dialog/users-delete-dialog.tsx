@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 // ✅ Gọi API xoá người dùng
 import { useUsers } from '../../context/users-context'
-import { userTypes } from '../../data/data'
-import { User } from '../../data/schema'
+import { userTypes } from '../../data'
+import { User } from '../../schema'
 
 // ✅ Gọi context để refresh user list
 

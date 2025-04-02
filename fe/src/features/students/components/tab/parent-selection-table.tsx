@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getParentListFromParentTable } from '@/features/users/data/users'
+import { getParentListFromParentTable } from '@/features/users/users'
 import type { StudentForm } from '../page/students-edit-view-page'
 
 // Parent type based on your existing code

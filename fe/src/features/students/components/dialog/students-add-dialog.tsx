@@ -20,8 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { User } from '@/features/users/data/schema'
-import { getParentListFromParentTable } from '@/features/users/data/users'
+import type { User } from '@/features/users/schema'
+import { getParentListFromParentTable } from '@/features/users/users'
 import { useStudents } from '../../context/students-context'
 
 const formSchema = z.object({

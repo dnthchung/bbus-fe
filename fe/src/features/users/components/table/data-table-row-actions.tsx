@@ -6,7 +6,7 @@ import { API_SERVICES } from '@/api/api-services'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useUsers } from '../../context/users-context'
-import { User } from '../../data/schema'
+import { User } from '../../schema'
 
 // Import API_SERVICES
 

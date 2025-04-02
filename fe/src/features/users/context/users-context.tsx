@@ -42,8 +42,8 @@
 import React, { useState, useEffect } from 'react'
 // Giả sử bạn có API getAllUsers() hoặc API_SERVICES.users.getAll(), tuỳ cài đặt
 import useDialogState from '@/hooks/use-dialog-state'
-import { User } from '../data/schema'
-import { getAllUsers } from '../data/users'
+import { User } from '../schema'
+import { getAllUsers } from '../users'
 
 // Giả sử bạn có hàm này để lấy danh sách users
 

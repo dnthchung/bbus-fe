@@ -58,7 +58,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { getAllBuses } from '@/features/buses/data/buses'
-import { Bus } from '@/features/buses/data/schema'
+import { Bus } from '@/features/buses/schema'
 
 export default function PageViewDetails() {
   const { id } = useParams({ strict: false })

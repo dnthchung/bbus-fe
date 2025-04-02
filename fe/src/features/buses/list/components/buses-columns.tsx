@@ -1,11 +1,16 @@
-// fe/src/features/buses/list/components/buses-columns.tsx
 import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import LongText from '@/components/common/long-text'
-import { Bus } from '@/features/buses/data/schema'
+import { Badge } from '@/components/mine/badge'
+import { Status } from '@/components/mine/status'
+import { statusLabels } from '@/features/buses/data'
+import { Bus } from '@/features/buses/schema'
 import { DataTableColumnHeader } from './table/data-table-column-header'
 import { DataTableRowActions } from './table/data-table-row-actions'
+
+// Define a component for empty values
+const EmptyValueBadge = ({ text }: { text: string }) => <Badge color='yellow'>{text}</Badge>
 
 export const columns: ColumnDef<Bus>[] = [
   // CỘT CHỌN DÒNG
@@ -20,7 +25,7 @@ export const columns: ColumnDef<Bus>[] = [
     },
   },
 
-  // CỘT TÊN XE
+  // CÁC CỘT THÔNG TIN CHÍNH
   {
     accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tên xe buýt' />,
@@ -28,39 +33,97 @@ export const columns: ColumnDef<Bus>[] = [
     meta: { className: 'w-40' },
   },
 
-  // CỘT BIỂN SỐ
   {
     accessorKey: 'licensePlate',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Biển số xe' />,
-    cell: ({ row }) => <div>{row.getValue('licensePlate')}</div>,
+    cell: ({ row }) => {
+      const value = row.getValue('licensePlate')
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Chưa có biển số' />
+    },
   },
 
-  // CỘT TÊN TÀI XẾ
   {
-    accessorKey: 'driverName',
+    accessorKey: 'driverId',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tài xế' />,
-    cell: ({ row }) => <div>{row.getValue('driverName')}</div>,
+    cell: ({ row }) => {
+      const value = row.getValue('driverId')
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Chưa có tài xế' />
+    },
   },
 
-  // CỘT TUYẾN ĐƯỜNG
-  {
-    accessorKey: 'route',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Tuyến đường' />,
-    cell: ({ row }) => <LongText className='max-w-52'>{row.getValue('route')}</LongText>,
-  },
-
-  // CỘT ESP ID
   {
     accessorKey: 'espId',
     header: ({ column }) => <DataTableColumnHeader column={column} title='ESP ID' />,
-    cell: ({ row }) => <div>{row.getValue('espId')}</div>,
+    cell: ({ row }) => {
+      const value = row.getValue('espId')
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
+    },
   },
 
-  // CỘT CAMERA ID
   {
     accessorKey: 'cameraFacesluice',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Camera ID' />,
-    cell: ({ row }) => <div>{row.getValue('cameraFacesluice')}</div>,
+    cell: ({ row }) => {
+      const value = row.getValue('cameraFacesluice')
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái' />,
+    cell: ({ row }) => {
+      const status = row.original.status
+      const statusLabel = statusLabels[status] || status // fallback
+      return <Status color={status === 'ACTIVE' ? 'green' : 'red'}>{statusLabel}</Status>
+    },
+  },
+
+  {
+    accessorKey: 'amountOfStudent',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Số học sinh' />,
+    cell: ({ row }) => <div>{row.getValue('amountOfStudent')}</div>,
+  },
+
+  {
+    accessorKey: 'maxCapacity',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Sức chứa' />,
+    cell: ({ row }) => <div>{row.getValue('maxCapacity')}</div>,
+  },
+
+  {
+    accessorKey: 'assistantId',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Phụ tá' />,
+    cell: ({ row }) => {
+      const value = row.getValue('assistantId')
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
+    },
+  },
+
+  {
+    accessorKey: 'routeId',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='ID tuyến đường' />,
+    cell: ({ row }) => {
+      const value = row.getValue('routeId')
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
+    },
+  },
+
+  {
+    accessorKey: 'createdAt',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Ngày tạo' />,
+    cell: ({ row }) => {
+      const date = new Date(row.getValue('createdAt'))
+      return <div>{date.toLocaleDateString()}</div>
+    },
+  },
+
+  {
+    accessorKey: 'updatedAt',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Cập nhật lúc' />,
+    cell: ({ row }) => {
+      const date = new Date(row.getValue('updatedAt'))
+      return <div>{date.toLocaleDateString()}</div>
+    },
   },
 
   // CỘT HÀNH ĐỘNG

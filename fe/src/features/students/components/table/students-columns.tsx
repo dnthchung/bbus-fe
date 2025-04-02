@@ -3,6 +3,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Status } from '@/components/mine/status'
 import { AvatarThumbnail } from '@/features/students/components/avatar-thumbnail'
 import { DataTableColumnHeader } from '@/features/students/components/table/data-table-column-header'
 import { genderLabels, statusLabels, studentStatusClasses } from '../../data/data'
@@ -77,19 +78,21 @@ export const columns: ColumnDef<Student>[] = [
     accessorKey: 'status',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái' />,
     cell: ({ row }) => {
-      const status = row.getValue('status') as StudentStatus
-      const label = statusLabels[status]
-      const className = studentStatusClasses.get(status) ?? ''
+      const status = row.original.status
+      const label = statusLabels[status] || status
+
       return (
-        <Badge variant='outline' className={cn(className)}>
-          {label}
-        </Badge>
+        <div className='flex space-x-2'>
+          <Status color={status === 'ACTIVE' ? 'green' : 'red'}>{label}</Status>
+        </div>
       )
     },
+    // Cho phép lọc theo trạng thái
     filterFn: (row, id, value) => {
-      // Cho phép lọc theo trạng thái
       return value.includes(row.getValue(id))
     },
+
+    enableSorting: false,
   },
   // --- Địa chỉ ---
   {

@@ -1,5 +1,5 @@
 //path : fe/src/features/students/data/data.ts
-import { StudentStatus } from './schema'
+import { StudentStatus } from '@/features/students/data/schema'
 
 // Map trạng thái học sinh với Tailwind classes
 export const studentStatusClasses = new Map<StudentStatus, string>([

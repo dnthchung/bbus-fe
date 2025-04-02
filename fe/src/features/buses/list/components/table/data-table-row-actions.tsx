@@ -5,7 +5,7 @@ import { Row } from '@tanstack/react-table'
 import { IconTrash, IconEye } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Bus } from '@/features/buses/data/schema'
+import { Bus } from '@/features/buses/schema'
 
 interface DataTableRowActionsProps {
   row: Row<Bus>

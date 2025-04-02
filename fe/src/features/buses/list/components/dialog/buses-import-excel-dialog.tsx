@@ -1,4 +1,6 @@
-// path: fe/src/features/users/components/UsersImportDialog.tsx
+'use client'
+
+//path : fe/src/features/buses/components/dialog/buses-import-excel-dialog.tsx
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,12 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
-// Định nghĩa các đuôi file được phép.
+// Định nghĩa các đuôi file được phép
 const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm', 'csv', 'txt', 'tsv', 'xlsb', 'ods', 'xml', 'html', 'pdf', 'xla', 'xlam']
 
-// Tạo schema cho việc tải lên file.
-// Đầu tiên đảm bảo rằng chỉ có đúng một file được tải lên, sau đó chuyển đổi FileList thành đối tượng File,
-// và cuối cùng kiểm tra đuôi file có hợp lệ hay không.
+// Tạo schema xác thực file upload
 const fileSchema = z
   .instanceof(FileList)
   .refine((files) => files.length === 1, {
@@ -33,20 +33,20 @@ const formSchema = z.object({
   file: fileSchema,
 })
 
-type UserImportForm = z.infer<typeof formSchema>
+type BusImportForm = z.infer<typeof formSchema>
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function UsersImportDialog({ open, onOpenChange }: Props) {
-  const form = useForm<UserImportForm>({
+export function BusImportDialog({ open, onOpenChange }: Props) {
+  const form = useForm<BusImportForm>({
     resolver: zodResolver(formSchema),
   })
 
-  const onSubmit = (values: UserImportForm) => {
-    // Xử lý values.file theo nhu cầu.
+  const onSubmit = (values: BusImportForm) => {
+    // Xử lý file values.file tại đây
     form.reset()
     toast({
       title: 'Tải file thành công',
@@ -69,14 +69,14 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
     >
       <DialogContent className='sm:max-w-md'>
         <DialogHeader className='text-left'>
-          <DialogTitle>Nhập danh sách tài khoản</DialogTitle>
+          <DialogTitle>Nhập danh sách xe buýt</DialogTitle>
           <DialogDescription>
-            Tải lên một file chứa danh sách tài khoản để nhập. Các định dạng file được hỗ trợ:
+            Tải lên một file chứa danh sách xe buýt để nhập. Các định dạng file được hỗ trợ:
             <code>.xls, .xlsx, .xlsm, .xltx, .xltm, .csv, .txt, .tsv, .xlsb, .ods, .xml, .html, .pdf, .xla, .xlam</code>
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form id='user-import-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <form id='bus-import-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <FormField
               control={form.control}
               name='file'
@@ -96,7 +96,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
           <DialogClose asChild>
             <Button variant='outline'>Hủy</Button>
           </DialogClose>
-          <Button type='submit' form='user-import-form'>
+          <Button type='submit' form='bus-import-form'>
             Nhập
           </Button>
         </DialogFooter>

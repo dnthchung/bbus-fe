@@ -9,8 +9,8 @@ import { UsersDialogs } from './components/users-dialogs'
 import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersTable } from './components/users-table'
 import UsersProvider from './context/users-context'
-import { User } from './data/schema'
-import { getAllUsers, getAllUsersRoleParent } from './data/users'
+import { User } from './schema'
+import { getAllUsers, getAllUsersRoleParent } from './users'
 
 // <-- hàm mới
 

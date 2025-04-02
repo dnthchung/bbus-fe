@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SelectDropdown } from '@/components/common/select-dropdown'
 // (3) Import data & types
-import { userTypes, statusLabels } from '../../data/data'
-import { User } from '../../data/schema'
+import { userTypes, statusLabels } from '../../data'
+import { User } from '../../schema'
 
 // (4) Tạo schema có trường status
 const formSchema = z.object({

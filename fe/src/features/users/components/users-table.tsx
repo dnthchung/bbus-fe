@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { ColumnDef, ColumnFiltersState, RowData, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { User } from '../data/schema'
+import { User } from '../schema'
 import { DataTablePagination } from './table/data-table-pagination'
 import { DataTableToolbar } from './table/data-table-toolbar'
 
