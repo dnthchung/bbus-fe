@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/common/password-input'
+import { AUTH_MESSAGES } from '@/features/auth/sign-in/data'
 
 // ✅ Define the validation schema using zod (only phone and password)
 const formSchema = z.object({
@@ -92,7 +93,14 @@ export function UserAuthForm({ className, onSubmit, isLoading = false, error, ..
             </Button>
 
             {/* ✅ Error Message */}
-            {error && <p className='text-sm text-red-500'>{error}</p>}
+            {/* {error && <p className='text-sm text-red-500'>{error}</p>} */}
+            {error && (
+              <p className='text-sm text-red-500'>
+                {Object.values(AUTH_MESSAGES).includes(error) 
+                  ? error 
+                  : AUTH_MESSAGES.UNAUTHORIZED}
+              </p>
+            )}
           </div>
         </form>
       </Form>
