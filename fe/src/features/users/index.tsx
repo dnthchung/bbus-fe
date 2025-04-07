@@ -10,7 +10,7 @@ import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersTable } from './components/users-table'
 import UsersProvider from './context/users-context'
 import { User } from './schema'
-import { getAllUsers, getAllUsersRoleParent } from './users'
+import { getAllUsers } from './users'
 
 // <-- hàm mới
 
@@ -22,9 +22,6 @@ export default function Users() {
       try {
         // Gọi hàm getAllUsers
         const parsedUsers = await getAllUsers()
-        // const parentUsers = await getAllUsersRoleParent()
-        // console.log('1. Parsed users:', parsedUsers)
-        // console.log('2. Parent users:', parentUsers)
         setUserList(parsedUsers)
       } catch (error) {
         console.error('Error fetching users in index.tsx:', error)

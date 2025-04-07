@@ -1,7 +1,7 @@
 // src/components/common/profile-dropdown.tsx
 import { Link } from '@tanstack/react-router'
 import { extractUsername } from '@/helpers/extract-user-name'
-import { LogOut, Wrench, User } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { useAuthQuery } from '@/hooks/use-auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
