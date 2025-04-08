@@ -1,7 +1,6 @@
 // src/hooks/use-auth.ts
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { getTimeGreeting } from '@/helpers/get-time-greeting.ts'
 import { getUserIdFromToken } from '@/helpers/jwt-decode'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast.ts'
@@ -86,7 +85,7 @@ export const useAuthQuery = () => {
 
       // Check if user has valid role
       if (!userData.role?.includes('SYSADMIN') && !userData.role?.includes('ADMIN')) {
-        console.error('Role không hợp lệ' + userData.role)
+        console.error('----- Role không hợp lệ: ' + userData.role)
         // Remove auth data
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
@@ -94,7 +93,7 @@ export const useAuthQuery = () => {
 
         // Show error message
         toast({
-          variant: 'destructive',
+          variant: 'deny',
           title: 'Từ chối truy cập',
           description: 'Tài khoản của bạn không có quyền truy cập hệ thống.',
         })
@@ -104,14 +103,7 @@ export const useAuthQuery = () => {
         navigate({ to: '/sign-in' })
         throw new Error('Unauthorized role')
       }
-
-      console.log('đăng nhập thành công:' + userData.role)
-      toast({
-        variant: 'success',
-        title: 'Đăng nhập thành công!!',
-        description: `${getTimeGreeting()}, ${userData.name}.`,
-      })
-
+      console.log('User data: =>', userData.role)
       return userData
     },
     enabled: isAuthenticated && !!userId,

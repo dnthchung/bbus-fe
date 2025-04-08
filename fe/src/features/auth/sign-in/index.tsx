@@ -8,6 +8,8 @@ import { API_SERVICES } from '@/api/api-services'
 import { UserAuthForm } from './components/user-auth-form'
 import { toast } from '@/hooks/use-toast'
 import { AUTH_MESSAGES } from '@/features/auth/sign-in/data.ts'
+import { getTimeGreeting } from '@/helpers/get-time-greeting.ts'
+
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -35,8 +37,13 @@ export default function SignIn() {
       const response = await API_SERVICES.auth.fetchUser(userId)
       const user = response.data.data
       // console.log('login - index.tsx - fetched user', user.userId)
-
+ 
       queryClient.setQueryData(['authUser'], user)
+      toast({
+        variant: 'success',
+        title: 'Đăng nhập thành công!!',
+        description: `${getTimeGreeting()}, ${user.name}.`,
+      })
       navigate({ to: '/' })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.'

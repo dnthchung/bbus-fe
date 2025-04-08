@@ -1,7 +1,7 @@
 // src/routes/_authenticated/route.tsx
 import { useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate, redirect } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { useAuthQuery } from '@/hooks/use-auth'
@@ -33,18 +33,7 @@ function ProtectedRouteWithLayout() {
       <SidebarProvider defaultOpen={defaultOpen}>
         <SkipToMain />
         <AppSidebar />
-        <div
-          id='content'
-          className={cn(
-            'ml-auto w-full max-w-full',
-            'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
-            'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
-            'transition-[width] duration-200 ease-linear',
-            'flex h-svh flex-col',
-            'group-data-[scroll-locked=1]/body:h-full',
-            'group-data-[scroll-locked=1]/body:has-[main.fixed-main]:h-svh'
-          )}
-        >
+        <div id='content' className={cn('ml-auto w-full max-w-full', 'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]', 'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]', 'transition-[width] duration-200 ease-linear', 'flex h-svh flex-col', 'group-data-[scroll-locked=1]/body:h-full', 'group-data-[scroll-locked=1]/body:has-[main.fixed-main]:h-svh')}>
           {/* Các route con sẽ được render tại đây */}
           <Outlet />
         </div>
