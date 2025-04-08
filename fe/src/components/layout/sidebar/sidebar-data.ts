@@ -33,7 +33,6 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Quản lý tuyến đường',
-          // icon: IconBusStop,
           icon: Route,
           items: [
             { title: 'DS tuyến đường', url: '/transportation/routes', icon: MapPinPlus },
@@ -41,7 +40,6 @@ export const sidebarData: SidebarData = {
             { title: 'DS các điểm dừng', url: '/transportation/checkpoints', icon: IconBusStop },
           ],
         },
-        // thêm quản lý danh sách xe bus
         {
           title: 'Quản lý xe bus',
           icon: IconBus,
@@ -68,7 +66,6 @@ export const sidebarData: SidebarData = {
           icon: IconSettings,
           items: [
             { title: 'Hồ sơ', url: '/settings', icon: IconUserCog },
-            // { title: 'Tài khoản', url: '/settings/account', icon: IconTool },
             {
               title: 'Giao diện',
               url: '/settings/appearance',

@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/common/password-input'
 import { AUTH_MESSAGES } from '@/features/auth/sign-in/data'
 
-// ✅ Define the validation schema using zod (only phone and password)
 const formSchema = z.object({
   phone: z
     .string()
@@ -22,7 +21,6 @@ const formSchema = z.object({
   password: z.string().min(1, { message: 'Vui lòng nhập mật khẩu' }).min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' }),
 })
 
-// ✅ Omit the native onSubmit from HTMLAttributes to avoid type conflicts
 export interface UserAuthFormProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSubmit'> {
   onSubmit?: (data: z.infer<typeof formSchema>) => void
   isLoading?: boolean
@@ -38,7 +36,6 @@ export function UserAuthForm({ className, onSubmit, isLoading = false, error, ..
     },
   })
 
-  // ✅ Handle form submission
   function onSubmitHandler(data: z.infer<typeof formSchema>) {
     if (onSubmit) {
       onSubmit(data)
@@ -52,7 +49,6 @@ export function UserAuthForm({ className, onSubmit, isLoading = false, error, ..
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmitHandler)}>
           <div className='grid gap-2'>
-            {/* ✅ Phone Number Field */}
             <FormField
               control={form.control}
               name='phone'
@@ -67,7 +63,6 @@ export function UserAuthForm({ className, onSubmit, isLoading = false, error, ..
               )}
             />
 
-            {/* ✅ Password Field */}
             <FormField
               control={form.control}
               name='password'
@@ -87,20 +82,11 @@ export function UserAuthForm({ className, onSubmit, isLoading = false, error, ..
               )}
             />
 
-            {/* ✅ Submit Button */}
             <Button className='mt-2' disabled={isLoading}>
               Đăng nhập
             </Button>
 
-            {/* ✅ Error Message */}
-            {/* {error && <p className='text-sm text-red-500'>{error}</p>} */}
-            {error && (
-              <p className='text-sm text-red-500'>
-                {Object.values(AUTH_MESSAGES).includes(error) 
-                  ? error 
-                  : AUTH_MESSAGES.UNAUTHORIZED}
-              </p>
-            )}
+            {error && <p className='text-sm text-red-500'>{Object.values(AUTH_MESSAGES).includes(error) ? error : AUTH_MESSAGES.UNAUTHORIZED}</p>}
           </div>
         </form>
       </Form>

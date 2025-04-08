@@ -1,10 +1,10 @@
 // src/hooks/use-auth.ts
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { getTimeGreeting } from '@/helpers/get-time-greeting.ts'
 import { getUserIdFromToken } from '@/helpers/jwt-decode'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast.ts'
-import {getTimeGreeting} from '@/helpers/get-time-greeting.ts'
 
 // Định nghĩa kiểu AuthUser dựa trên cấu trúc trả về từ API
 interface AuthUser {
@@ -58,9 +58,9 @@ export const useAuthQuery = () => {
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('isAuthenticated')
       toast({
-        variant: "success",
-        title: "Đăng xuất thành công",
-        description: "Bạn đã đăng xuất khỏi hệ thống.",
+        variant: 'success',
+        title: 'Đăng xuất thành công',
+        description: 'Bạn đã đăng xuất khỏi hệ thống.',
       })
       navigate({ to: '/sign-in' })
       // window.location.href = '/sign-in'
@@ -91,30 +91,30 @@ export const useAuthQuery = () => {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('isAuthenticated')
-        
+
         // Show error message
         toast({
-          variant: "destructive",
-          title: "Từ chối truy cập",
-          description: "Tài khoản của bạn không có quyền truy cập hệ thống.",
+          variant: 'destructive',
+          title: 'Từ chối truy cập',
+          description: 'Tài khoản của bạn không có quyền truy cập hệ thống.',
         })
-        
+
         // Redirect to sign in
         // window.location.href = '/sign-in'
         navigate({ to: '/sign-in' })
         throw new Error('Unauthorized role')
       }
 
-      console.log('đăng nhập thành công:'  +  userData.role)
+      console.log('đăng nhập thành công:' + userData.role)
       toast({
-        variant: "success",
-        title: "Đăng nhập thành công!!",
+        variant: 'success',
+        title: 'Đăng nhập thành công!!',
         description: `${getTimeGreeting()}, ${userData.name}.`,
-      });
+      })
 
       return userData
     },
-    enabled: isAuthenticated && !!userId, 
+    enabled: isAuthenticated && !!userId,
     retry: false,
     staleTime: 5 * 60 * 1000,
   })
@@ -123,9 +123,9 @@ export const useAuthQuery = () => {
   if (isError && error instanceof Error && error.message.includes('JWT expired')) {
     // console.error('JWT expired detected, logging out...')
     toast({
-      variant: "deny",
-      title: "Từ chối truy cập",
-      description: "Phiên đăng nhập đã hết hạn.",
+      variant: 'deny',
+      title: 'Từ chối truy cập',
+      description: 'Phiên đăng nhập đã hết hạn.',
     })
     logout()
   }
