@@ -44,6 +44,12 @@ interface ApiServices {
     get_all: () => Promise<any>
     get_detail: (busId: string) => Promise<any>
   }
+  drivers: {
+    get_all: () => Promise<any>
+  }
+  assistants: {
+    get_all: () => Promise<any>
+  }
 }
 
 export const API_SERVICES: ApiServices = {
@@ -120,5 +126,17 @@ export const API_SERVICES: ApiServices = {
   buses: {
     get_all: () => apiClient.get(API_ENDPOINTS.BUSES.GET_ALL),
     get_detail: (busId: string) => apiClient.get(API_ENDPOINTS.BUSES.GET_DETAIL(busId)),
+  },
+  //--------------------------
+  // 8) Driver
+  //--------------------------
+  drivers: {
+    get_all: () => apiClient.get(API_ENDPOINTS.DRIVER.GET_ALL),
+  },
+  //--------------------------
+  // 9) Assistant
+  //--------------------------
+  assistants: {
+    get_all: () => apiClient.get(API_ENDPOINTS.ASSISTANT.GET_ALL),
   },
 }

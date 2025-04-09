@@ -14,12 +14,12 @@ export const busSchema = z.object({
   assistantId: z.string().uuid().nullable(),
   assistantName: z.string().nullable(),
   assistantPhone: z.string().nullable(),
+  amountOfStudents: z.number(),
   routeId: z.string().uuid().nullable(),
   routeCode: z.string().nullable(),
   espId: z.string().nullable(),
   cameraFacesluice: z.string().nullable(),
   busStatus: busStatusSchema,
-  amountOfStudents: z.number(),
 })
 
 export type Bus = z.infer<typeof busSchema>

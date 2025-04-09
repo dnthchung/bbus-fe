@@ -37,4 +37,10 @@ export const API_ENDPOINTS = {
     GET_ALL: '/bus/list',
     GET_DETAIL: (busId: string) => `/bus/${busId}`,
   },
+  DRIVER: {
+    GET_ALL: '/driver/list',
+  },
+  ASSISTANT: {
+    GET_ALL: '/assistant/list',
+  },
 } as const
