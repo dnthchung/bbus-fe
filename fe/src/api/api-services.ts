@@ -40,6 +40,10 @@ interface ApiServices {
       list: () => Promise<any>
     }
   }
+  buses: {
+    get_all: () => Promise<any>
+    get_detail: (busId: string) => Promise<any>
+  }
 }
 
 export const API_SERVICES: ApiServices = {
@@ -109,5 +113,12 @@ export const API_SERVICES: ApiServices = {
     checkpoints: {
       list: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
     },
+  },
+  //--------------------------
+  // 7) Bus
+  //--------------------------
+  buses: {
+    get_all: () => apiClient.get(API_ENDPOINTS.BUSES.GET_ALL),
+    get_detail: (busId: string) => apiClient.get(API_ENDPOINTS.BUSES.GET_DETAIL(busId)),
   },
 }

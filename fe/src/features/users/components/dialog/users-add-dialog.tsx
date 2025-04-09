@@ -246,7 +246,8 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
       }
 
       // Gọi API thêm người dùng mới với FormData
-      const response = await API_SERVICES.users.addOne(formData)
+      // const response = await API_SERVICES.users.addOne(formData)
+      await API_SERVICES.users.addOne(formData)
       // console.log("response => ", response)
       // console.log("formData", formData)
       // Đảm bảo gọi xong refreshUsers trước khi onSuccess

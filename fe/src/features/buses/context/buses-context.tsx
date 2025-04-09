@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { getAllBuses } from '@/features/buses/function'
+import { getAllBuses } from '@/features/buses/buses'
 import { Bus } from '@/features/buses/schema'
 
 // Hàm giả định để lấy danh sách buses

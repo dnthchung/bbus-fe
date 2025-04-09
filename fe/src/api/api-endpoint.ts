@@ -33,4 +33,8 @@ export const API_ENDPOINTS = {
       GET_ALL: '/checkpoints/list',
     },
   },
+  BUSES: {
+    GET_ALL: '/bus/list',
+    GET_DETAIL: (busId: string) => `/bus/${busId}`,
+  },
 } as const
