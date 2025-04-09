@@ -43,6 +43,7 @@ interface ApiServices {
   buses: {
     get_all: () => Promise<any>
     get_detail: (busId: string) => Promise<any>
+    update_status: (busId: string, status: string) => Promise<any>
   }
   drivers: {
     get_all: () => Promise<any>
@@ -123,9 +124,15 @@ export const API_SERVICES: ApiServices = {
   //--------------------------
   // 7) Bus
   //--------------------------
+  // In the buses section of API_SERVICES
   buses: {
     get_all: () => apiClient.get(API_ENDPOINTS.BUSES.GET_ALL),
     get_detail: (busId: string) => apiClient.get(API_ENDPOINTS.BUSES.GET_DETAIL(busId)),
+    update_status: (busId: string, status: string) =>
+      apiClient.patch(API_ENDPOINTS.BUSES.UPDATE_STATUS, {
+        id: busId,
+        status: status,
+      }),
   },
   //--------------------------
   // 8) Driver

@@ -36,6 +36,7 @@ export const API_ENDPOINTS = {
   BUSES: {
     GET_ALL: '/bus/list',
     GET_DETAIL: (busId: string) => `/bus/${busId}`,
+    UPDATE_STATUS: '/bus/status', // Updated to match the required endpoint
   },
   DRIVER: {
     GET_ALL: '/driver/list',

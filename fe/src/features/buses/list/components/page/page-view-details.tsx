@@ -3,16 +3,19 @@ import { useEffect, useState } from 'react'
 import { ArrowLeftIcon } from '@radix-ui/react-icons'
 import { useParams } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
+import { API_SERVICES } from '@/api/api-services'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { Badge } from '@/components/mine/badge'
-import { Status } from '@/components/mine/status'
-import { getBusById, getAllAssistants, getAllBuses } from '@/features/buses/buses'
-import { statusLabels } from '@/features/buses/data'
+import { getBusById } from '@/features/buses/buses'
+import { BasicInfoTab } from '@/features/buses/list/components/tab/basic-info-tab'
+import { DeviceInfoTab } from '@/features/buses/list/components/tab/device-info-tab'
+import DriverInfoTab from '@/features/buses/list/components/tab/driver-info-tab'
 import { Bus } from '@/features/buses/schema'
 
 export default function PageViewDetails() {
@@ -21,6 +24,7 @@ export default function PageViewDetails() {
   const [bus, setBus] = useState<Bus | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const [updatingStatus, setUpdatingStatus] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +48,38 @@ export default function PageViewDetails() {
 
   const handleBack = () => {
     navigate({ to: '/buses/list' })
+  }
+
+  const handleBusUpdate = (updatedBus: Bus) => {
+    setBus(updatedBus)
+    // Here you would typically call an API to update the bus in the backend
+  }
+
+  const handleStatusUpdate = async () => {
+    if (!bus || !id) return
+    try {
+      setUpdatingStatus(true)
+      const newStatus = bus.busStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+      await API_SERVICES.buses.update_status(id, newStatus)
+      setBus({
+        ...bus,
+        busStatus: newStatus,
+      })
+      toast({
+        title: 'Thành công',
+        description: newStatus === 'ACTIVE' ? 'Xe buýt đã được kích hoạt' : 'Xe buýt đã bị vô hiệu hóa',
+        variant: 'success',
+      })
+    } catch (err) {
+      console.error('Error updating bus status:', err)
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật trạng thái xe buýt',
+        variant: 'deny',
+      })
+    } finally {
+      setUpdatingStatus(false)
+    }
   }
 
   return (
@@ -79,9 +115,6 @@ export default function PageViewDetails() {
                 <p className='text-lg font-semibold'>Đã xảy ra lỗi</p>
                 <p>{error.message}</p>
               </div>
-              {/* <Button variant='outline' className='mt-4' onClick={() => fetchData()}>
-                Thử lại
-              </Button> */}
             </CardContent>
           </Card>
         ) : !bus ? (
@@ -94,91 +127,39 @@ export default function PageViewDetails() {
             </CardContent>
           </Card>
         ) : (
-          <div className='grid gap-6 md:grid-cols-2'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin cơ bản</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Tên xe buýt</p>
-                    <p className='font-medium'>{bus.name || 'Chưa có tên'}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Biển số xe</p>
-                    <p className='font-medium'>{bus.licensePlate || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Mã tuyến</p>
-                    <p className='font-medium'>{bus.routeCode || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Trạng thái</p>
-                    <Status color={bus.busStatus === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[bus.busStatus] || bus.busStatus}</Status>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Số học sinh</p>
-                    <p className='font-medium'>{bus.amountOfStudents}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <>
+            <Tabs defaultValue='basic' className='mb-6'>
+              <TabsList className='grid w-1/2 grid-cols-3'>
+                <TabsTrigger value='basic'>Thông tin cơ bản</TabsTrigger>
+                <TabsTrigger value='driver'>Thông tin tài xế và phụ xe</TabsTrigger>
+                <TabsTrigger value='device'>Thông tin thiết bị</TabsTrigger>
+              </TabsList>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin tài xế và phụ xe</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Tài xế</p>
-                    <p className='font-medium'>{bus.driverName || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>SĐT tài xế</p>
-                    <p className='font-medium'>{bus.driverPhone || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Phụ xe</p>
-                    <p className='font-medium'>{bus.assistantName || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>SĐT phụ xe</p>
-                    <p className='font-medium'>{bus.assistantPhone || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <TabsContent className='w-1/2' value='basic'>
+                <BasicInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
+              </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin thiết bị</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>GPS ID</p>
-                    <p className='font-medium'>{bus.espId || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Camera ID</p>
-                    <p className='font-medium'>{bus.cameraFacesluice || <Badge color='yellow'>Trống</Badge>}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <TabsContent value='driver'>
+                <DriverInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
+              </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Hành động</CardTitle>
-              </CardHeader>
-              <CardContent className='flex gap-2'>
-                <Button variant='outline'>Chỉnh sửa thông tin</Button>
-                <Button variant='destructive'>Vô hiệu hóa</Button>
-              </CardContent>
-            </Card>
-          </div>
+              <TabsContent className='w-1/2' value='device'>
+                <DeviceInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
+              </TabsContent>
+            </Tabs>
+
+            <div className='border-t pt-4'>
+              {bus.busStatus === 'ACTIVE' ? (
+                <Button variant='destructive' onClick={handleStatusUpdate} disabled={updatingStatus}>
+                  {updatingStatus ? 'Đang xử lý...' : 'Vô hiệu hóa'}
+                </Button>
+              ) : (
+                <Button variant='default' onClick={handleStatusUpdate} disabled={updatingStatus}>
+                  {updatingStatus ? 'Đang xử lý...' : 'Kích hoạt'}
+                </Button>
+              )}
+            </div>
+          </>
         )}
       </Main>
     </>
