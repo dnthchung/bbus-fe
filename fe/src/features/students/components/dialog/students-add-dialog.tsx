@@ -137,13 +137,12 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
       }
 
       const response = await API_SERVICES.students.addOne(newStudent)
-
       // Đảm bảo cập nhật danh sách học sinh trước
       await refreshStudents()
-
       toast({
         title: 'Thêm học sinh thành công',
         description: 'Học sinh mới đã được thêm vào hệ thống',
+        variant: 'success',
       })
 
       reset()
@@ -157,7 +156,7 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
       toast({
         title: `${error || 'Không thể thêm học sinh'}`,
         description: 'Đã xảy ra lỗi khi thêm học sinh mới. Vui lòng thử lại sau.',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setIsSubmitting(false)

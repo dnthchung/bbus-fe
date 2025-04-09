@@ -142,7 +142,7 @@ export async function getAllUsersExceptAdmins(): Promise<User[]> {
     console.error('Error getAllUsersExceptAdmins in users.ts:', error)
     throw error
   }
-}
+}  
 
 /**
  * Lấy tất cả người dùng có quyền SYSADMIN và ADMIN

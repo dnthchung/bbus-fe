@@ -43,7 +43,7 @@ import React, { useState, useEffect } from 'react'
 // Giả sử bạn có API getAllUsers() hoặc API_SERVICES.users.getAll(), tuỳ cài đặt
 import useDialogState from '@/hooks/use-dialog-state'
 import { User } from '../schema'
-import { getAllUsers } from '../users'
+import { getAllUsers, getAllAdminUsers , getAllUsersExceptAdmins } from '../users'
 
 // Giả sử bạn có hàm này để lấy danh sách users
 
@@ -89,8 +89,21 @@ export default function UsersProvider({ children }: Props) {
   const refreshUsers = async () => {
     try {
       setLoading(true)
-      const userData = await getAllUsers()
-      // const userData = response.data?.data || response.data || []
+      //get role from local storage
+      const role = localStorage.getItem('role')
+      let userData: User[] = [];
+      // Fetch users based on role
+      if (role === 'ADMIN') {
+        // ADMIN can see all users except those with ADMIN and SYSADMIN roles
+        userData = await getAllUsersExceptAdmins();
+      } else if (role === 'SYSADMIN') {
+        // SYSADMIN can see only users with ADMIN and SYSADMIN roles
+        userData = await getAllAdminUsers();
+      } else {
+        // Other roles can see all users
+        userData = await getAllUsers();
+      }
+      
       setUsers(userData)
       setError(null)
     } catch (err) {

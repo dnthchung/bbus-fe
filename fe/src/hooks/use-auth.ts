@@ -103,7 +103,7 @@ export const useAuthQuery = () => {
         navigate({ to: '/sign-in' })
         throw new Error('Unauthorized role')
       }
-      console.log('User data: =>', userData.role)
+      // console.log('User data: =>', userData.role)
       //save role to localStorage
       localStorage.setItem('role', userData.role)
 
