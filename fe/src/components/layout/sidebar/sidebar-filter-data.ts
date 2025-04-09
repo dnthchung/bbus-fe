@@ -15,7 +15,7 @@ function isNotNull<T>(item: T | null | undefined): item is T {
  * Lọc navGroups trong sidebar dựa theo role của user,
  * bằng cách kiểm tra map routePermissionMap.
  */
-export function filterSidebarData(): typeof sidebarData {
+export function sideBarFilterData(): typeof sidebarData {
   // Lấy user từ hook (lấy ra user.role)
   const { user } = useAuthQuery()
   // Nếu user chưa đăng nhập => tạm coi role = '' hoặc undefined

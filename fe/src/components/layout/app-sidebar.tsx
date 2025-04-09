@@ -3,11 +3,11 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } fr
 import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { TeamSwitcher } from '@/components/layout/team-switcher'
-import { filterSidebarData } from './sidebar/filterSidebarData'
+import { sideBarFilterData } from './sidebar/sidebar-filter-data'
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   // Gọi hàm filterSidebarData để lấy menu đã lọc
-  const filteredSidebarData = filterSidebarData()
+  const filteredSidebarData = sideBarFilterData()
 
   return (
     <Sidebar collapsible="icon" variant="floating" {...props}>
