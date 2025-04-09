@@ -1,33 +1,10 @@
-import {
-  IconBug,
-  IconHelp,
-  IconLayoutDashboard,
-  IconLockAccess,
-  IconPalette,
-  IconSettings,
-  IconUser,
-  IconUserCog,
-  IconUserOff,
-  IconUsers,
-  IconReport,
-  IconBusStop,
-  IconBus,
-  IconFlag,
-  IconNotification,
-} from '@tabler/icons-react'
+// src/components/layout/sidebar/sidebar-data.ts
+// (Vẫn giữ nguyên cấu trúc sidebarData)
 
+import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconUser, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification, } from '@tabler/icons-react'
 import { Bus, CalendarCheck, MapPinPlus, Route } from 'lucide-react'
-import {
-  type SidebarData,
-  type NavGroup,
-  type NavItem,
-  type NavCollapsible,
-  type NavLink,
-} from '@/components/layout/sidebar/sidebar-type'
+import { type SidebarData } from '@/components/layout/sidebar/sidebar-type'
 
-// ------------------------------
-// ❄️ Default sidebar definition
-// ------------------------------
 export const sidebarData: SidebarData = {
   user: {
     name: 'chung',
@@ -36,9 +13,9 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: 'Trường Liên cấp THCS & Tiểu học Tư thục Ngôi Sao Hà Nội',
+      name: 'Trường Liên cấp...',
       logo: Bus,
-      plan: 'BBus System ',
+      plan: 'BBus System',
     },
   ],
   navGroups: [
@@ -163,78 +140,4 @@ export const sidebarData: SidebarData = {
       ],
     },
   ],
-}
-
-// ------------------------------
-// 🔍 Type guard to avoid nulls
-// ------------------------------
-function isNotNull<T>(item: T | null | undefined): item is T {
-  return item !== null && item !== undefined
-}
-
-// ------------------------------
-// ✅ Role-based filtering
-// ------------------------------
-export function filterSidebarData(
-  permissions: ReturnType<typeof import('@/hooks/use-role-permissions').useRolePermissions>
-): SidebarData {
-  const {
-    canAccessUserManagement,
-    canAccessStudents,
-    canAccessTransportation,
-    canAccessReports,
-    canAccessBuses,
-  } = permissions
-
-  // 👇 Role-to-title mapping
-  const checkPermission = (title: string): boolean => {
-    if (title === 'Quản lý TK người dùng') return canAccessUserManagement
-    if (title === 'Quản lý học sinh') return canAccessStudents
-    if (title === 'Quản lý tuyến đường') return canAccessTransportation
-    if (title === 'Quản lý xe bus') return canAccessBuses
-    if (title === 'Quản lý báo cáo') return canAccessReports
-    return true
-  }
-
-  const filteredNavGroups: NavGroup[] = sidebarData.navGroups
-    .map((group): NavGroup | null => {
-      const filteredItems: NavItem[] = group.items
-        .map((item): NavItem | null => {
-          // Nếu là collapsible
-          if ('items' in item && Array.isArray(item.items)) {
-            const filteredSubItems = item.items.filter((subItem) =>
-              checkPermission(subItem.title)
-            )
-
-            if (filteredSubItems.length === 0) return null
-
-            // Trả về NavCollapsible (phải loại bỏ `url`)
-            const collapsible: NavCollapsible = {
-              title: item.title,
-              icon: item.icon,
-              badge: item.badge,
-              items: filteredSubItems,
-            }
-
-            return collapsible
-          }
-
-          // Nếu là NavLink
-          return checkPermission(item.title) ? item as NavLink : null
-        })
-        .filter(isNotNull)
-
-      if (filteredItems.length === 0) return null
-
-      return {
-        ...group,
-        items: filteredItems,
-      }
-    })
-    .filter(isNotNull)
-
-  return {
-    ...sidebarData,
-    navGroups: filteredNavGroups,
-  }
 }
