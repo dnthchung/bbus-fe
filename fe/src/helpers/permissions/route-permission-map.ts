@@ -6,7 +6,7 @@
  * Value là mảng các role được phép truy cập.
  */
 export const routePermissionMap: Record<string, string[]> = {
-    '/users': ['SYSADMIN'],
+    '/users': ['SYSADMIN','ADMIN'],
     
     //=====================================//
     '/students': ['ADMIN'],

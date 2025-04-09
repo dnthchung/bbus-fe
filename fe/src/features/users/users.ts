@@ -113,3 +113,61 @@ export async function getParentIdByGetEntityByUserId(userId: string): Promise<Us
     throw error
   }
 }
+
+// ... existing code ...
+
+/**
+ * Lấy tất cả người dùng ngoại trừ SYSADMIN và ADMIN
+ * @returns Danh sách người dùng không có quyền SYSADMIN và ADMIN
+ */
+export async function getAllUsersExceptAdmins(): Promise<User[]> {
+  try {
+    const response = await API_SERVICES.users.list()
+    const rawData = response.data
+    const rawUsers = rawData?.data?.users
+    
+    if (!rawUsers) {
+      return []
+    }
+
+    // Lọc danh sách user không có role là "SYSADMIN" hoặc "ADMIN"
+    const filteredUsers = rawUsers.filter(
+      (user: User) => user.role !== 'SYSADMIN' && user.role !== 'ADMIN'
+    )
+    
+    // Parse & validate với Zod
+    const parsedUsers = userListSchema.parse(filteredUsers)
+    return parsedUsers
+  } catch (error) {
+    console.error('Error getAllUsersExceptAdmins in users.ts:', error)
+    throw error
+  }
+}
+
+/**
+ * Lấy tất cả người dùng có quyền SYSADMIN và ADMIN
+ * @returns Danh sách người dùng có quyền SYSADMIN và ADMIN
+ */
+export async function getAllAdminUsers(): Promise<User[]> {
+  try {
+    const response = await API_SERVICES.users.list()
+    const rawData = response.data
+    const rawUsers = rawData?.data?.users
+    
+    if (!rawUsers) {
+      return []
+    }
+
+    // Lọc danh sách user có role là "SYSADMIN" hoặc "ADMIN"
+    const adminUsers = rawUsers.filter(
+      (user: User) => user.role === 'SYSADMIN' || user.role === 'ADMIN'
+    )
+    
+    // Parse & validate với Zod
+    const parsedUsers = userListSchema.parse(adminUsers)
+    return parsedUsers
+  } catch (error) {
+    console.error('Error getAllAdminUsers in users.ts:', error)
+    throw error
+  }
+}

@@ -5,5 +5,5 @@ import { withRoleRoute } from '@/guards/with-role-route'
 
 
 export const Route = createLazyFileRoute('/_authenticated/users/')({
-  component: withRoleRoute(Users, ['SYSADMIN']),
+  component: withRoleRoute(Users, ['SYSADMIN','ADMIN']),
 })

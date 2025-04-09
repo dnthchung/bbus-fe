@@ -1,65 +1,89 @@
-### 1) Có cần thiết phải dùng `withRoleRoute()` không?
+# Role-Based Access Control Guide
 
-- **Nếu chỉ ẩn/hiện menu** (tức không cho hiển thị các tính năng ở sidebar) nhưng **vẫn cho phép** người dùng gõ URL trực tiếp để truy cập, thì **không cần** bọc `withRoleRoute()`.  
-- **Nếu muốn chặn hẳn** (người không có quyền gõ URL vẫn bị chặn), thì **cần** bọc route với `withRoleRoute()`.  
+## Configuration Files
+To manage role-based permissions in the application:
 
-> Thông thường, để bảo mật thực sự, bạn **nên** dùng cả 2:  
-> 1. _Filter sidebar_ để tránh hiển thị menu cho user không đủ quyền.  
-> 2. _Bọc route bằng `withRoleRoute()`_ để chặn truy cập URL trực tiếp.
+1. **Permission Map**: 
+   - Location: `src/permissions/routePermissionMap.ts`
+   - Example: `'/users': ['SYSADMIN','ADMIN']`
 
-Bạn có thể tuỳ nhu cầu thực tế mà quyết định. Nếu tính năng không quan trọng hoặc vai trò “cũng được vào” thì chỉ cần ẩn menu (cho gọn). Nếu là tính năng quan trọng, bạn nên `withRoleRoute()` để chặn hẳn.
-
----
-
-### 2) Tóm gọn luồng hoạt động của **auth + role** đã triển khai
-
-Dưới đây là bản tóm tắt 5 bước của dòng chảy **phân quyền** trong dự án của bạn:
-
-1. **Đăng nhập** (Sign-in)  
-   - Khi người dùng đăng nhập, backend trả về `accessToken` (có chứa role).  
-   - Lưu `accessToken` vào localStorage (cùng với `refreshToken`, cờ `isAuthenticated`, v.v.).
-
-2. **Lấy thông tin user** (`useAuthQuery`)  
-   - Bên front, bạn có `useAuthQuery` để giải mã token (xem userId, role, v.v.).  
-   - Gửi request `API_SERVICES.auth.fetchUser(userId)` lấy chi tiết user.  
-   - Nếu user không có quyền (không khớp vai trò “ADMIN” hay “SYSADMIN”), bạn xóa token, báo lỗi, và điều hướng về `/sign-in`.
-
-3. **Filter sidebar** (`filterSidebarData`)  
-   - Trong `AppSidebar`, bạn gọi `filterSidebarData()`.  
-   - Hàm `filterSidebarData()` sẽ lấy `userRole` và duyệt qua cấu trúc menu gốc.  
-   - Với mỗi menu item, nó gọi `hasAccessByUrl(item.url, userRole)` để quyết định ẩn/hiện.  
-   - `hasAccessByUrl` tra cứu `routePermissionMap`.  
-     - Nếu URL đó **không** nằm trong `routePermissionMap`, ta mặc định cho hiển thị.  
-     - Nếu có, nó so sánh `userRole ===` một trong các role được cấp phép.  
-       - **Khớp** => hiển thị  
-       - **Không khớp** => ẩn.
-
-4. **Hiển thị giao diện**  
-   - Kết quả: user chỉ thấy được những menu mà `hasAccessByUrl()` cho phép.  
-   - Nếu item là **collapsible** (có `items`), bạn cẩn thận **không** gán `url` cho nó (theo đúng kiểu `NavCollapsible`).  
-   - Nếu item là link (không có `items`), thì **bắt buộc** phải có `url` (theo kiểu `NavLink`).
-
-5. **Chặn truy cập trực tiếp** (nếu dùng `withRoleRoute`)  
-   - Khi user bấm vào URL (hoặc gõ trực tiếp), nếu file route của bạn bọc `withRoleRoute(Component, [...roles])`, thì code bên trong `withRoleRoute` sẽ:  
-     - Lấy role user  
-     - Kiểm tra `roles` cho phép.  
-     - Nếu user không thuộc mảng role => toast “Từ chối truy cập” và chuyển hướng.  
-   - Nếu **không** bọc, route sẽ **mở** cho bất kỳ user (miễn đăng nhập) truy cập.
-
-**Kết quả**:  
-- Nếu **chỉ filter sidebar** và KHÔNG dùng `withRoleRoute`, người dùng sẽ **không thấy** menu, nhưng **vẫn** truy cập được qua URL nếu họ biết đường dẫn.  
-- Nếu muốn “chặn” cả URL, hãy bọc `withRoleRoute`.
+2. **Protected Routes**:
+   - Location: `routes/_authenticated/...` files
+   - Example: `component: withRoleRoute(Users, ['SYSADMIN','ADMIN'])`
 
 ---
 
-### 3) Lời khuyên tóm tắt
+## Hướng dẫn triển khai
 
-- **Luôn** dùng `filterSidebarData()` để ẩn menu => giao diện “gọn gàng”.  
-- **Bổ sung** `withRoleRoute()` cho những route quan trọng => bảo mật thật sự.  
-- Tránh dùng `userRole.includes(...)` nếu bạn không cố tình muốn `'SYSADMIN'` match `'ADMIN'`. Hãy so sánh chặt `===` hoặc tách mảng.  
-- Kiểm tra cẩn thận chuỗi role trả về từ server xem nó là `'ADMIN'`, `'SYSADMIN'`, hay `'ROLE_ADMIN'`, `'ROLE_SYSADMIN'`,…
+### 1️⃣ Khi nào cần dùng `withRoleRoute()`
 
-Vậy là bạn đã có giải pháp phân quyền hoàn chỉnh:  
-1. Lấy user & role qua `useAuthQuery`.  
-2. Xây dựng sidebar với `filterSidebarData + routePermissionMap`.  
-3. Dùng `withRoleRoute` để chặn truy cập URL nếu cần.
+| Cách tiếp cận | Trường hợp sử dụng | Triển khai |
+|----------|----------|----------------|
+| **Chỉ lọc menu** | Ẩn các mục sidebar nhưng cho phép truy cập URL trực tiếp | Không dùng `withRoleRoute()` |
+| **Bảo vệ hoàn toàn** | Chặn người dùng không có quyền truy cập qua URL | Sử dụng `withRoleRoute()` |
+
+> 💡 **Thực hành tốt nhất**: Để bảo mật thực sự, bạn **nên** dùng cả 2:  
+> - Lọc các mục sidebar để duy trì giao diện gọn gàng
+> - Sử dụng `withRoleRoute()` để ngăn chặn truy cập trực tiếp trái phép
+
+Lựa chọn dựa trên yêu cầu của bạn - chỉ lọc menu cho các tính năng ít quan trọng, và thêm `withRoleRoute()` cho các khu vực nhạy cảm.
+
+---
+
+### 2️⃣ Luồng xác thực & phân quyền
+
+Kiểm soát truy cập dựa trên vai trò tuân theo 5 bước sau:
+
+#### Bước 1: Đăng nhập
+- Người dùng đăng nhập → Backend trả về `accessToken` chứa thông tin vai trò
+- Frontend lưu token trong localStorage (`accessToken`, `refreshToken`, cờ `isAuthenticated`)
+
+#### Bước 2: Lấy thông tin người dùng
+- Frontend sử dụng `useAuthQuery` để giải mã token (trích xuất userId, role)
+- Gọi `API_SERVICES.auth.fetchUser(userId)` để lấy thông tin chi tiết người dùng
+- Nếu người dùng thiếu quyền thích hợp (không phải "ADMIN" hoặc "SYSADMIN"), token sẽ bị xóa và người dùng được chuyển hướng đến `/sign-in`
+
+#### Bước 3: Lọc sidebar
+- `AppSidebar` gọi `filterSidebarData()` với vai trò người dùng hiện tại
+- Với mỗi mục menu, `hasAccessByUrl(item.url, userRole)` xác định khả năng hiển thị
+- `hasAccessByUrl` kiểm tra đối chiếu với `routePermissionMap`:
+  - Nếu URL không có trong map → Hiển thị mặc định
+  - Nếu URL có trong map → So sánh vai trò người dùng với các vai trò được phép
+    - Khớp → Hiển thị mục
+    - Không khớp → Ẩn mục
+
+#### Bước 4: Hiển thị giao diện
+- Người dùng chỉ thấy các mục menu được phép bởi `hasAccessByUrl()`
+- Các mục có thể thu gọn (có thuộc tính `items`) không nên có thuộc tính `url`
+- Các mục liên kết (không có thuộc tính `items`) phải có thuộc tính `url`
+
+#### Bước 5: Ngăn chặn truy cập trực tiếp
+- Khi sử dụng `withRoleRoute(Component, [...roles])`:
+  - Lấy vai trò người dùng
+  - Kiểm tra đối chiếu với các vai trò được phép
+  - Nếu không được phép → Hiển thị thông báo "Từ chối truy cập" và chuyển hướng
+- Không có `withRoleRoute`, bất kỳ người dùng đã xác thực nào cũng có thể truy cập route
+
+**Kết quả**:
+- Chỉ lọc menu → Các mục bị ẩn nhưng URL vẫn có thể truy cập nếu biết
+- Với `withRoleRoute` → Bảo vệ hoàn toàn khỏi truy cập trái phép
+
+---
+
+### 3️⃣ Tóm tắt các thực hành tốt nhất
+
+✅ **Luôn sử dụng `filterSidebarData()`** để có giao diện người dùng gọn gàng, phù hợp với vai trò
+
+✅ **Thêm `withRoleRoute()`** cho các route quan trọng yêu cầu kiểm soát truy cập nghiêm ngặt
+
+⚠️ **Tránh `userRole.includes(...)`** trừ khi bạn cố ý muốn khớp chuỗi con (ví dụ: 'SYSADMIN' khớp với 'ADMIN')
+
+🔍 **Xác minh chuỗi vai trò** từ server ('ADMIN' vs 'SYSADMIN' vs 'ROLE_ADMIN')
+
+---
+
+## Giải pháp hoàn chỉnh
+
+1. Lấy thông tin người dùng & vai trò qua `useAuthQuery`
+2. Xây dựng sidebar với `filterSidebarData` + `routePermissionMap`
+3. Bảo vệ các route với `withRoleRoute` khi cần thiết

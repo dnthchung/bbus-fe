@@ -104,6 +104,9 @@ export const useAuthQuery = () => {
         throw new Error('Unauthorized role')
       }
       console.log('User data: =>', userData.role)
+      //save role to localStorage
+      localStorage.setItem('role', userData.role)
+
       return userData
     },
     enabled: isAuthenticated && !!userId,
