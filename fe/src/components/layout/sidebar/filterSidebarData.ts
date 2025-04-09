@@ -1,7 +1,7 @@
 // src/components/layout/sidebar/filterSidebarData.ts
 import { sidebarData } from './sidebar-data'
 import { NavGroup, NavItem, NavCollapsible, NavLink } from '@/components/layout/sidebar/sidebar-type'
-import { hasAccessByUrl } from '@/permissions/hasAccessByUrl'
+import { hasAccessByUrl } from '@/helpers/permissions/has-access-by-url'
 import { useAuthQuery } from '@/hooks/use-auth'
 
 /**

@@ -1,5 +1,5 @@
 // src/permissions/hasAccessByUrl.ts
-import { routePermissionMap } from '@/permissions/routePermissionMap'
+import { routePermissionMap } from '@/helpers/permissions/route-permission-map'
 
 /**
  * Kiểm tra 1 URL xem role hiện tại có được phép truy cập không
