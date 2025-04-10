@@ -44,6 +44,7 @@ interface ApiServices {
     get_all: () => Promise<any>
     get_detail: (busId: string) => Promise<any>
     update_status: (busId: string, status: string) => Promise<any>
+    update_max_capacity_for_all: (params: { maxCapacity: number; checkpointId?: string }) => Promise<any>
   }
   drivers: {
     get_all: () => Promise<any>
@@ -133,6 +134,11 @@ export const API_SERVICES: ApiServices = {
         id: busId,
         status: status,
       }),
+    update_max_capacity_for_all: (params: { maxCapacity: number }) => {
+      const url = new URL(API_ENDPOINTS.BUSES.UPDATE_MAX_CAPACITY_FOR_ALL, import.meta.env.VITE_API_URL_BBUS)
+      url.searchParams.append('maxCapacity', params.maxCapacity.toString())
+      return apiClient.post(url.pathname + url.search)
+    },
   },
   //--------------------------
   // 8) Driver

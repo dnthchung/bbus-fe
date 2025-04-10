@@ -1,17 +1,16 @@
-//path : fe/src/features/buses/list/components/dialog/buses-edit-capacity.tsx
 'use client'
 
+//path : fe/src/features/buses/list/components/dialog/buses-edit-capacity.tsx
 import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-
-//path : fe/src/features/buses/list/components/dialog/buses-edit-capacity.tsx
 
 const formSchema = z.object({
   amountOfStudent: z.number({ invalid_type_error: 'Phải là số' }).min(0, 'Số học sinh không thể nhỏ hơn 0'),
@@ -40,11 +39,15 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
   const handleFormSubmit = async (values: CapacityForm) => {
     try {
       setIsSubmitting(true)
-      onSubmit(values.amountOfStudent)
+      
+      // Call the API to update capacity for all buses
+      await API_SERVICES.buses.update_max_capacity_for_all({
+        maxCapacity: values.amountOfStudent,
+      })
 
       toast({
         title: 'Đã cập nhật số học sinh',
-        description: `Số lượng học sinh đã được chỉnh sửa thành ${values.amountOfStudent}.`,
+        description: `Số lượng học sinh tối đa đã được chỉnh sửa thành ${values.amountOfStudent}.`,
         variant: 'success',
       })
 
@@ -73,7 +76,7 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle>Chỉnh sửa số học sinh</DialogTitle>
-          <DialogDescription>Nhập số lượng học sinh được phép lên xe.</DialogDescription>
+          <DialogDescription>Nhập số lượng học sinh tối đa cho tất cả xe buýt.</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -83,7 +86,7 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
               name='amountOfStudent'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Số học sinh</FormLabel>
+                  <FormLabel>Số học sinh tối đa</FormLabel>
                   <FormControl>
                     <Input type='number' min={0} placeholder='Nhập số học sinh' {...field} value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} />
                   </FormControl>
@@ -91,6 +94,7 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
                 </FormItem>
               )}
             />
+
             <DialogFooter>
               <Button type='submit' disabled={isSubmitting}>
                 {isSubmitting ? 'Đang lưu...' : 'Lưu'}
