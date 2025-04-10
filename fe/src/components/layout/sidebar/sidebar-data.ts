@@ -1,7 +1,6 @@
 // src/components/layout/sidebar/sidebar-data.ts
 // (Vẫn giữ nguyên cấu trúc sidebarData)
-
-import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconUser, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification, } from '@tabler/icons-react'
+import { IconBug, IconHelp, IconLayoutDashboard, IconLockAccess, IconPalette, IconSettings, IconUser, IconUserCog, IconUserOff, IconUsers, IconReport, IconBusStop, IconBus, IconFlag, IconNotification } from '@tabler/icons-react'
 import { Bus, CalendarCheck, MapPinPlus, Route } from 'lucide-react'
 import { type SidebarData } from '@/components/layout/sidebar/sidebar-type'
 
@@ -82,6 +81,11 @@ export const sidebarData: SidebarData = {
               title: 'DS xe bus',
               url: '/buses/list',
               icon: IconBus,
+            },
+            {
+              title: 'Lịch trình xe bus',
+              url: '/buses/schedule',
+              icon: MapPinPlus,
             },
           ],
         },
