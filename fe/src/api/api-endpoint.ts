@@ -24,6 +24,9 @@ export const API_ENDPOINTS = {
     GET_ONE: (studentId: string) => `/student/${studentId}`,
     DELETE_ONE: (studentId: string) => `/student/del/${studentId}`,
     UPDATE: () => `/student/upd`,
+    UPDATE_STATUS: '/student/change-status',
+    GET_STUDENT_LIST: '/student/list',
+    GET_STUDENT_LIST_BY_ENTITY_ID: (entityId: string) => `/student/list/${entityId}`,
   },
   PARENTS: {
     GET_PARENT_LIST: '/parent/list',

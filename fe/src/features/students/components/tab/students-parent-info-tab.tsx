@@ -1,96 +1,100 @@
 'use client'
 
-import { useFormContext } from 'react-hook-form'
-import { User, Mail, MapPin, Phone } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { FormField, FormItem, FormControl, FormLabel, FormMessage } from '@/components/ui/form'
-import { genderLabels } from '../../data/data'
+import { useState } from 'react'
+import { toast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/mine/badge'
 import type { Student } from '../../data/schema'
-import type { StudentForm } from '../page/students-edit-view-page'
 import { ParentSelectionTable } from './parent-selection-table'
 
 interface StudentsParentInfoTabProps {
-  displayData: Student
-  isEditing: boolean
+  student: Student
+  onStudentUpdate: (updatedStudent: Student) => void
 }
 
-export function StudentsParentInfoTab({ displayData, isEditing }: StudentsParentInfoTabProps) {
-  const { control } = useFormContext<StudentForm>()
+export function StudentsParentInfoTab({ student, onStudentUpdate }: StudentsParentInfoTabProps) {
+  const [editing, setEditing] = useState(false)
+  const [selectedParentId, setSelectedParentId] = useState(student.parentId || '')
 
-  // Function to render edit form fields
-  const renderEditForm = () => (
-    <>
-      <Card>
-        <CardContent className='pt-6'>
-          <h4 className='mb-4 text-sm font-semibold'>Thông tin phụ huynh</h4>
-          <FormField
-            control={control}
-            name='parentId'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phụ huynh</FormLabel>
-                <FormControl>
-                  <ParentSelectionTable />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </CardContent>
-      </Card>
-    </>
+  const handleParentSelect = (parentId: string) => {
+    setSelectedParentId(parentId)
+  }
+
+  const handleSave = async () => {
+    try {
+      const updatedStudent = { ...student, parentId: selectedParentId }
+      onStudentUpdate(updatedStudent)
+      toast({
+        title: 'Thành công',
+        description: 'Đã cập nhật thông tin phụ huynh',
+        variant: 'success',
+      })
+      setEditing(false)
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật thông tin phụ huynh',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleCancel = () => {
+    setSelectedParentId(student.parentId || '')
+    setEditing(false)
+  }
+
+  return (
+    <div className='mt-5 space-y-1'>
+      <div className='mb-4 flex w-1/2 items-center justify-between'>
+        <h3 className='text-lg font-medium'>Thông tin phụ huynh</h3>
+        {editing ? (
+          <div className='space-x-2'>
+            <Button variant='outline' size='sm' onClick={handleCancel}>
+              Hủy
+            </Button>
+            <Button size='sm' onClick={handleSave}>
+              Lưu
+            </Button>
+          </div>
+        ) : (
+          <Button variant='outline' size='sm' onClick={() => setEditing(true)}>
+            Chỉnh sửa
+          </Button>
+        )}
+      </div>
+
+      {editing ? (
+        <div className='w-1/2 rounded-md border p-4'>
+          <ParentSelectionTable initialParentId={student.parentId} onParentSelect={handleParentSelect} />
+        </div>
+      ) : (
+        <div className='w-1/2 overflow-hidden rounded-md border text-sm'>
+          {/* Tên phụ huynh */}
+          <div className='flex border-b'>
+            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Tên phụ huynh</div>
+            <div className='flex-1 px-4 py-3'>{student.parent?.name || <Badge color='yellow'>Chưa có</Badge>}</div>
+          </div>
+
+          {/* Email */}
+          <div className='flex border-b'>
+            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Email</div>
+            <div className='flex-1 px-4 py-3'>{student.parent?.email || <Badge color='yellow'>Không có</Badge>}</div>
+          </div>
+
+          {/* Số điện thoại */}
+          <div className='flex border-b'>
+            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Số điện thoại</div>
+            <div className='flex-1 px-4 py-3'>{student.parent?.phone || <Badge color='yellow'>Chưa có</Badge>}</div>
+          </div>
+
+          {/* Địa chỉ */}
+          <div className='flex'>
+            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</div>
+            <div className='flex-1 px-4 py-3'>{student.parent?.address || <Badge color='yellow'>Không có</Badge>}</div>
+          </div>
+        </div>
+      )}
+    </div>
   )
-
-  // Function to render view mode
-  const renderViewMode = () => (
-    <>
-      <Card>
-        <CardContent className='pt-6'>
-          <h4 className='mb-4 text-sm font-semibold'>Thông tin phụ huynh</h4>
-          {displayData.parent ? (
-            <dl className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-              <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                  <User className='mr-2 h-4 w-4 text-muted-foreground' />
-                  Tên phụ huynh
-                </dt>
-                <dd className='mt-1 text-base'>{displayData.parent.name}</dd>
-              </div>
-              <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                  <Phone className='mr-2 h-4 w-4 text-muted-foreground' />
-                  Số điện thoại
-                </dt>
-                <dd className='mt-1 text-base'>{displayData.parent.phone}</dd>
-              </div>
-              <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                  <Mail className='mr-2 h-4 w-4 text-muted-foreground' />
-                  Email
-                </dt>
-                <dd className='mt-1 text-base'>{displayData.parent.email}</dd>
-              </div>
-              <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                <dt className='flex items-center text-sm font-medium text-muted-foreground'>Giới tính</dt>
-                <dd className='mt-1 text-base'>{genderLabels[displayData.parent.gender as keyof typeof genderLabels]}</dd>
-              </div>
-              <div className='group col-span-2 rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                  <MapPin className='mr-2 h-4 w-4 text-muted-foreground' />
-                  Địa chỉ
-                </dt>
-                <dd className='mt-1 text-base'>{displayData.parent.address}</dd>
-              </div>
-            </dl>
-          ) : (
-            <div className='rounded-md p-4 text-center'>
-              <p className='text-muted-foreground'>Chưa có thông tin phụ huynh</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </>
-  )
-
-  return <div>{isEditing ? renderEditForm() : renderViewMode()}</div>
 }

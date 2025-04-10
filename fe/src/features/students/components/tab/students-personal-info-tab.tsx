@@ -1,191 +1,167 @@
 'use client'
 
-//path : fe/src/features/students/components/tab/students-personal-info-tab.tsx
-import { format } from 'date-fns'
-import { useFormContext } from 'react-hook-form'
-import { Calendar, User, CheckCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { FormField, FormItem, FormControl, FormLabel, FormMessage } from '@/components/ui/form'
+import { useState } from 'react'
+import { toast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { SelectDropdown } from '@/components/common/select-dropdown'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/mine/badge'
+import { Status } from '@/components/mine/status'
 import { genderLabels, statusLabels } from '../../data/data'
 import type { Student } from '../../data/schema'
-import type { StudentForm } from '../page/students-edit-view-page'
 
 interface StudentsPersonalInfoTabProps {
-  displayData: Student
-  isEditing: boolean
+  student: Student
+  onStudentUpdate: (updatedStudent: Student) => void
   formatDate: (date: Date | string | undefined) => string
 }
 
-export function StudentsPersonalInfoTab({ displayData, isEditing, formatDate }: StudentsPersonalInfoTabProps) {
-  const { control } = useFormContext<StudentForm>()
+export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }: StudentsPersonalInfoTabProps) {
+  const [editing, setEditing] = useState(false)
+  const [formData, setFormData] = useState({
+    name: student.name || '',
+    dob: student.dob || '',
+    address: student.address || '',
+    gender: student.gender || 'MALE',
+    status: student.status || 'ACTIVE',
+    rollNumber: student.rollNumber || '',
+  })
 
-  // Function to render edit form fields
-  const renderEditForm = () => (
-    <>
-      <Card>
-        <CardContent className='pt-6'>
-          <h4 className='mb-4 text-sm font-semibold'>Thông tin cá nhân</h4>
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-            {/* Left Column - Personal Info fields */}
-            <div className='space-y-4'>
-              {/* Họ và tên */}
-              <FormField
-                control={control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Họ và tên</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Nguyễn Văn A' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Ngày sinh */}
-              <FormField
-                control={control}
-                name='dob'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ngày sinh</FormLabel>
-                    <FormControl>
-                      <Input type='date' value={field.value instanceof Date ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Địa chỉ */}
-              <FormField
-                control={control}
-                name='address'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Địa chỉ</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Nhập địa chỉ' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Right Column - Additional Info fields */}
-            <div className='space-y-4'>
-              {/* Giới tính */}
-              <FormField
-                control={control}
-                name='gender'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Giới tính</FormLabel>
-                    <FormControl>
-                      <SelectDropdown
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
-                        placeholder='Chọn giới tính'
-                        items={Object.entries(genderLabels).map(([key, label]) => ({
-                          label,
-                          value: key,
-                        }))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Trạng thái */}
-              <FormField
-                control={control}
-                name='status'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Trạng thái</FormLabel>
-                    <FormControl>
-                      <SelectDropdown
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
-                        placeholder='Chọn trạng thái'
-                        items={Object.entries(statusLabels).map(([key, label]) => ({
-                          label,
-                          value: key,
-                        }))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleGenderChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, gender: value as Student['gender'] }))
+  }
+
+  const handleStatusChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, status: value as Student['status'] }))
+  }
+
+  const handleSave = async () => {
+    try {
+      const updatedStudent = { ...student, ...formData }
+      onStudentUpdate(updatedStudent)
+      toast({
+        title: 'Thành công',
+        description: 'Đã cập nhật thông tin cá nhân',
+        variant: 'success',
+      })
+      setEditing(false)
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật thông tin cá nhân',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleCancel = () => {
+    setFormData({
+      name: student.name || '',
+      dob: student.dob || '',
+      address: student.address || '',
+      gender: student.gender || 'MALE',
+      status: student.status || 'ACTIVE',
+      rollNumber: student.rollNumber || '',
+    })
+    setEditing(false)
+  }
+
+  return (
+    <div className='mt-5 space-y-1'>
+      <div className='mb-4 flex items-center justify-between'>
+        <h3 className='text-lg font-medium'>Thông tin cá nhân</h3>
+        {editing ? (
+          <div className='space-x-2'>
+            <Button variant='outline' size='sm' onClick={handleCancel}>
+              Hủy
+            </Button>
+            <Button size='sm' onClick={handleSave}>
+              Lưu
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-    </>
-  )
+        ) : (
+          <Button variant='outline' size='sm' onClick={() => setEditing(true)}>
+            Chỉnh sửa
+          </Button>
+        )}
+      </div>
 
-  // Function to render view mode
-  const renderViewMode = () => (
-    <>
-      <Card>
-        <CardContent className='pt-6'>
-          <h4 className='mb-4 text-sm font-semibold'>Thông tin cá nhân</h4>
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-            {/* Left Column - Personal Info */}
-            <div>
-              <dl className='grid grid-cols-1 gap-4'>
-                <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                  <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                    <User className='mr-2 h-4 w-4 text-muted-foreground' />
-                    Họ và tên
-                  </dt>
-                  <dd className='mt-1 text-base font-medium'>{displayData.name}</dd>
-                </div>
-                <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                  <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                    <Calendar className='mr-2 h-4 w-4 text-muted-foreground' />
-                    Ngày sinh
-                  </dt>
-                  <dd className='mt-1 text-base'>{formatDate(displayData.dob)}</dd>
-                </div>
-                <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                  <dt className='flex items-center text-sm font-medium text-muted-foreground'>Địa chỉ</dt>
-                  <dd className='mt-1 text-base'>{displayData.address}</dd>
-                </div>
-              </dl>
-            </div>
-            {/* Right Column - Additional Info */}
-            <div>
-              <dl className='grid grid-cols-1 gap-4'>
-                <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                  <dt className='flex items-center text-sm font-medium text-muted-foreground'>Giới tính</dt>
-                  <dd className='mt-1 text-base'>{genderLabels[displayData.gender as keyof typeof genderLabels]}</dd>
-                </div>
-                <div className='group rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'>
-                  <dt className='flex items-center text-sm font-medium text-muted-foreground'>
-                    <CheckCircle className='mr-2 h-4 w-4 text-muted-foreground' />
-                    Trạng thái
-                  </dt>
-                  <dd className='mt-1'>
-                    {displayData.status === 'ACTIVE' ? (
-                      <Badge className='bg-green-100 text-green-800 hover:bg-green-200'>Đang sử dụng</Badge>
-                    ) : (
-                      <Badge variant='outline' className='text-gray-600'>
-                        Không hoạt động
-                      </Badge>
-                    )}
-                  </dd>
-                </div>
-              </dl>
-            </div>
+      <div className='overflow-hidden rounded-md border text-sm'>
+        {/* Họ và tên */}
+        <div className='flex border-b'>
+          <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Họ và tên</div>
+          <div className='flex-1 px-4 py-3'>{editing ? <Input name='name' value={formData.name} onChange={handleChange} className='h-8' /> : student.name || <Badge color='yellow'>Trống</Badge>}</div>
+        </div>
+
+        {/* Ngày sinh */}
+        <div className='flex border-b'>
+          <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Ngày sinh</div>
+          <div className='flex-1 px-4 py-3'>{editing ? <Input type='date' name='dob' value={formData.dob instanceof Date ? formData.dob.toISOString().split('T')[0] : formData.dob} onChange={handleChange} className='h-8' /> : formatDate(student.dob)}</div>
+        </div>
+
+        {/* Mã học sinh */}
+        <div className='flex border-b'>
+          <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Mã học sinh</div>
+          <div className='flex-1 px-4 py-3'>{editing ? <Input name='rollNumber' value={formData.rollNumber} onChange={handleChange} className='h-8' /> : student.rollNumber || <Badge color='yellow'>Trống</Badge>}</div>
+        </div>
+
+        {/* Địa chỉ */}
+        <div className='flex border-b'>
+          <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</div>
+          <div className='flex-1 px-4 py-3'>{editing ? <Input name='address' value={formData.address} onChange={handleChange} className='h-8' /> : student.address || <Badge color='yellow'>Trống</Badge>}</div>
+        </div>
+
+        {/* Giới tính */}
+        <div className='flex border-b'>
+          <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Giới tính</div>
+          <div className='flex-1 px-4 py-3'>
+            {editing ? (
+              <Select value={formData.gender} onValueChange={handleGenderChange}>
+                <SelectTrigger className='h-8 w-full'>
+                  <SelectValue placeholder='Chọn giới tính' />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(genderLabels).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              genderLabels[student.gender] || <Badge color='yellow'>Không rõ</Badge>
+            )}
           </div>
-        </CardContent>
-      </Card>
-    </>
-  )
+        </div>
 
-  return <div>{isEditing ? renderEditForm() : renderViewMode()}</div>
+        {/* Trạng thái */}
+        <div className='flex'>
+          <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Trạng thái</div>
+          <div className='flex-1 px-4 py-3'>
+            {editing ? (
+              <Select value={formData.status} onValueChange={handleStatusChange}>
+                <SelectTrigger className='h-8 w-full'>
+                  <SelectValue placeholder='Chọn trạng thái' />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(statusLabels).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Status color={student.status === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[student.status]}</Status>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
