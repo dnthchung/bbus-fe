@@ -96,3 +96,15 @@ export async function getScheduledDatesByMonth(month: string): Promise<string[]>
     throw error
   }
 }
+
+// Delete scheduled dates
+export async function deleteScheduledDates(dates: string): Promise<boolean> {
+  try {
+    const response = await API_SERVICES.bus_schedule.delete_batch(dates)
+    console.log('Deleted scheduled dates response:', response)
+    return response.success || response.status === 200
+  } catch (error) {
+    console.error(`Error deleteScheduledDates in buses.ts:`, error)
+    throw error
+  }
+}

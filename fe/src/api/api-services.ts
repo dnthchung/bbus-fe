@@ -58,6 +58,7 @@ interface ApiServices {
   bus_schedule: {
     get_dates_by_month: (month: string) => Promise<any>
     assign_batch: (dates: string[]) => Promise<any>
+    delete_batch: (date: string) => Promise<any>
   }
 }
 
@@ -183,5 +184,6 @@ export const API_SERVICES: ApiServices = {
   bus_schedule: {
     get_dates_by_month: (month: string) => apiClient.get(`${API_ENDPOINTS.SCHEDULE.GET_DATES_BY_MONTH}?month=${month}&size=1000`),
     assign_batch: (dates: string[]) => apiClient.post(API_ENDPOINTS.SCHEDULE.ASSIGN_BATCH, { dates }),
+    delete_batch: (date: string) => apiClient.delete(`${API_ENDPOINTS.SCHEDULE.DELETE_BATCH}?date=${date}`),
   },
 }

@@ -53,5 +53,6 @@ export const API_ENDPOINTS = {
   SCHEDULE: {
     GET_DATES_BY_MONTH: '/bus-schedule/dates',
     ASSIGN_BATCH: '/bus-schedule/assign-batch',
+    DELETE_BATCH: '/bus-schedule',
   },
 } as const
