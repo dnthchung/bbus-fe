@@ -83,3 +83,16 @@ export async function getAllAssistants() {
     throw error
   }
 }
+
+//get all date for schedule
+export async function getScheduledDatesByMonth(month: string): Promise<string[]> {
+  try {
+    const response = await API_SERVICES.bus_schedule.get_dates_by_month(month)
+    const dates = response?.data?.data?.dates || []
+    console.log('Fetched scheduled dates:', dates)
+    return dates
+  } catch (error) {
+    console.error(`Error getScheduledDatesByMonth(${month}) in buses.ts:`, error)
+    throw error
+  }
+}

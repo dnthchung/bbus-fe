@@ -49,4 +49,9 @@ export const API_ENDPOINTS = {
   ASSISTANT: {
     GET_ALL: '/assistant/list',
   },
+
+  SCHEDULE: {
+    GET_DATES_BY_MONTH: '/bus-schedule/dates',
+    ASSIGN_BATCH: '/bus-schedule/assign-batch',
+  },
 } as const

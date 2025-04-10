@@ -55,6 +55,10 @@ interface ApiServices {
   assistants: {
     get_all: () => Promise<any>
   }
+  bus_schedule: {
+    get_dates_by_month: (month: string) => Promise<any>
+    assign_batch: (dates: string[]) => Promise<any>
+  }
 }
 
 // Add the implementation in the students section of API_SERVICES
@@ -171,5 +175,13 @@ export const API_SERVICES: ApiServices = {
   //--------------------------
   assistants: {
     get_all: () => apiClient.get(API_ENDPOINTS.ASSISTANT.GET_ALL),
+  },
+  //--------------------------
+  // 10) Schedule
+  //--------------------------
+
+  bus_schedule: {
+    get_dates_by_month: (month: string) => apiClient.get(`${API_ENDPOINTS.SCHEDULE.GET_DATES_BY_MONTH}?month=${month}&size=1000`),
+    assign_batch: (dates: string[]) => apiClient.post(API_ENDPOINTS.SCHEDULE.ASSIGN_BATCH, { dates }),
   },
 }
