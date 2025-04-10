@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from './api-endpoint'
 
 // Gợi ý: Định nghĩa type chung cho cấu trúc trả về,
 // tùy logic BE (có thể tuỳ biến, đây chỉ là ví dụ).
+// Update the ApiServices interface
 interface ApiServices {
   auth: {
     login: (credentials: LoginCredentials) => Promise<any>
@@ -32,6 +33,7 @@ interface ApiServices {
     update: (student: any) => Promise<any>
     updateParent: (student: any) => Promise<any>
     updateStatus: (studentId: string, status: string) => Promise<any>
+    updateAvatar: (studentId: string, avatarFile: File) => Promise<any> // New method
   }
   parents: {
     getParentList: () => Promise<any>
@@ -55,6 +57,7 @@ interface ApiServices {
   }
 }
 
+// Add the implementation in the students section of API_SERVICES
 export const API_SERVICES: ApiServices = {
   // -------------------------
   // 1) AUTH
@@ -113,6 +116,17 @@ export const API_SERVICES: ApiServices = {
         id: studentId,
         status: status,
       }),
+    updateAvatar: (studentId: string, avatarFile: File) => {
+      const formData = new FormData()
+      formData.append('id', studentId)
+      formData.append('avatar', avatarFile)
+
+      return apiClient.patch(API_ENDPOINTS.STUDENTS.UPDATE_AVATAR, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
   },
   //-------------------------
   // 5) PARENTS
