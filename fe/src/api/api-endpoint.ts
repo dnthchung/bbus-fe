@@ -24,6 +24,10 @@ export const API_ENDPOINTS = {
     GET_ONE: (studentId: string) => `/student/${studentId}`,
     DELETE_ONE: (studentId: string) => `/student/del/${studentId}`,
     UPDATE: () => `/student/upd`,
+    UPDATE_STATUS: '/student/change-status',
+    UPDATE_AVATAR: '/student/update-avatar', // New endpoint for avatar update
+    GET_STUDENT_LIST: '/student/list',
+    GET_STUDENT_LIST_BY_ENTITY_ID: (entityId: string) => `/student/list/${entityId}`,
   },
   PARENTS: {
     GET_PARENT_LIST: '/parent/list',
@@ -32,5 +36,23 @@ export const API_ENDPOINTS = {
     CHECKPOINTS: {
       GET_ALL: '/checkpoints/list',
     },
+  },
+  BUSES: {
+    GET_ALL: '/bus/list',
+    GET_DETAIL: (busId: string) => `/bus/${busId}`,
+    UPDATE_STATUS: '/bus/status',
+    UPDATE_MAX_CAPACITY_FOR_ALL: '/bus/upd-max-capacity-for-all-bus',
+  },
+  DRIVER: {
+    GET_ALL: '/driver/list',
+  },
+  ASSISTANT: {
+    GET_ALL: '/assistant/list',
+  },
+
+  SCHEDULE: {
+    GET_DATES_BY_MONTH: '/bus-schedule/dates',
+    ASSIGN_BATCH: '/bus-schedule/assign-batch',
+    DELETE_BATCH: '/bus-schedule',
   },
 } as const

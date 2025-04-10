@@ -47,3 +47,312 @@ B. Quản lý hệ thống
             + Phản hồi về điểm danh sai, sự cố xe buýt, an toàn học sinh.
         + Báo cáo trạng thái thiết bị/camera
             + Hiệu suất nhận diện của camera AI.Lịch sử bảo trì & lỗi kỹ thuật.
+
+
+Directory structure:
+└── dnthchung-bbus-fe/
+    ├── README.md
+    ├── documents/
+    │   ├── api-list.md
+    │   ├── docker-guide.md
+    │   ├── local-setup-guide.md
+    │   ├── notes.md
+    │   └── todos.md
+    └── fe/
+        ├── README.md
+        ├── components.json
+        ├── cz.yaml
+        ├── docker-compose.yml
+        ├── Dockerfile
+        ├── eslint.config.js
+        ├── index.html
+        ├── knip.config.ts
+        ├── mock-data.json
+        ├── nginx.conf
+        ├── package.json
+        ├── pnpm-lock.yaml
+        ├── postcss.config.js
+        ├── tailwind.config.js
+        ├── tsconfig.app.json
+        ├── tsconfig.json
+        ├── tsconfig.node.json
+        ├── vite.config.ts
+        ├── .dockerignore
+        ├── .env.example
+        ├── .gitignore
+        ├── .prettierignore
+        ├── .prettierrc
+        ├── public/
+        │   ├── backup/
+        │   │   └── images/
+        │   └── images/
+        ├── src/
+        │   ├── index.css
+        │   ├── main.tsx
+        │   ├── routeTree.gen.ts
+        │   ├── vite-env.d.ts
+        │   ├── api/
+        │   │   ├── api-client.ts
+        │   │   ├── api-endpoint.ts
+        │   │   ├── api-methods.ts
+        │   │   └── api-services.ts
+        │   ├── assets/
+        │   │   └── images/
+        │   ├── components/
+        │   │   ├── common/
+        │   │   │   ├── coming-soon.tsx
+        │   │   │   ├── command-menu.tsx
+        │   │   │   ├── confirm-dialog.tsx
+        │   │   │   ├── long-text.tsx
+        │   │   │   ├── password-input.tsx
+        │   │   │   ├── pin-input.tsx
+        │   │   │   ├── profile-dropdown.tsx
+        │   │   │   ├── search.tsx
+        │   │   │   ├── select-dropdown.tsx
+        │   │   │   ├── skip-to-main.tsx
+        │   │   │   └── theme-switch.tsx
+        │   │   ├── layout/
+        │   │   │   ├── app-sidebar.tsx
+        │   │   │   ├── header.tsx
+        │   │   │   ├── main.tsx
+        │   │   │   ├── nav-group.tsx
+        │   │   │   ├── nav-user.tsx
+        │   │   │   ├── team-switcher.tsx
+        │   │   │   ├── top-nav.tsx
+        │   │   │   └── sidebar/
+        │   │   │       ├── sidebar-data.ts
+        │   │   │       └── sidebar-type.ts
+        │   │   └── ui/
+        │   │       ├── alert-dialog.tsx
+        │   │       ├── alert.tsx
+        │   │       ├── avatar.tsx
+        │   │       ├── badge.tsx
+        │   │       ├── button.tsx
+        │   │       ├── calendar.tsx
+        │   │       ├── card.tsx
+        │   │       ├── checkbox.tsx
+        │   │       ├── collapsible.tsx
+        │   │       ├── command.tsx
+        │   │       ├── dialog.tsx
+        │   │       ├── dropdown-menu.tsx
+        │   │       ├── form.tsx
+        │   │       ├── input.tsx
+        │   │       ├── label.tsx
+        │   │       ├── popover.tsx
+        │   │       ├── radio-group.tsx
+        │   │       ├── scroll-area.tsx
+        │   │       ├── select.tsx
+        │   │       ├── separator.tsx
+        │   │       ├── sheet.tsx
+        │   │       ├── sidebar.tsx
+        │   │       ├── skeleton.tsx
+        │   │       ├── switch.tsx
+        │   │       ├── table.tsx
+        │   │       ├── tabs.tsx
+        │   │       ├── textarea.tsx
+        │   │       ├── toast.tsx
+        │   │       ├── toaster.tsx
+        │   │       └── tooltip.tsx
+        │   ├── config/
+        │   │   └── fonts.ts
+        │   ├── context/
+        │   │   ├── font-context.tsx
+        │   │   ├── search-context.tsx
+        │   │   └── theme-context.tsx
+        │   ├── features/
+        │   │   ├── apps/
+        │   │   │   ├── index.tsx
+        │   │   │   └── data/
+        │   │   │       └── apps.tsx
+        │   │   ├── auth/
+        │   │   │   ├── auth-api.tsx
+        │   │   │   ├── auth-hook.tsx
+        │   │   │   ├── auth-layout.tsx
+        │   │   │   ├── forgot-password/
+        │   │   │   │   ├── index.tsx
+        │   │   │   │   └── components/
+        │   │   │   │       └── forgot-password-form.tsx
+        │   │   │   ├── otp/
+        │   │   │   │   ├── index.tsx
+        │   │   │   │   └── components/
+        │   │   │   │       └── otp-form.tsx
+        │   │   │   ├── sign-in/
+        │   │   │   │   ├── index.tsx
+        │   │   │   │   ├── sign-in-2.tsx
+        │   │   │   │   ├── components/
+        │   │   │   │   │   └── user-auth-form.tsx
+        │   │   │   │   └── utils/
+        │   │   │   │       └── language.ts
+        │   │   │   └── sign-up/
+        │   │   │       ├── index.tsx
+        │   │   │       └── components/
+        │   │   │           └── sign-up-form.tsx
+        │   │   ├── dashboard/
+        │   │   │   ├── index.tsx
+        │   │   │   └── components/
+        │   │   │       ├── overview.tsx
+        │   │   │       └── recent-sales.tsx
+        │   │   ├── errors/
+        │   │   │   ├── forbidden.tsx
+        │   │   │   ├── general-error.tsx
+        │   │   │   ├── maintenance-error.tsx
+        │   │   │   ├── not-found-error.tsx
+        │   │   │   └── unauthorized-error.tsx
+        │   │   ├── reports/
+        │   │   │   └── index.tsx
+        │   │   ├── settings/
+        │   │   │   ├── index.tsx
+        │   │   │   ├── account/
+        │   │   │   │   ├── account-form.tsx
+        │   │   │   │   └── index.tsx
+        │   │   │   ├── appearance/
+        │   │   │   │   ├── appearance-form.tsx
+        │   │   │   │   └── index.tsx
+        │   │   │   ├── components/
+        │   │   │   │   ├── content-section.tsx
+        │   │   │   │   └── sidebar-nav.tsx
+        │   │   │   ├── notifications/
+        │   │   │   │   ├── index.tsx
+        │   │   │   │   └── notifications-form.tsx
+        │   │   │   └── profile/
+        │   │   │       ├── index.tsx
+        │   │   │       └── profile-form.tsx
+        │   │   ├── students/
+        │   │   │   ├── index.tsx
+        │   │   │   ├── components/
+        │   │   │   │   ├── avatar-thumbnail.tsx
+        │   │   │   │   ├── students-primary-buttons.tsx
+        │   │   │   │   ├── students-table.tsx
+        │   │   │   │   ├── dialog/
+        │   │   │   │   │   ├── students-action-dialog.tsx
+        │   │   │   │   │   ├── students-add-dialog.tsx
+        │   │   │   │   │   ├── students-delete-dialog.tsx
+        │   │   │   │   │   ├── students-dialogs.tsx
+        │   │   │   │   │   ├── students-export-dialog.tsx
+        │   │   │   │   │   ├── students-import-excel-dialog.tsx
+        │   │   │   │   │   └── students-invite-dialog.tsx
+        │   │   │   │   └── table/
+        │   │   │   │       ├── data-table-column-header.tsx
+        │   │   │   │       ├── data-table-faceted-filter.tsx
+        │   │   │   │       ├── data-table-pagination.tsx
+        │   │   │   │       ├── data-table-row-actions.tsx
+        │   │   │   │       ├── data-table-toolbar.tsx
+        │   │   │   │       ├── data-table-view-options.tsx
+        │   │   │   │       └── students-columns.tsx
+        │   │   │   ├── context/
+        │   │   │   │   └── students-context.tsx
+        │   │   │   └── data/
+        │   │   │       ├── data.ts
+        │   │   │       ├── schema.ts
+        │   │   │       └── students.ts
+        │   │   ├── transportation/
+        │   │   │   ├── index.tsx
+        │   │   │   ├── bus/
+        │   │   │   │   └── index.tsx
+        │   │   │   └── routes/
+        │   │   │       └── index.tsx
+        │   │   └── users/
+        │   │       ├── index.tsx
+        │   │       ├── note.md
+        │   │       ├── components/
+        │   │       │   ├── users-dialogs.tsx
+        │   │       │   ├── users-primary-buttons.tsx
+        │   │       │   ├── users-table.tsx
+        │   │       │   ├── dialog/
+        │   │       │   │   ├── users-action-dialog.tsx
+        │   │       │   │   ├── users-delete-dialog.tsx
+        │   │       │   │   ├── users-import-excel-dialog.tsx
+        │   │       │   │   └── users-invite-dialog.tsx
+        │   │       │   └── table/
+        │   │       │       ├── data-table-column-header.tsx
+        │   │       │       ├── data-table-faceted-filter.tsx
+        │   │       │       ├── data-table-pagination.tsx
+        │   │       │       ├── data-table-row-actions.tsx
+        │   │       │       ├── data-table-toolbar.tsx
+        │   │       │       ├── data-table-view-options.tsx
+        │   │       │       └── users-columns.tsx
+        │   │       ├── context/
+        │   │       │   └── users-context.tsx
+        │   │       └── data/
+        │   │           ├── data.ts
+        │   │           ├── notes.md
+        │   │           ├── schema.ts
+        │   │           └── users.ts
+        │   ├── guards/
+        │   │   └── with-guest-route.tsx
+        │   ├── helpers/
+        │   │   ├── error-code.ts
+        │   │   ├── extract-user-name.ts
+        │   │   ├── handle-server-error.ts
+        │   │   ├── jwt-decode.ts
+        │   │   └── regex.ts
+        │   ├── hooks/
+        │   │   ├── use-auth.ts
+        │   │   ├── use-dialog-state.tsx
+        │   │   ├── use-mobile.tsx
+        │   │   └── use-toast.ts
+        │   ├── lib/
+        │   │   └── utils.ts
+        │   ├── routes/
+        │   │   ├── __root.tsx
+        │   │   ├── (auth)/
+        │   │   │   ├── 500.tsx
+        │   │   │   ├── forgot-password.lazy.tsx
+        │   │   │   ├── otp.tsx
+        │   │   │   ├── sign-in-2.lazy.tsx
+        │   │   │   ├── sign-in.tsx
+        │   │   │   └── sign-up.lazy.tsx
+        │   │   ├── (errors)/
+        │   │   │   ├── 401.lazy.tsx
+        │   │   │   ├── 403.lazy.tsx
+        │   │   │   ├── 404.lazy.tsx
+        │   │   │   ├── 500.lazy.tsx
+        │   │   │   └── 503.lazy.tsx
+        │   │   └── _authenticated/
+        │   │       ├── index.tsx
+        │   │       ├── route.tsx
+        │   │       ├── apps/
+        │   │       │   └── index.lazy.tsx
+        │   │       ├── help-center/
+        │   │       │   └── index.lazy.tsx
+        │   │       ├── reports/
+        │   │       │   └── index.lazy.tsx
+        │   │       ├── settings/
+        │   │       │   ├── account.lazy.tsx
+        │   │       │   ├── appearance.lazy.tsx
+        │   │       │   ├── index.lazy.tsx
+        │   │       │   ├── notifications.lazy.tsx
+        │   │       │   └── route.lazy.tsx
+        │   │       ├── students/
+        │   │       │   └── index.lazy.tsx
+        │   │       ├── transportation/
+        │   │       │   ├── bus.lazy.tsx
+        │   │       │   ├── index.lazy.tsx
+        │   │       │   └── routes.tsx
+        │   │       └── users/
+        │   │           └── index.lazy.tsx
+        │   ├── stores/
+        │   │   └── authStore.ts
+        │   └── types/
+        │       ├── api.ts
+        │       ├── auth.ts
+        │       ├── index.ts
+        │       ├── user.ts
+        │       └── response/
+        │           └── error-response.ts
+        └── .github/
+            ├── CODE_OF_CONDUCT.md
+            ├── CONTRIBUTING.md
+            ├── FUNDING.yml
+            ├── PULL_REQUEST_TEMPLATE.md
+            ├── ISSUE_TEMPLATE/
+            │   ├── config.yml
+            │   ├── ✨-feature-request.md
+            │   └── 🐞-bug-report.md
+            └── workflows/
+                ├── ci.yml
+                └── stale.yml
+
+
+----
+

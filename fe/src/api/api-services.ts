@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from './api-endpoint'
 
 // Gợi ý: Định nghĩa type chung cho cấu trúc trả về,
 // tùy logic BE (có thể tuỳ biến, đây chỉ là ví dụ).
+// Update the ApiServices interface
 interface ApiServices {
   auth: {
     login: (credentials: LoginCredentials) => Promise<any>
@@ -31,6 +32,8 @@ interface ApiServices {
     deleteOne: (studentId: string) => Promise<any>
     update: (student: any) => Promise<any>
     updateParent: (student: any) => Promise<any>
+    updateStatus: (studentId: string, status: string) => Promise<any>
+    updateAvatar: (studentId: string, avatarFile: File) => Promise<any> // New method
   }
   parents: {
     getParentList: () => Promise<any>
@@ -40,8 +43,26 @@ interface ApiServices {
       list: () => Promise<any>
     }
   }
+  buses: {
+    get_all: () => Promise<any>
+    get_detail: (busId: string) => Promise<any>
+    update_status: (busId: string, status: string) => Promise<any>
+    update_max_capacity_for_all: (params: { maxCapacity: number; checkpointId?: string }) => Promise<any>
+  }
+  drivers: {
+    get_all: () => Promise<any>
+  }
+  assistants: {
+    get_all: () => Promise<any>
+  }
+  bus_schedule: {
+    get_dates_by_month: (month: string) => Promise<any>
+    assign_batch: (dates: string[]) => Promise<any>
+    delete_batch: (date: string) => Promise<any>
+  }
 }
 
+// Add the implementation in the students section of API_SERVICES
 export const API_SERVICES: ApiServices = {
   // -------------------------
   // 1) AUTH
@@ -95,6 +116,22 @@ export const API_SERVICES: ApiServices = {
     deleteOne: (studentId: string) => apiClient.delete(API_ENDPOINTS.STUDENTS.DELETE_ONE(studentId)),
     update: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
     updateParent: (student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE(), student),
+    updateStatus: (studentId: string, status: string) =>
+      apiClient.patch(API_ENDPOINTS.STUDENTS.UPDATE_STATUS, {
+        id: studentId,
+        status: status,
+      }),
+    updateAvatar: (studentId: string, avatarFile: File) => {
+      const formData = new FormData()
+      formData.append('id', studentId)
+      formData.append('avatar', avatarFile)
+
+      return apiClient.patch(API_ENDPOINTS.STUDENTS.UPDATE_AVATAR, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
   },
   //-------------------------
   // 5) PARENTS
@@ -109,5 +146,44 @@ export const API_SERVICES: ApiServices = {
     checkpoints: {
       list: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
     },
+  },
+  //--------------------------
+  // 7) Bus
+  //--------------------------
+  // In the buses section of API_SERVICES
+  buses: {
+    get_all: () => apiClient.get(API_ENDPOINTS.BUSES.GET_ALL),
+    get_detail: (busId: string) => apiClient.get(API_ENDPOINTS.BUSES.GET_DETAIL(busId)),
+    update_status: (busId: string, status: string) =>
+      apiClient.patch(API_ENDPOINTS.BUSES.UPDATE_STATUS, {
+        id: busId,
+        status: status,
+      }),
+    update_max_capacity_for_all: (params: { maxCapacity: number }) => {
+      const url = new URL(API_ENDPOINTS.BUSES.UPDATE_MAX_CAPACITY_FOR_ALL, import.meta.env.VITE_API_URL_BBUS)
+      url.searchParams.append('maxCapacity', params.maxCapacity.toString())
+      return apiClient.post(url.pathname + url.search)
+    },
+  },
+  //--------------------------
+  // 8) Driver
+  //--------------------------
+  drivers: {
+    get_all: () => apiClient.get(API_ENDPOINTS.DRIVER.GET_ALL),
+  },
+  //--------------------------
+  // 9) Assistant
+  //--------------------------
+  assistants: {
+    get_all: () => apiClient.get(API_ENDPOINTS.ASSISTANT.GET_ALL),
+  },
+  //--------------------------
+  // 10) Schedule
+  //--------------------------
+
+  bus_schedule: {
+    get_dates_by_month: (month: string) => apiClient.get(`${API_ENDPOINTS.SCHEDULE.GET_DATES_BY_MONTH}?month=${month}&size=1000`),
+    assign_batch: (dates: string[]) => apiClient.post(API_ENDPOINTS.SCHEDULE.ASSIGN_BATCH, { dates }),
+    delete_batch: (date: string) => apiClient.delete(`${API_ENDPOINTS.SCHEDULE.DELETE_BATCH}?date=${date}`),
   },
 }

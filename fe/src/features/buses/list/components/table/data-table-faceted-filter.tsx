@@ -1,4 +1,4 @@
-//path : fe/src/features/users/components/table/data-table-faceted-filter.tsx
+//path : fe/src/features/buses/list/components/table/data-table-faceted-filter.tsx
 import * as React from 'react'
 import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons'
 import { Column } from '@tanstack/react-table'
@@ -37,7 +37,7 @@ export function DataTableFacetedFilter<TData, TValue>({ column, title, options }
               <div className='hidden space-x-1 lg:flex'>
                 {selectedValues.size > 2 ? (
                   <Badge variant='secondary' className='rounded-sm px-1 font-normal'>
-                    {selectedValues.size} selected
+                    {selectedValues.size} đã chọn
                   </Badge>
                 ) : (
                   options
@@ -57,7 +57,7 @@ export function DataTableFacetedFilter<TData, TValue>({ column, title, options }
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>Không tìm thấy kết quả.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value)
@@ -89,7 +89,7 @@ export function DataTableFacetedFilter<TData, TValue>({ column, title, options }
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem onSelect={() => column?.setFilterValue(undefined)} className='justify-center text-center'>
-                    Clear filters
+                    Xóa bộ lọc
                   </CommandItem>
                 </CommandGroup>
               </>

@@ -2,9 +2,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import StudentsDetailsContent from '@/features/students/components/page/students-edit-view-page'
 import { getStudentById } from '@/features/students/data/students'
+import { withRoleRoute } from '@/guards/with-role-route'
+
 
 export const Route = createFileRoute('/_authenticated/students/details/$id')({
-  component: StudentsDetailsContent,
+  component: withRoleRoute(StudentsDetailsContent, ['ADMIN']),
   loader: async ({ params }) => {
     console.log('params', params)
     const student = await getStudentById(params.id)

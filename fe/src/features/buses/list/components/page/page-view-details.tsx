@@ -1,84 +1,167 @@
-// // fe/src/features/buses/list/components/page/page-view-details.tsx
-// import { useEffect, useState } from 'react'
-// import { useParams } from '@tanstack/react-router'
-// import { Badge } from '@/components/ui/badge'
-// import { ScrollArea } from '@/components/ui/scroll-area'
-// import { Separator } from '@/components/ui/separator'
-// import { getAllBuses } from '@/features/buses/data/buses'
-// import { Bus } from '@/features/buses/data/schema'
-// export default function PageViewDetails() {
-//   const { busId } = useParams({ strict: false })
-//   const [currentRow, setCurrentRow] = useState<Bus | null>(null)
-//   useEffect(() => {
-//     const fetchBus = async () => {
-//       const buses = await getAllBuses()
-//       const bus = buses.find((b) => b.id === busId) || null
-//       setCurrentRow(bus)
-//     }
-//     fetchBus()
-//   }, [busId])
-//   if (!currentRow) {
-//     return <div>Không tìm thấy thông tin xe buýt.</div>
-//   }
-//   return (
-//     <div className='mx-auto max-w-2xl p-4'>
-//       <h1 className='text-xl font-bold'>Thông tin chi tiết xe buýt</h1>
-//       <Separator className='my-2' />
-//       <ScrollArea className='h-[400px] pr-4'>
-//         <div className='space-y-4 text-sm'>
-//           <div>
-//             <p className='font-semibold'>Tên xe:</p>
-//             <p>{currentRow.name}</p>
-//           </div>
-//           <div>
-//             <p className='font-semibold'>Biển số xe:</p>
-//             <p>{currentRow.licensePlate}</p>
-//           </div>
-//           <div>
-//             <p className='font-semibold'>Tài xế:</p>
-//             <p>{currentRow.driverName}</p>
-//           </div>
-//           <div>
-//             <p className='font-semibold'>Tuyến đường:</p>
-//             <p>{currentRow.route}</p>
-//           </div>
-//           <div>
-//             <p className='font-semibold'>ESP ID:</p>
-//             <Badge variant='secondary'>{currentRow.espId}</Badge>
-//           </div>
-//           <div>
-//             <p className='font-semibold'>Camera ID:</p>
-//             <Badge variant='secondary'>{currentRow.cameraFacesluice}</Badge>
-//           </div>
-//         </div>
-//       </ScrollArea>
-//     </div>
-//   )
-// }
+// fe/src/features/buses/list/components/page/page-view-details.tsx
 import { useEffect, useState } from 'react'
+import { ArrowLeftIcon } from '@radix-ui/react-icons'
 import { useParams } from '@tanstack/react-router'
-import { getAllBuses } from '@/features/buses/data/buses'
+import { useNavigate } from '@tanstack/react-router'
+import { API_SERVICES } from '@/api/api-services'
+import { toast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { ThemeSwitch } from '@/components/common/theme-switch'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { getBusById } from '@/features/buses/buses'
+import { BasicInfoTab } from '@/features/buses/list/components/tab/basic-info-tab'
+import { DeviceInfoTab } from '@/features/buses/list/components/tab/device-info-tab'
+import DriverInfoTab from '@/features/buses/list/components/tab/driver-info-tab'
 import { Bus } from '@/features/buses/schema'
 
 export default function PageViewDetails() {
   const { id } = useParams({ strict: false })
-  // const [currentRow, setCurrentRow] = useState<Bus | null>(null)
+  const navigate = useNavigate()
+  const [bus, setBus] = useState<Bus | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [updatingStatus, setUpdatingStatus] = useState(false)
 
-  // function PageViewDetails() {
-  //   const { id } = Route.useParams()
-  //   const user = Route.useLoaderData()
-  //   console.log('user', user)
-  //   return <div>Hello "/_authenticated/buses/list/{id}"!</div>
-  // }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const busData = await getBusById(id ?? '')
+        setBus(busData)
+        setError(null)
+      } catch (err) {
+        console.error('Error fetching bus details:', err)
+        setError(err instanceof Error ? err : new Error('Không thể tải thông tin xe buýt'))
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  // if (!currentRow) {
-  //   return <div>Không tìm thấy thông tin xe buýt.</div>
-  // }
+    if (id) {
+      fetchData()
+    }
+  }, [id])
+
+  const handleBack = () => {
+    navigate({ to: '/buses/list' })
+  }
+
+  const handleBusUpdate = (updatedBus: Bus) => {
+    setBus(updatedBus)
+    // Here you would typically call an API to update the bus in the backend
+  }
+
+  const handleStatusUpdate = async () => {
+    if (!bus || !id) return
+    try {
+      setUpdatingStatus(true)
+      const newStatus = bus.busStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+      await API_SERVICES.buses.update_status(id, newStatus)
+      setBus({
+        ...bus,
+        busStatus: newStatus,
+      })
+      toast({
+        title: 'Thành công',
+        description: newStatus === 'ACTIVE' ? 'Xe buýt đã được kích hoạt' : 'Xe buýt đã bị vô hiệu hóa',
+        variant: 'success',
+      })
+    } catch (err) {
+      console.error('Error updating bus status:', err)
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật trạng thái xe buýt',
+        variant: 'deny',
+      })
+    } finally {
+      setUpdatingStatus(false)
+    }
+  }
 
   return (
-    <div className='mx-auto max-w-2xl p-4'>
-      <h1 className='text-xl font-bold'>Thông tin chi tiết xe buýt {id}</h1>
-      {/* Hiển thị thông tin chi tiết của xe buýt */}
-    </div>
+    <>
+      <Header fixed>
+        <div className='ml-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ProfileDropdown />
+        </div>
+      </Header>
+
+      <Main>
+        <div className='mb-6'>
+          <Button variant='outline' size='sm' onClick={handleBack}>
+            <ArrowLeftIcon className='mr-2 h-4 w-4' />
+            Quay lại danh sách
+          </Button>
+        </div>
+
+        <div className='mb-6'>
+          <h1 className='text-2xl font-bold tracking-tight'>Thông tin chi tiết xe buýt</h1>
+          <p className='text-muted-foreground'>Xem và quản lý thông tin chi tiết của xe buýt.</p>
+        </div>
+
+        {loading ? (
+          <div className='flex items-center justify-center py-10'>
+            <div className='h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+          </div>
+        ) : error ? (
+          <Card>
+            <CardContent className='py-10 text-center'>
+              <div className='text-destructive'>
+                <p className='text-lg font-semibold'>Đã xảy ra lỗi</p>
+                <p>{error.message}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : !bus ? (
+          <Card>
+            <CardContent className='py-10 text-center'>
+              <p className='text-lg font-semibold'>Không tìm thấy thông tin xe buýt</p>
+              <Button variant='outline' className='mt-4' onClick={handleBack}>
+                Quay lại danh sách
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Tabs defaultValue='basic' className='mb-6'>
+              <TabsList className='grid w-1/2 grid-cols-3'>
+                <TabsTrigger value='basic'>Thông tin cơ bản</TabsTrigger>
+                <TabsTrigger value='driver'>Thông tin tài xế và phụ xe</TabsTrigger>
+                <TabsTrigger value='device'>Thông tin thiết bị</TabsTrigger>
+              </TabsList>
+
+              <TabsContent className='w-1/2' value='basic'>
+                <BasicInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
+              </TabsContent>
+
+              <TabsContent value='driver'>
+                <DriverInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
+              </TabsContent>
+
+              <TabsContent className='w-1/2' value='device'>
+                <DeviceInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
+              </TabsContent>
+            </Tabs>
+
+            <div className='border-t pt-4'>
+              {bus.busStatus === 'ACTIVE' ? (
+                <Button variant='destructive' onClick={handleStatusUpdate} disabled={updatingStatus}>
+                  {updatingStatus ? 'Đang xử lý...' : 'Vô hiệu hóa'}
+                </Button>
+              ) : (
+                <Button variant='default' onClick={handleStatusUpdate} disabled={updatingStatus}>
+                  {updatingStatus ? 'Đang xử lý...' : 'Kích hoạt'}
+                </Button>
+              )}
+            </div>
+          </>
+        )}
+      </Main>
+    </>
   )
 }

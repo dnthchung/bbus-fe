@@ -4,8 +4,8 @@ import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { getAllBuses } from '@/features/buses/buses'
 import BusesProvider from '@/features/buses/context/buses-context'
-import { getAllBuses } from '@/features/buses/function'
 import { columns } from '@/features/buses/list/components/buses-columns'
 import { BusesDialogs } from '@/features/buses/list/components/buses-dialogs'
 import { BusesPrimaryButtons } from '@/features/buses/list/components/buses-primary-buttons'
@@ -19,6 +19,7 @@ export default function BusList() {
     async function fetchBuses() {
       try {
         const data = await getAllBuses()
+        console.log('Data:', data)
         setBusList(data)
       } catch (error) {
         console.error('Error fetching buses in index.tsx:', error)

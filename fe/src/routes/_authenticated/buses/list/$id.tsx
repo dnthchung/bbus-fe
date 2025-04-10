@@ -4,10 +4,11 @@
 //   component: PageViewDetails,
 // })
 import { createFileRoute } from '@tanstack/react-router'
+import { withRoleRoute } from '@/guards/with-role-route'
 import PageViewDetails from '@/features/buses/list/components/page/page-view-details'
 
 export const Route = createFileRoute('/_authenticated/buses/list/$id')({
-  component: PageViewDetails,
+  component: withRoleRoute(PageViewDetails, ['ADMIN']),
 })
 
 // import { getUserById } from '@/features/users/data/users'

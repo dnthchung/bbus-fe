@@ -8,6 +8,21 @@ interface DataTableViewOptionsProps<TData> {
   table: Table<TData>
 }
 
+// Mapping column IDs to Vietnamese titles
+const columnTitles: Record<string, string> = {
+  name: 'Tên xe buýt',
+  licensePlate: 'Biển số xe',
+  driverName: 'Tài xế',
+  driverPhone: 'SĐT tài xế',
+  assistantName: 'Phụ xe',
+  assistantPhone: 'SĐT phụ xe',
+  routeCode: 'Mã tuyến',
+  espId: 'GPS ID',
+  cameraFacesluice: 'Camera ID',
+  busStatus: 'Trạng thái',
+  amountOfStudents: 'Số học sinh',
+}
+
 export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps<TData>) {
   return (
     <DropdownMenu modal={false}>
@@ -17,7 +32,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
           Hiển thị
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-[150px]'>
+      <DropdownMenuContent align='end' className='w-[200px]'>
         <DropdownMenuLabel>Hiện / ẩn cột</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table
@@ -26,7 +41,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
           .map((column) => {
             return (
               <DropdownMenuCheckboxItem key={column.id} className='capitalize' checked={column.getIsVisible()} onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                {column.id}
+                {columnTitles[column.id] || column.id}
               </DropdownMenuCheckboxItem>
             )
           })}
