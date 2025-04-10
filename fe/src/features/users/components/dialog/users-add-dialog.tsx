@@ -534,7 +534,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         {currentUserRole === 'SYSADMIN' && (
                           <>
                             <SelectItem value='ADMIN'>Quản lý</SelectItem>
-                            <SelectItem value='SYSADMIN'>Quản trị hệ thống</SelectItem>
+                            {/* <SelectItem value='SYSADMIN'>Quản trị hệ thống</SelectItem> */}
                           </>
                         )}
                       </SelectContent>
