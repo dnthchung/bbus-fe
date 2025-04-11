@@ -6,7 +6,8 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { X, Navigation, Search, MapPin, Plus } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
-import { cn } from '@/lib/utils'
+import { API_SERVICES } from '@/api/api-services'
+import { toast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -15,82 +16,9 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
-const existingCheckpoints = [
-  {
-    id: '346b48c3-912f-456f-b2e2-4469260962e6',
-    name: 'Cầu Chương Dương',
-    description: 'Trạm xe buýt ở đầu cầu Chương Dương',
-    latitude: '21.033028',
-    longitude: '105.863672',
-    status: 'INACTIVE',
-  },
-  {
-    id: '40c64531-8e7a-4294-9e48-e41f02f57e3b',
-    name: 'Công viên Thống Nhất',
-    description: 'Điểm dừng xe gần Công viên Thống Nhất',
-    latitude: '21.017111',
-    longitude: '105.847450',
-    status: 'INACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-  {
-    id: '882f1ff1-4013-4d0c-9608-acc007354e82',
-    name: 'Royal City',
-    description: 'Điểm đón xe trước cổng Royal City',
-    latitude: '21.003653',
-    longitude: '105.815528',
-    status: 'ACTIVE',
-  },
-]
 
 // Component để cập nhật vị trí và zoom của bản đồ từ xa
 const MapController = ({ center, zoom }: { center?: [number, number]; zoom?: number }) => {
@@ -122,7 +50,9 @@ export default function CreateCheckpointPage() {
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const mapRef = useRef(null)
-  const [checkpoints, setCheckpoints] = useState(existingCheckpoints)
+
+  // Use the context instead of local state for checkpoints
+  const { checkpoints, refreshCheckpoints } = useCheckpoints()
 
   // Lấy vị trí hiện tại và zoom đến vị trí đó
   const getCurrentLocation = () => {
@@ -168,29 +98,51 @@ export default function CreateCheckpointPage() {
   // Lưu điểm dừng mới vào hệ thống
   const saveCheckpoint = async () => {
     if (!checkpoint || !checkpointName.trim() || !description.trim()) {
-      alert('Vui lòng nhập đầy đủ thông tin điểm dừng.')
+      toast({
+        title: 'Vui lòng nhập đầy đủ thông tin!',
+        description: 'Vui lòng nhập đầy đủ thông tin để tạo điểm dừng mới.',
+        variant: 'deny',
+      })
       return
     }
 
-    const newCheckpoint = {
-      id: crypto.randomUUID(),
-      name: checkpointName,
-      description,
-      latitude: checkpoint[0].toString(),
-      longitude: checkpoint[1].toString(),
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+    setIsLoading(true)
 
-    console.log('Đã lưu điểm dừng:', newCheckpoint)
-    // Add to local state for demo purposes
-    setCheckpoints([...checkpoints, newCheckpoint])
-    // Reset form
-    setCheckpointName('')
-    setDescription('')
-    setCheckpoint(null)
-    alert('Điểm dừng đã được tạo thành công!')
+    try {
+      // Chuẩn bị dữ liệu gửi lên API
+      const checkpointData = {
+        checkpointName: checkpointName,
+        description: description,
+        latitude: checkpoint[0].toString(),
+        longitude: checkpoint[1].toString(),
+      }
+
+      // Gọi API để thêm điểm dừng mới
+      await API_SERVICES.checkpoints.add_one(checkpointData)
+
+      // Refresh the checkpoint list
+      await refreshCheckpoints()
+
+      // Reset form
+      setCheckpointName('')
+      setDescription('')
+      setCheckpoint(null)
+
+      toast({
+        title: 'Đã lưu thành công!',
+        description: 'Điểm dừng mới đã được lưu thành công.',
+        variant: 'success',
+      })
+    } catch (error) {
+      // console.error('Lỗi khi tạo điểm dừng:', error)
+      toast({
+        title: 'Lỗi khi tạo điểm dừng!',
+        description: 'Đã xảy ra lỗi khi lưu điểm dừng. Vui lòng thử lại sau.',
+        variant: 'deny',
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -201,8 +153,7 @@ export default function CreateCheckpointPage() {
           <Card className='relative border-border'>
             <CardHeader className='pb-2'>
               <CardTitle className='flex items-center gap-2'>
-                <MapPin className='h-5 w-5 text-primary' />
-                Bản đồ điểm dừng
+                <MapPin className='h-5 w-5 text-primary' /> Bản đồ điểm dừng
               </CardTitle>
               <CardDescription>Chọn vị trí trên bản đồ hoặc tìm kiếm địa điểm</CardDescription>
             </CardHeader>
@@ -253,8 +204,7 @@ export default function CreateCheckpointPage() {
                 </div>
                 {/* Current location button */}
                 <Button variant='secondary' onClick={getCurrentLocation} title='Sử dụng vị trí hiện tại' className='absolute bottom-4 left-4 z-[10] h-9 px-3 shadow-lg'>
-                  <Navigation className='mr-2 h-4 w-4' />
-                  Vị trí hiện tại
+                  <Navigation className='mr-2 h-4 w-4' /> Vị trí hiện tại
                 </Button>
               </div>
             </CardContent>
@@ -263,8 +213,7 @@ export default function CreateCheckpointPage() {
           <Card className='border-border'>
             <CardHeader className='pb-2'>
               <CardTitle className='flex items-center gap-2'>
-                <Plus className='h-5 w-5 text-primary' />
-                Thông tin điểm dừng
+                <Plus className='h-5 w-5 text-primary' /> Thông tin điểm dừng
               </CardTitle>
               <CardDescription>Nhập thông tin chi tiết cho điểm dừng mới</CardDescription>
             </CardHeader>
@@ -300,8 +249,7 @@ export default function CreateCheckpointPage() {
                   {checkpoint && (
                     <div className='flex justify-end'>
                       <Button variant='ghost' size='sm' className='h-8 text-destructive' onClick={() => setCheckpoint(null)}>
-                        <X className='mr-1 h-4 w-4' />
-                        Xóa vị trí
+                        <X className='mr-1 h-4 w-4' /> Xóa vị trí
                       </Button>
                     </div>
                   )}
@@ -309,54 +257,75 @@ export default function CreateCheckpointPage() {
               </div>
               <Separator />
               {/* Nút lưu điểm dừng */}
-              <Button onClick={saveCheckpoint} className='w-full' disabled={!checkpoint || !checkpointName.trim() || !description.trim()}>
-                Lưu điểm dừng
+              <Button onClick={saveCheckpoint} className='w-full' disabled={!checkpoint || !checkpointName.trim() || !description.trim() || isLoading}>
+                {isLoading ? (
+                  <>
+                    <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                    Đang lưu...
+                  </>
+                ) : (
+                  'Lưu điểm dừng'
+                )}
               </Button>
             </CardContent>
           </Card>
         </div>
-        {/* Checkpoint List */}
+        {/* Checkpoint List - Simplified */}
         <div className='w-full md:w-2/5'>
-          <Card className='h-full border-border'>
-            <CardHeader className='pb-2'>
-              <CardTitle className='flex items-center gap-2'>
-                <MapPin className='h-5 w-5 text-primary' />
-                Danh sách điểm dừng
-              </CardTitle>
-              <CardDescription>Các điểm dừng hiện có trong hệ thống</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className='h-[850px] pr-4'>
-                <div className='space-y-3'>
-                  {checkpoints.map((cp, index) => (
-                    <Card key={cp.id} className={cn('overflow-hidden transition-all hover:shadow-md', cp.status === 'ACTIVE' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-gray-400')}>
-                      <CardContent className='p-4'>
-                        <div className='flex items-start justify-between'>
-                          <div className='space-y-1'>
-                            <div className='flex items-center gap-2'>
-                              <h3 className='font-medium'>{cp.name}</h3>
-                              <Badge variant={cp.status === 'ACTIVE' ? 'default' : 'secondary'} className='text-xs'>
-                                {cp.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
-                              </Badge>
-                            </div>
-                            <p className='text-sm text-muted-foreground'>{cp.description}</p>
-                          </div>
-                        </div>
-                        <div className='mt-2 grid grid-cols-2 gap-1 text-xs text-muted-foreground'>
+          <div className='rounded-lg border'>
+            <div className='border-b p-4'>
+              <h3 className='flex items-center gap-2 text-lg font-semibold'>
+                <MapPin className='h-5 w-5 text-primary' /> Danh sách điểm dừng
+              </h3>
+              <p className='text-sm text-muted-foreground'>Các điểm dừng hiện có trong hệ thống</p>
+            </div>
+            <ScrollArea className='h-[850px]'>
+              <table className='w-full'>
+                <thead className='sticky top-0 bg-muted text-left'>
+                  <tr>
+                    <th className='p-3 text-sm font-medium'>Tên điểm dừng</th>
+                    <th className='p-3 text-sm font-medium'>Trạng thái</th>
+                    <th className='p-3 text-sm font-medium'>Vị trí</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {checkpoints.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className='p-4 text-center text-muted-foreground'>
+                        Chưa có điểm dừng nào
+                      </td>
+                    </tr>
+                  ) : (
+                    checkpoints.map((cp) => (
+                      <tr key={cp.id} className='border-b hover:bg-muted/50'>
+                        <td className='p-3'>
                           <div>
-                            <span className='font-medium'>Latitude:</span> {cp.latitude}
+                            <p className='font-medium'>{cp.name}</p>
+                            <p className='text-xs text-muted-foreground'>{cp.description}</p>
                           </div>
-                          <div>
-                            <span className='font-medium'>Longitude:</span> {cp.longitude}
+                        </td>
+                        <td className='p-3'>
+                          <Badge variant={cp.status === 'ACTIVE' ? 'default' : 'secondary'} className='text-xs'>
+                            {cp.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                          </Badge>
+                        </td>
+                        <td className='p-3'>
+                          <div className='text-xs'>
+                            <p>
+                              <span className='font-medium'>Lat:</span> {cp.latitude}
+                            </p>
+                            <p>
+                              <span className='font-medium'>Long:</span> {cp.longitude}
+                            </p>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>

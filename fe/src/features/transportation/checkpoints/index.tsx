@@ -7,7 +7,7 @@ import { Main } from '@/components/layout/main'
 import { CheckpointsDialogs } from '@/features/transportation/checkpoints/components/checkpoints-dialogs'
 import { CheckpointsPrimaryButtons } from './components/checkpoints-primary-buttons'
 import { CheckpointsTable } from './components/checkpoints-table'
-import CreateCheckpointPage from './components/page/CreateCheckpointPage'
+import CreateCheckpointPage from './components/page/create-checkpoint-page'
 import { columns } from './components/table/checkpoints-columns'
 import CheckpointsProvider, { useCheckpoints } from './context/checkpoints-context'
 import { getAllCheckpoints } from './data/checkpoints'
@@ -48,12 +48,6 @@ function CheckpointsContent() {
             <TabsList>
               <TabsTrigger value='list'>Danh sách</TabsTrigger>
               <TabsTrigger value='create'>Tạo mới</TabsTrigger>
-              <TabsTrigger value='reports' disabled>
-                Reports
-              </TabsTrigger>
-              <TabsTrigger value='notifications' disabled>
-                Notifications
-              </TabsTrigger>
             </TabsList>
           </div>
           <TabsContent value='list' className='space-y-4'>

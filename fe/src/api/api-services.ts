@@ -24,6 +24,7 @@ interface ApiServices {
   }
   checkpoints: {
     get_all: () => Promise<any>
+    add_one: (checkpoint: any) => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -39,11 +40,6 @@ interface ApiServices {
   }
   parents: {
     getParentList: () => Promise<any>
-  }
-  transportation: {
-    checkpoints: {
-      list: () => Promise<any>
-    }
   }
   buses: {
     get_all: () => Promise<any>
@@ -117,6 +113,7 @@ export const API_SERVICES: ApiServices = {
   // -------------------------
   checkpoints: {
     get_all: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+    add_one: (checkpoint: any) => apiClient.post(API_ENDPOINTS.CHECKPOINTS.ADD_ONE, checkpoint),
   },
   //-------------------------
   // 4) STUDENTS
@@ -161,14 +158,6 @@ export const API_SERVICES: ApiServices = {
   //-------------------------
   parents: {
     getParentList: () => apiClient.get(API_ENDPOINTS.PARENTS.GET_PARENT_LIST),
-  },
-  //-------------------------
-  // 6) TRANSPORTATION
-  //-------------------------
-  transportation: {
-    checkpoints: {
-      list: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
-    },
   },
   //--------------------------
   // 7) Bus
