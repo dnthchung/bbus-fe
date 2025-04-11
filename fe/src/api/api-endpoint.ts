@@ -16,7 +16,7 @@ export const API_ENDPOINTS = {
     IMPORT_USER: '/user/import',
   },
   CHECKPOINTS: {
-    GET_ALL: '/checkpoints/list',
+    GET_ALL: '/checkpoint/list',
   },
   STUDENTS: {
     LIST: '/student/list',
@@ -36,7 +36,7 @@ export const API_ENDPOINTS = {
   },
   TRANSPORTATION: {
     CHECKPOINTS: {
-      GET_ALL: '/checkpoints/list',
+      GET_ALL: '/checkpoint/list',
     },
   },
   BUSES: {

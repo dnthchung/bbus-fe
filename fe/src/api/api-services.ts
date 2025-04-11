@@ -23,7 +23,7 @@ interface ApiServices {
     importUserFile: (file: File, roleName: string) => Promise<any>
   }
   checkpoints: {
-    getAll: () => Promise<any>
+    get_all: () => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -116,7 +116,7 @@ export const API_SERVICES: ApiServices = {
   // 3) CHECKPOINTS
   // -------------------------
   checkpoints: {
-    getAll: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+    get_all: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
   },
   //-------------------------
   // 4) STUDENTS

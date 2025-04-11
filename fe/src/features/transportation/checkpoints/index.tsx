@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
@@ -8,14 +9,33 @@ import { CheckpointsPrimaryButtons } from './components/checkpoints-primary-butt
 import { CheckpointsTable } from './components/checkpoints-table'
 import CreateCheckpointPage from './components/page/CreateCheckpointPage'
 import { columns } from './components/table/checkpoints-columns'
-import CheckpointsProvider from './context/checkpoints-context'
-import { checkpoints } from './data/checkpoints'
-import { checkpointListSchema } from './data/schema'
+import CheckpointsProvider, { useCheckpoints } from './context/checkpoints-context'
+import { getAllCheckpoints } from './data/checkpoints'
+import { Checkpoint } from './data/schema'
 
-export default function Checkpoints() {
-  const checkpointList = checkpointListSchema.parse(checkpoints)
+// Separate content component that uses the context
+function CheckpointsContent() {
+  const [checkpointList, setCheckpointList] = useState<Checkpoint[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch checkpoints on mount
+  useEffect(() => {
+    async function fetchCheckpoints() {
+      try {
+        setLoading(true)
+        const parsedCheckpoints = await getAllCheckpoints()
+        setCheckpointList(parsedCheckpoints)
+      } catch (error) {
+        console.error('Error fetching checkpoints in index.tsx:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCheckpoints()
+  }, [])
+
   return (
-    <CheckpointsProvider>
+    <>
       <Header fixed>
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
@@ -44,10 +64,7 @@ export default function Checkpoints() {
               </div>
               <CheckpointsPrimaryButtons />
             </div>
-            <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-              <CheckpointsTable data={checkpointList} columns={columns} />
-            </div>
-            <CheckpointsDialogs />
+            <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>{loading ? <div className='flex justify-center p-8'>Đang tải...</div> : <CheckpointsTable data={checkpointList} columns={columns} />}</div>
           </TabsContent>
           {/* ====================================== */}
           <TabsContent value='create' className='space-y-4'>
@@ -61,6 +78,16 @@ export default function Checkpoints() {
           </TabsContent>
         </Tabs>
       </Main>
+      <CheckpointsDialogs />
+    </>
+  )
+}
+
+// Main component that wraps the content with the provider
+export default function Checkpoints() {
+  return (
+    <CheckpointsProvider>
+      <CheckpointsContent />
     </CheckpointsProvider>
   )
 }
