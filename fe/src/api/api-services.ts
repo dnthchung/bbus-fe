@@ -34,7 +34,8 @@ interface ApiServices {
     update: (student: any) => Promise<any>
     updateParent: (student: any) => Promise<any>
     updateStatus: (studentId: string, status: string) => Promise<any>
-    updateAvatar: (studentId: string, avatarFile: File) => Promise<any> // New method
+    updateAvatar: (studentId: string, avatarFile: File) => Promise<any>
+    importStudentFile: (file: File) => Promise<any>
   }
   parents: {
     getParentList: () => Promise<any>
@@ -139,6 +140,16 @@ export const API_SERVICES: ApiServices = {
       formData.append('avatar', avatarFile)
 
       return apiClient.patch(API_ENDPOINTS.STUDENTS.UPDATE_AVATAR, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
+    importStudentFile: (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      return apiClient.post(API_ENDPOINTS.STUDENTS.IMPORT_STUDENT, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
     UPDATE_AVATAR: '/student/update-avatar', // New endpoint for avatar update
     GET_STUDENT_LIST: '/student/list',
     GET_STUDENT_LIST_BY_ENTITY_ID: (entityId: string) => `/student/list/${entityId}`,
+    IMPORT_STUDENT: '/student/import',
   },
   PARENTS: {
     GET_PARENT_LIST: '/parent/list',
