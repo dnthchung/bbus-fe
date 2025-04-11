@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     ADD_ONE: '/user/add',
     DELETE_ONE: (userId: string) => `/user/del/${userId}`,
     GET_ENTITY_BY_USER_ID: (userId: string) => `/user/entity/${userId}`,
+    IMPORT_USER: '/user/import',
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoints/list',

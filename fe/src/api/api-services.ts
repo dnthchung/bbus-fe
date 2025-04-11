@@ -20,6 +20,7 @@ interface ApiServices {
     addOne: (user: any) => Promise<any>
     deleteOne: (userId: string) => Promise<any>
     getUserEntity: (userId: string) => Promise<any>
+    importUserFile: (file: File, roleName: string) => Promise<any>
   }
   checkpoints: {
     getAll: () => Promise<any>
@@ -98,6 +99,17 @@ export const API_SERVICES: ApiServices = {
     addOne: (user: any) => apiClient.post(API_ENDPOINTS.USERS.ADD_ONE, user),
     deleteOne: (userId: string) => apiClient.delete(API_ENDPOINTS.USERS.DELETE_ONE(userId)),
     getUserEntity: (userId: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ENTITY_BY_USER_ID(userId)),
+    importUserFile: (file: File, roleName: string) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('roleName', roleName)
+
+      return apiClient.post(API_ENDPOINTS.USERS.IMPORT_USER, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
   },
   // -------------------------
   // 3) CHECKPOINTS
