@@ -100,7 +100,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   useEffect(() => {
     try {
       const role = localStorage.getItem('role')
-      console.log('role => ', role)
+      // console.log('role => ', role)
       setCurrentUserRole(role || null)
     } catch (error) {
       console.error('Error reading user role from localStorage:', error)

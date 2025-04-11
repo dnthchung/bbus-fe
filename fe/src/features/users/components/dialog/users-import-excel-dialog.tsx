@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,13 +10,15 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ImportErrorDialog } from '@/components/common/import-error-dialog'
 import { allUsersExceptAdminsTypes, allAdminUsersTypes } from '@/features/users/data'
+import { userTypes } from '@/features/users/data'
 import { useUsers } from '../../context/users-context'
 
 // Các định dạng file cho phép
 const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm', 'csv', 'txt', 'tsv', 'xlsb', 'ods', 'xml', 'html', 'pdf', 'xla', 'xlam']
 
-// Zod schema cho form (file optional để không lỗi khi xóa)
+// Zod schema cho form
 const fileSchema = z
   .instanceof(FileList)
   .refine((files) => files.length === 1, {
@@ -47,7 +49,10 @@ interface Props {
 
 export function UsersImportDialog({ open, onOpenChange }: Props) {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
+  const [importErrors, setImportErrors] = useState<Record<string, string>>({})
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false)
   const { refreshUsers } = useUsers()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const form = useForm<UserImportForm>({
     resolver: zodResolver(formSchema),
@@ -64,19 +69,33 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
     return []
   }, [currentUserRole])
 
+  // Hàm xử lý xóa file
+  const handleClearFile = () => {
+    // Reset giá trị trong form
+    form.setValue('file', undefined, { shouldValidate: true })
+
+    // Reset trực tiếp input element để UI cũng được cập nhật
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
   const onSubmit = async (values: UserImportForm) => {
     // 🛑 Kiểm tra nếu chưa có file
     if (!values.file) {
       toast({
         title: 'Vui lòng chọn file',
         description: 'Bạn cần tải lên file trước khi nhập.',
-        variant: 'destructive',
+        variant: 'deny',
       })
       return
     }
 
     try {
       await API_SERVICES.users.importUserFile(values.file, values.role)
+
+      // Tìm label tiếng Việt của role đã chọn
+      const roleLabel = userTypes.find((role) => role.value === values.role)?.labelVi || values.role
 
       toast({
         title: 'Tải file thành công',
@@ -86,130 +105,125 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
               <strong>File:</strong> {values.file.name}
             </div>
             <div>
-              <strong>Vai trò:</strong> {values.role}
+              <strong>Vai trò:</strong> {roleLabel}
             </div>
           </div>
         ),
         variant: 'success',
       })
-
       form.reset()
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
       onOpenChange(false)
       refreshUsers()
     } catch (error: any) {
       const response = error?.response?.data
       const details = response?.details
-
       if (details && typeof details === 'object') {
-        const messages = Object.entries(details).map(([line, msg]) => `• ${msg}`)
-
+        setImportErrors(details)
+        setIsErrorDialogOpen(true)
         toast({
           title: 'Import thất bại',
-          description: (
-            <div className='max-h-60 overflow-y-auto whitespace-pre-line text-sm'>
-              <strong>{response?.message || 'Có lỗi xảy ra:'}</strong>
-              <ul className='mt-1 list-disc pl-5 text-red-600'>
-                {messages.map((msg, i) => (
-                  <li key={i}>{msg}</li>
-                ))}
-              </ul>
-            </div>
-          ),
-          variant: 'destructive',
+          description: `Có ${Object.keys(details).length} lỗi.`,
+          variant: 'deny',
         })
       } else {
         toast({
           title: 'Lỗi nhập danh sách',
           description: response?.message || 'Đã xảy ra lỗi không xác định.',
-          variant: 'destructive',
+          variant: 'deny',
         })
       }
     }
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(state) => {
-        form.reset()
-        onOpenChange(state)
-      }}
-    >
-      <DialogContent className='sm:max-w-md'>
-        <DialogHeader className='text-left'>
-          <DialogTitle>Nhập danh sách tài khoản</DialogTitle>
-          <DialogDescription>
-            Tải lên file chứa danh sách tài khoản và chọn vai trò tương ứng.
-            <br />
-            Hỗ trợ định dạng: <code>.xls, .xlsx, .csv, .txt, .pdf...</code>
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form id='user-import-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* Dropdown chọn role */}
-            <FormField
-              control={form.control}
-              name='role'
-              render={({ field }) => (
-                <FormItem className='w-1/2'>
-                  <FormLabel>Vai trò người dùng</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Chọn vai trò...' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roleOptions.map((role) => (
-                        <SelectItem key={role.value} value={role.value}>
-                          {role.labelVi}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* File upload + xóa file */}
-            <FormField
-              control={form.control}
-              name='file'
-              render={({ field }) => {
-                const selectedFile = form.watch('file')
-
-                return (
-                  <FormItem>
-                    <FormLabel>File Excel</FormLabel>
-                    <FormControl>
-                      <div className='flex items-center gap-2'>
-                        <input type='file' accept={allowedExtensions.map((e) => `.${e}`).join(',')} onChange={(e) => field.onChange(e.target.files)} />
-                        {selectedFile && (
-                          <Button type='button' size='sm' variant='ghost' onClick={() => form.setValue('file', undefined)}>
-                            Xóa
-                          </Button>
-                        )}
-                      </div>
-                    </FormControl>
+    <>
+      <Dialog
+        open={open}
+        onOpenChange={(state) => {
+          form.reset()
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+          }
+          onOpenChange(state)
+        }}
+      >
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader className='text-left'>
+            <DialogTitle>Nhập danh sách tài khoản</DialogTitle>
+            <DialogDescription>
+              Tải lên file chứa danh sách tài khoản và chọn vai trò tương ứng.
+              <br />
+              Hỗ trợ định dạng: <code>.xls, .xlsx, .csv, .txt, .pdf...</code>
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form id='user-import-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+              {/* Dropdown chọn role */}
+              <FormField
+                control={form.control}
+                name='role'
+                render={({ field }) => (
+                  <FormItem className='w-1/2'>
+                    <FormLabel>Vai trò người dùng</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Chọn vai trò...' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roleOptions.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            {role.labelVi}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
-                )
-              }}
-            />
-          </form>
-        </Form>
+                )}
+              />
 
-        <DialogFooter className='gap-y-2'>
-          <DialogClose asChild>
-            <Button variant='outline'>Hủy</Button>
-          </DialogClose>
-          <Button type='submit' form='user-import-form'>
-            Nhập
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              {/* File upload + xóa file */}
+              <FormField
+                control={form.control}
+                name='file'
+                render={({ field }) => {
+                  const selectedFile = form.watch('file')
+                  return (
+                    <FormItem>
+                      <FormLabel>File Excel</FormLabel>
+                      <FormControl>
+                        <div className='flex items-center gap-2'>
+                          <input type='file' ref={fileInputRef} accept={allowedExtensions.map((e) => `.${e}`).join(',')} onChange={(e) => field.onChange(e.target.files)} />
+                          {selectedFile && (
+                            <Button type='button' size='sm' variant='ghost' onClick={handleClearFile}>
+                              Xóa
+                            </Button>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
+              />
+            </form>
+          </Form>
+          <DialogFooter className='gap-y-2'>
+            <DialogClose asChild>
+              <Button variant='outline'>Hủy</Button>
+            </DialogClose>
+            <Button type='submit' form='user-import-form'>
+              Nhập
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <ImportErrorDialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen} errors={importErrors} />
+    </>
   )
 }
