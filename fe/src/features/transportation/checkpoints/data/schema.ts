@@ -19,8 +19,6 @@ export const checkpointSchema = z.object({
   longitude: z.string().regex(/^[-+]?[0-9]*\.?[0-9]+$/, {
     message: 'Longitude must be a valid coordinate',
   }), // Kinh độ (longitude) dạng số
-  createdAt: z.coerce.date(), // Thời gian tạo
-  updatedAt: z.coerce.date(), // Thời gian cập nhật gần nhất
   status: checkpointStatusSchema, // Trạng thái điểm dừng
 })
 

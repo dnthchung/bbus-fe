@@ -1,24 +1,35 @@
-//path  :fe/src/types/bus.ts
 export interface BusStop {
-  id: number
+  id: string
   name: string
+  description?: string
   lat: number
   lng: number
   studentCount: number
-  buses?: number[] // IDs of buses that pass through this stop
+  status?: string
+  buses?: string[] // Optional array of bus IDs that pass through this stop
 }
 
 export interface Bus {
-  id: number
+  id: string
+  name: string
+  licensePlate?: string
+  driverName?: string
+  driverPhone?: string
+  assistantName?: string
+  assistantPhone?: string
   capacity: number
   registeredCount: number
-  route: BusStop[]
+  routeId?: string
+  routeCode?: string
+  status?: string
+  route?: string[] // Array of checkpoint IDs
 }
 
 export interface Student {
-  id: number
+  id: string
   name: string
-  stopId: number
-  busId?: number
-  status: 'waiting' | 'registered'
+  rollNumber?: string
+  status: 'registered' | 'waiting'
+  busId?: string
+  busName?: string
 }

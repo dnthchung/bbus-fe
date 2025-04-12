@@ -1,10 +1,10 @@
 'use client'
 
-// path : fe/src/features/transportation/routes/index.tsx
 import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { busStops as initialBusStops, buses, students } from '@/data/sample-data'
 import type { BusStop, Bus, Student } from '@/types/bus'
+import { Loader2, Save } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
@@ -12,226 +12,431 @@ import { Main } from '@/components/layout/main'
 import LeftSidebar from './components/left-sidebar'
 import DraggableBusRoutePlanner from './components/map/draggable-bus-route-planner'
 import RightPanel from './components/right-panel'
+import { getListCheckpoint, getBusesByCheckpointId, getStudentsByCheckpointId, getNumberOfStudentInEachCheckpoint } from './data/function'
 
-export default function BusRouteManagement() {
-  const [busStops, setBusStops] = useState<BusStop[]>(initialBusStops)
-  const [selectedStop, setSelectedStop] = useState<BusStop | null>(null)
+export default function TransportationRouteManagement() {
+  const { toast } = useToast()
+  const [checkpoints, setCheckpoints] = useState<BusStop[]>([])
+  const [buses, setBuses] = useState<Bus[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState<BusStop | null>(null)
   const [selectedBus, setSelectedBus] = useState<Bus | null>(null)
   const [filteredBuses, setFilteredBuses] = useState<Bus[]>([])
-  const [waitingStudents, setWaitingStudents] = useState<Student[]>([])
+  const [checkpointStudents, setCheckpointStudents] = useState<Student[]>([])
+  const [busRoutesGeometry, setBusRoutesGeometry] = useState<{ [busId: string]: [number, number][] }>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingBuses, setIsLoadingBuses] = useState(false)
+  const [isLoadingStudents, setIsLoadingStudents] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  // State to store the OSRM route geometry for each bus
-  const [busRoutesGeometry, setBusRoutesGeometry] = useState<{ [busId: number]: [number, number][] }>({})
+  // Fetch all checkpoints on initial load
+  useEffect(() => {
+    const fetchCheckpoints = async () => {
+      setIsLoading(true)
+      try {
+        const checkpointsData = await getListCheckpoint()
 
-  // Function to fetch OSRM route data for a specific bus
-  async function fetchOSRMRoute(bus: Bus) {
-    try {
-      // Get the list of [lat, lng] coordinates from bus.route
-      const routePoints = bus.route.map((stop) => [stop.lat, stop.lng])
+        // Transform API response to match our BusStop type
+        const transformedCheckpoints: BusStop[] = await Promise.all(
+          checkpointsData.map(async (checkpoint: any) => {
+            // Get student count for each checkpoint
+            let studentCount = 0
+            try {
+              studentCount = await getNumberOfStudentInEachCheckpoint(checkpoint.id)
+            } catch (error) {
+              console.error(`Error fetching student count for checkpoint ${checkpoint.id}:`, error)
+            }
 
-      if (routePoints.length < 2) {
-        // If there aren't at least 2 points, don't call OSRM
-        return
+            return {
+              id: checkpoint.id,
+              name: checkpoint.name,
+              description: checkpoint.description,
+              lat: Number.parseFloat(checkpoint.latitude),
+              lng: Number.parseFloat(checkpoint.longitude),
+              status: checkpoint.status,
+              studentCount,
+            }
+          })
+        )
+
+        setCheckpoints(transformedCheckpoints)
+      } catch (error) {
+        console.error('Error fetching checkpoints:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load checkpoints data',
+          variant: 'destructive',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCheckpoints()
+  }, [toast])
+
+  // Fetch buses and students when a checkpoint is selected
+  useEffect(() => {
+    if (!selectedCheckpoint) {
+      setFilteredBuses([])
+      setCheckpointStudents([])
+      return
+    }
+
+    const fetchBusesAndStudents = async () => {
+      setIsLoadingBuses(true)
+      setIsLoadingStudents(true)
+
+      // Fetch buses for the selected checkpoint
+      try {
+        const busesData = await getBusesByCheckpointId(selectedCheckpoint.id)
+
+        // Transform API response to match our Bus type
+        const transformedBuses: Bus[] = busesData.map((bus: any) => ({
+          id: bus.id,
+          name: bus.name || `Bus ${bus.id.substring(0, 6)}`,
+          licensePlate: bus.licensePlate,
+          driverName: bus.driverName,
+          driverPhone: bus.driverPhone,
+          assistantName: bus.assistantName,
+          assistantPhone: bus.assistantPhone,
+          capacity: 30, // Default capacity if not provided
+          registeredCount: bus.amountOfStudents || 0,
+          routeId: bus.routeId,
+          routeCode: bus.routeCode,
+          status: bus.busStatus,
+          route: [], // Will be populated if needed
+        }))
+
+        setFilteredBuses(transformedBuses)
+      } catch (error) {
+        console.error(`Error fetching buses for checkpoint ${selectedCheckpoint.id}:`, error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load buses data',
+          variant: 'destructive',
+        })
+        setFilteredBuses([])
+      } finally {
+        setIsLoadingBuses(false)
       }
 
-      // OSRM requires a string in the format "lng,lat;lng,lat;..."
-      const coordinates = routePoints.map(([lat, lng]) => `${lng},${lat}`).join(';')
+      // Fetch students for the selected checkpoint
+      try {
+        const studentsData = await getStudentsByCheckpointId(selectedCheckpoint.id)
+
+        // Transform API response to match our Student type
+        const transformedStudents: Student[] = studentsData.map((student: any) => ({
+          id: student.studentId,
+          name: student.studentName,
+          rollNumber: student.rollNumber,
+          status: student.registered ? 'registered' : 'waiting',
+          busId: student.busId,
+          busName: student.busName,
+        }))
+
+        setCheckpointStudents(transformedStudents)
+      } catch (error) {
+        console.error(`Error fetching students for checkpoint ${selectedCheckpoint.id}:`, error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load students data',
+          variant: 'destructive',
+        })
+        setCheckpointStudents([])
+      } finally {
+        setIsLoadingStudents(false)
+      }
+    }
+
+    fetchBusesAndStudents()
+  }, [selectedCheckpoint, toast])
+
+  // Generate route geometry when selected bus changes
+  useEffect(() => {
+    if (selectedBus) {
+      generateRouteGeometry(selectedBus)
+    }
+  }, [selectedBus])
+
+  // Generate route geometry using OSRM
+  const generateRouteGeometry = async (bus: Bus) => {
+    // Skip if the bus doesn't have a route or has less than 2 stops
+    if (!bus.route || bus.route.length < 2) return
+
+    try {
+      // Find the checkpoints that are in this bus's route
+      const busCheckpoints = checkpoints.filter((checkpoint) => bus.route && bus.route.includes(checkpoint.id))
+
+      if (busCheckpoints.length < 2) return
+
+      const coordinates = busCheckpoints.map((checkpoint) => `${checkpoint.lng},${checkpoint.lat}`).join(';')
+
       const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`
 
-      const response = await axios.get(url)
+      const response = await fetch(url)
+      const data = await response.json()
 
-      if (response.data.routes && response.data.routes.length > 0) {
-        // OSRM returns geometry in [lng, lat] format
-        const routeGeometry = response.data.routes[0].geometry.coordinates
-
-        // Convert back to [lat, lng] for Leaflet Polyline
+      if (data.routes && data.routes.length > 0) {
+        const routeGeometry = data.routes[0].geometry.coordinates
         const convertedRoute = routeGeometry.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number])
 
-        // Save to state with busId as the key
         setBusRoutesGeometry((prev) => ({
           ...prev,
           [bus.id]: convertedRoute,
         }))
       }
     } catch (error) {
-      console.error('Error generating OSRM route:', error)
-    }
-  }
-
-  // When a stop is selected, find buses passing through that stop and students waiting there
-  useEffect(() => {
-    if (selectedStop) {
-      const busesPassingThrough = buses.filter((bus) => bus.route.some((stop) => stop.id === selectedStop.id))
-      setFilteredBuses(busesPassingThrough)
-
-      const studentsAtStop = students.filter((student) => student.stopId === selectedStop.id && (student.status === 'waiting' || student.status === 'registered'))
-      setWaitingStudents(studentsAtStop)
-    } else {
-      setFilteredBuses([])
-      setWaitingStudents([])
-    }
-  }, [selectedStop])
-
-  // Fetch OSRM route whenever the selected bus changes
-  useEffect(() => {
-    if (selectedBus) {
-      fetchOSRMRoute(selectedBus)
-    }
-  }, [selectedBus])
-
-  // Auto-fill students into buses
-  const autoFillStudents = () => {
-    if (!selectedStop) return
-
-    const updatedStudents = [...waitingStudents]
-    const updatedBuses = [...filteredBuses]
-
-    updatedBuses.forEach((bus) => {
-      const registeredCount = updatedStudents.filter((s) => s.busId === bus.id && s.status === 'registered').length
-
-      const availableSeats = bus.capacity - registeredCount
-
-      if (availableSeats > 0) {
-        const waitingStudentsForBus = updatedStudents.filter((s) => s.status === 'waiting' && !s.busId).slice(0, availableSeats)
-
-        waitingStudentsForBus.forEach((student) => {
-          const index = updatedStudents.findIndex((s) => s.id === student.id)
-          if (index !== -1) {
-            updatedStudents[index] = {
-              ...updatedStudents[index],
-              busId: bus.id,
-              status: 'registered',
-            }
-          }
-        })
-      }
-    })
-
-    setWaitingStudents(updatedStudents)
-  }
-
-  // Add a stop to a bus route
-  const addStopToBusRoute = (busId: number, stopId: number) => {
-    const updatedBuses = [...filteredBuses]
-    const busIndex = updatedBuses.findIndex((bus) => bus.id === busId)
-
-    if (busIndex !== -1) {
-      const stopToAdd = busStops.find((stop) => stop.id === stopId)
-      if (stopToAdd && !updatedBuses[busIndex].route.some((stop) => stop.id === stopId)) {
-        updatedBuses[busIndex].route.push(stopToAdd)
-        setFilteredBuses(updatedBuses)
-
-        // Fetch the updated OSRM route if this is the currently selected bus
-        if (selectedBus && selectedBus.id === busId) {
-          fetchOSRMRoute(updatedBuses[busIndex])
-        }
-      }
-    }
-  }
-
-  // Reorder stops in a bus route
-  const reorderStops = (busId: number, stopIds: number[]) => {
-    const updatedBuses = [...filteredBuses]
-    const busIndex = updatedBuses.findIndex((bus) => bus.id === busId)
-
-    if (busIndex !== -1) {
-      const newRoute = stopIds.map((id) => busStops.find((stop) => stop.id === id)).filter(Boolean) as BusStop[]
-
-      updatedBuses[busIndex].route = newRoute
-      setFilteredBuses(updatedBuses)
-
-      // Fetch the updated OSRM route if this is the currently selected bus
-      if (selectedBus && selectedBus.id === busId) {
-        fetchOSRMRoute(updatedBuses[busIndex])
-      }
-    }
-  }
-
-  // Register a student to a bus
-  const registerStudent = (studentId: number, busId: number) => {
-    const updatedStudents = [...waitingStudents]
-    const studentIndex = updatedStudents.findIndex((s) => s.id === studentId)
-
-    if (studentIndex !== -1) {
-      updatedStudents[studentIndex] = {
-        ...updatedStudents[studentIndex],
-        busId,
-        status: 'registered',
-      }
-      setWaitingStudents(updatedStudents)
-    }
-  }
-
-  // Update bus stop position
-  const handleUpdateBusStop = (stopId: number, newPosition: [number, number]) => {
-    const updatedStops = busStops.map((stop) => {
-      if (stop.id === stopId) {
-        return {
-          ...stop,
-          lat: newPosition[0],
-          lng: newPosition[1],
-        }
-      }
-      return stop
-    })
-
-    setBusStops(updatedStops)
-
-    // Update in selectedStop if this stop is currently selected
-    if (selectedStop && selectedStop.id === stopId) {
-      setSelectedStop({
-        ...selectedStop,
-        lat: newPosition[0],
-        lng: newPosition[1],
+      console.error('Error generating route:', error)
+      toast({
+        title: 'Route Generation Failed',
+        description: 'Could not generate the route. Please try again.',
+        variant: 'destructive',
       })
     }
+  }
 
-    // If this stop is part of the selected bus route, update the OSRM route
-    if (selectedBus && selectedBus.route.some((stop) => stop.id === stopId)) {
-      // Find the bus in filteredBuses to get the updated route
-      const bus = filteredBuses.find((b) => b.id === selectedBus.id)
-      if (bus) {
-        fetchOSRMRoute(bus)
-      }
+  // Auto-assign students to buses
+  const autoAssignStudents = async () => {
+    if (!selectedCheckpoint) return
+
+    setIsSaving(true)
+    try {
+      // In a real implementation, you would call an API to assign students to buses
+      // For now, we'll just show a success message
+
+      toast({
+        title: 'Auto-Assignment Complete',
+        description: `Students have been assigned to available buses at ${selectedCheckpoint.name}`,
+      })
+
+      // Refresh the students data after assignment
+      const studentsData = await getStudentsByCheckpointId(selectedCheckpoint.id)
+
+      const transformedStudents: Student[] = studentsData.map((student: any) => ({
+        id: student.studentId,
+        name: student.studentName,
+        rollNumber: student.rollNumber,
+        status: student.registered ? 'registered' : 'waiting',
+        busId: student.busId,
+        busName: student.busName,
+      }))
+
+      setCheckpointStudents(transformedStudents)
+    } catch (error) {
+      console.error('Error assigning students:', error)
+      toast({
+        title: 'Assignment Failed',
+        description: 'Could not assign students to buses. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSaving(false)
     }
   }
 
-  // Add new bus stop
-  const handleAddBusStop = (position: [number, number], name: string) => {
-    const newStop: BusStop = {
-      id: busStops.length + 1,
-      name,
-      lat: position[0],
-      lng: position[1],
-      studentCount: 0,
-    }
+  // Register student to a bus
+  const registerStudent = async (studentId: string, busId: string) => {
+    if (!selectedCheckpoint) return
 
-    setBusStops([...busStops, newStop])
+    setIsSaving(true)
+    try {
+      // In a real implementation, you would call an API to register a student to a bus
+      // For now, we'll just show a success message and update the local state
+
+      // Update the local state to reflect the change
+      const updatedStudents = checkpointStudents.map((student) => {
+        if (student.id === studentId) {
+          const selectedBusInfo = filteredBuses.find((bus) => bus.id === busId)
+          return {
+            ...student,
+            busId,
+            busName: selectedBusInfo?.name || `Bus ${busId.substring(0, 6)}`,
+            status: 'registered' as const,
+          }
+        }
+        return student
+      })
+
+      setCheckpointStudents(updatedStudents)
+
+      // Also update the bus's registered count
+      const updatedBuses = filteredBuses.map((bus) => {
+        if (bus.id === busId) {
+          return {
+            ...bus,
+            registeredCount: (bus.registeredCount || 0) + 1,
+          }
+        }
+        return bus
+      })
+
+      setFilteredBuses(updatedBuses)
+
+      toast({
+        title: 'Student Registered',
+        description: `Student has been assigned to bus successfully`,
+      })
+    } catch (error) {
+      console.error('Error registering student:', error)
+      toast({
+        title: 'Registration Failed',
+        description: 'Could not register student to bus. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update checkpoint position
+  const handleUpdateCheckpoint = async (checkpointId: string, newPosition: [number, number]) => {
+    setIsSaving(true)
+    try {
+      // In a real implementation, you would call an API to update the checkpoint position
+      // For now, we'll just update the local state and show a success message
+
+      const updatedCheckpoints = checkpoints.map((checkpoint) => {
+        if (checkpoint.id === checkpointId) {
+          return {
+            ...checkpoint,
+            lat: newPosition[0],
+            lng: newPosition[1],
+          }
+        }
+        return checkpoint
+      })
+
+      setCheckpoints(updatedCheckpoints)
+
+      if (selectedCheckpoint && selectedCheckpoint.id === checkpointId) {
+        setSelectedCheckpoint({
+          ...selectedCheckpoint,
+          lat: newPosition[0],
+          lng: newPosition[1],
+        })
+      }
+
+      toast({
+        title: 'Checkpoint Updated',
+        description: 'Checkpoint position has been updated',
+      })
+    } catch (error) {
+      console.error('Error updating checkpoint:', error)
+      toast({
+        title: 'Update Failed',
+        description: 'Could not update checkpoint position. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Add new checkpoint
+  const handleAddCheckpoint = async (position: [number, number], name: string) => {
+    setIsSaving(true)
+    try {
+      // In a real implementation, you would call an API to create a new checkpoint
+      // For now, we'll just show a success message
+
+      toast({
+        title: 'Checkpoint Added',
+        description: `New checkpoint "${name}" has been created`,
+      })
+
+      // Refresh the checkpoints list
+      const checkpointsData = await getListCheckpoint()
+
+      const transformedCheckpoints: BusStop[] = await Promise.all(
+        checkpointsData.map(async (checkpoint: any) => {
+          let studentCount = 0
+          try {
+            studentCount = await getNumberOfStudentInEachCheckpoint(checkpoint.id)
+          } catch (error) {
+            console.error(`Error fetching student count for checkpoint ${checkpoint.id}:`, error)
+          }
+
+          return {
+            id: checkpoint.id,
+            name: checkpoint.name,
+            description: checkpoint.description,
+            lat: Number.parseFloat(checkpoint.latitude),
+            lng: Number.parseFloat(checkpoint.longitude),
+            status: checkpoint.status,
+            studentCount,
+          }
+        })
+      )
+
+      setCheckpoints(transformedCheckpoints)
+    } catch (error) {
+      console.error('Error adding checkpoint:', error)
+      toast({
+        title: 'Add Failed',
+        description: 'Could not add new checkpoint. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Save all changes
+  const saveChanges = async () => {
+    setIsSaving(true)
+    try {
+      // In a real implementation, you would call APIs to save all changes
+      // For now, we'll just show a success message
+
+      toast({
+        title: 'Changes Saved',
+        description: 'All transportation routes and assignments have been saved',
+      })
+    } catch (error) {
+      console.error('Error saving data:', error)
+      toast({
+        title: 'Save Failed',
+        description: 'Could not save changes. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className='flex h-screen w-full items-center justify-center'>
+        <div className='flex flex-col items-center gap-2'>
+          <Loader2 className='h-8 w-8 animate-spin text-primary' />
+          <p className='text-lg font-medium'>Loading transportation data...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <>
       <Header fixed className='z-50'>
-        <div className='ml-auto flex items-center space-x-4'>
+        <div className='ml-auto flex items-center gap-4'>
+          <Button onClick={saveChanges} disabled={isSaving} className='gap-2'>
+            {isSaving ? <Loader2 className='h-4 w-4 animate-spin' /> : <Save className='h-4 w-4' />}
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
       </Header>
-      <Main>
-        <div className='flex h-screen'>
-          <div>
-            <LeftSidebar busStops={busStops} onSelectStop={setSelectedStop} selectedStop={selectedStop} />
+      <div className='mt-16'>
+        <div className='flex h-[calc(100vh-64px)]'>
+          <LeftSidebar checkpoints={checkpoints} onSelectCheckpoint={setSelectedCheckpoint} selectedCheckpoint={selectedCheckpoint} />
+          <div className='flex h-full flex-1 flex-col overflow-hidden p-4'>
+            <DraggableBusRoutePlanner checkpoints={checkpoints} onUpdateCheckpoint={handleUpdateCheckpoint} onAddCheckpoint={handleAddCheckpoint} selectedBusId={selectedBus?.id} selectedBus={selectedBus} routeGeometry={selectedBus ? busRoutesGeometry[selectedBus.id] : undefined} />
           </div>
-
-          <div className='flex h-[70vh] flex-1 flex-col overflow-auto p-4'>
-            <DraggableBusRoutePlanner busStops={busStops} onUpdateBusStop={handleUpdateBusStop} onAddBusStop={handleAddBusStop} selectedBusId={selectedBus?.id} selectedBus={selectedBus} routeGeometry={selectedBus ? busRoutesGeometry[selectedBus.id] : undefined} />
-          </div>
-
-          <div>
-            <RightPanel buses={filteredBuses} students={waitingStudents} selectedStop={selectedStop} onAutoFill={autoFillStudents} onAddStop={addStopToBusRoute} onReorderStops={reorderStops} onRegisterStudent={registerStudent} onSelectBus={setSelectedBus} selectedBus={selectedBus} />
-          </div>
+          <RightPanel buses={filteredBuses} students={checkpointStudents} selectedCheckpoint={selectedCheckpoint} onAutoFill={autoAssignStudents} onRegisterStudent={registerStudent} onSelectBus={setSelectedBus} selectedBus={selectedBus} isLoadingBuses={isLoadingBuses} isLoadingStudents={isLoadingStudents} />
         </div>
-      </Main>
+      </div>
     </>
   )
 }

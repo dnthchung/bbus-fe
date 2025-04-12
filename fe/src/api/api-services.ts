@@ -20,9 +20,12 @@ interface ApiServices {
     addOne: (user: any) => Promise<any>
     deleteOne: (userId: string) => Promise<any>
     getUserEntity: (userId: string) => Promise<any>
+    importUserFile: (file: File, roleName: string) => Promise<any>
   }
   checkpoints: {
-    getAll: () => Promise<any>
+    get_all: () => Promise<any>
+    add_one: (checkpoint: any) => Promise<any>
+    count_students_of_one_checkpoint: (checkpointId: string) => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -33,21 +36,19 @@ interface ApiServices {
     update: (student: any) => Promise<any>
     updateParent: (student: any) => Promise<any>
     updateStatus: (studentId: string, status: string) => Promise<any>
-    updateAvatar: (studentId: string, avatarFile: File) => Promise<any> // New method
+    updateAvatar: (studentId: string, avatarFile: File) => Promise<any>
+    importStudentFile: (file: File) => Promise<any>
+    get_list_student_by_checkpoint_id: (checkpointId: string) => Promise<any>
   }
   parents: {
     getParentList: () => Promise<any>
-  }
-  transportation: {
-    checkpoints: {
-      list: () => Promise<any>
-    }
   }
   buses: {
     get_all: () => Promise<any>
     get_detail: (busId: string) => Promise<any>
     update_status: (busId: string, status: string) => Promise<any>
     update_max_capacity_for_all: (params: { maxCapacity: number; checkpointId?: string }) => Promise<any>
+    get_list_bus_by_checkpoint_id: (checkpointId: string) => Promise<any>
   }
   drivers: {
     get_all: () => Promise<any>
@@ -98,12 +99,25 @@ export const API_SERVICES: ApiServices = {
     addOne: (user: any) => apiClient.post(API_ENDPOINTS.USERS.ADD_ONE, user),
     deleteOne: (userId: string) => apiClient.delete(API_ENDPOINTS.USERS.DELETE_ONE(userId)),
     getUserEntity: (userId: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ENTITY_BY_USER_ID(userId)),
+    importUserFile: (file: File, roleName: string) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('roleName', roleName)
+
+      return apiClient.post(API_ENDPOINTS.USERS.IMPORT_USER, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
   },
   // -------------------------
   // 3) CHECKPOINTS
   // -------------------------
   checkpoints: {
-    getAll: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+    get_all: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+    add_one: (checkpoint: any) => apiClient.post(API_ENDPOINTS.CHECKPOINTS.ADD_ONE, checkpoint),
+    count_students_of_one_checkpoint: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.COUNT_STUDENTS_OF_ONE_CHECKPOINT}?checkpointId=${checkpointId}`),
   },
   //-------------------------
   // 4) STUDENTS
@@ -132,20 +146,23 @@ export const API_SERVICES: ApiServices = {
         },
       })
     },
+    importStudentFile: (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      return apiClient.post(API_ENDPOINTS.STUDENTS.IMPORT_STUDENT, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
+    get_list_student_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_LIST_STUDENT_BY_CHECKPOINT_ID}?checkpointId=${checkpointId}`),
   },
   //-------------------------
   // 5) PARENTS
   //-------------------------
   parents: {
     getParentList: () => apiClient.get(API_ENDPOINTS.PARENTS.GET_PARENT_LIST),
-  },
-  //-------------------------
-  // 6) TRANSPORTATION
-  //-------------------------
-  transportation: {
-    checkpoints: {
-      list: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
-    },
   },
   //--------------------------
   // 7) Bus
@@ -154,16 +171,13 @@ export const API_SERVICES: ApiServices = {
   buses: {
     get_all: () => apiClient.get(API_ENDPOINTS.BUSES.GET_ALL),
     get_detail: (busId: string) => apiClient.get(API_ENDPOINTS.BUSES.GET_DETAIL(busId)),
-    update_status: (busId: string, status: string) =>
-      apiClient.patch(API_ENDPOINTS.BUSES.UPDATE_STATUS, {
-        id: busId,
-        status: status,
-      }),
+    update_status: (busId: string, status: string) => apiClient.patch(API_ENDPOINTS.BUSES.UPDATE_STATUS, { id: busId, status: status }),
     update_max_capacity_for_all: (params: { maxCapacity: number }) => {
       const url = new URL(API_ENDPOINTS.BUSES.UPDATE_MAX_CAPACITY_FOR_ALL, import.meta.env.VITE_API_URL_BBUS)
       url.searchParams.append('maxCapacity', params.maxCapacity.toString())
       return apiClient.post(url.pathname + url.search)
     },
+    get_list_bus_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.BUSES.GET_LIST_BUS_BY_CHECKPOINT_ID}?checkpointId=${checkpointId}`),
   },
   //--------------------------
   // 8) Driver
@@ -180,7 +194,6 @@ export const API_SERVICES: ApiServices = {
   //--------------------------
   // 10) Schedule
   //--------------------------
-
   bus_schedule: {
     get_dates_by_month: (month: string) => apiClient.get(`${API_ENDPOINTS.SCHEDULE.GET_DATES_BY_MONTH}?month=${month}&size=1000`),
     assign_batch: (dates: string[]) => apiClient.post(API_ENDPOINTS.SCHEDULE.ASSIGN_BATCH, { dates }),

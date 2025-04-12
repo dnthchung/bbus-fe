@@ -1,15 +1,16 @@
 'use client'
 
-// path: fe/src/features/transportation/routes/components/map/draggable-bus-route-planner.tsx
 import type React from 'react'
 import { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
 import type { Bus, BusStop } from '@/types/bus'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { Search, Plus, MapPin, Loader2 } from 'lucide-react'
+import { Search, Plus, MapPin, Loader2, X, Check } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMapEvents, Polyline, useMap, Popup, Tooltip } from 'react-leaflet'
+import { useToast } from '@/hooks/use-toast'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
 // Add custom CSS to hide attribution
@@ -76,36 +77,51 @@ const DraggableMarker = ({ position, onDragEnd, icon, tooltip, popupContent }: {
 }
 
 interface BusRoutePlannerProps {
-  busStops: BusStop[]
-  onUpdateBusStop: (stopId: number, newPosition: [number, number]) => void
-  onAddBusStop: (position: [number, number], name: string) => void
-  selectedBusId?: number
+  checkpoints: BusStop[]
+  onUpdateCheckpoint: (checkpointId: string, newPosition: [number, number]) => void
+  onAddCheckpoint: (position: [number, number], name: string) => void
+  selectedBusId?: string
   selectedBus?: Bus | null
   routeGeometry?: [number, number][]
 }
 
-export default function DraggableBusRoutePlanner({ busStops, onUpdateBusStop, onAddBusStop, selectedBusId, selectedBus, routeGeometry }: BusRoutePlannerProps) {
+export default function DraggableBusRoutePlanner({ checkpoints, onUpdateCheckpoint, onAddCheckpoint, selectedBusId, selectedBus, routeGeometry }: BusRoutePlannerProps) {
+  const { toast } = useToast()
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_POSITION)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [newStopName, setNewStopName] = useState('')
+  const [newCheckpointName, setNewCheckpointName] = useState('')
   const [tempMarker, setTempMarker] = useState<[number, number] | null>(null)
   const [isRouteLoading, setIsRouteLoading] = useState(false)
+  const [isAddingCheckpoint, setIsAddingCheckpoint] = useState(false)
   const mapRef = useRef(null)
 
   // Create custom icons
-  const busStopIcon = new L.DivIcon({
+  const checkpointIcon = new L.DivIcon({
     className: 'custom-div-icon',
     html: `<div style="position: relative;">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
-        <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24c0-6.6-5.4-12-12-12z" fill="#e53935" stroke="#b71c1c" strokeWidth="1" />
+        <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24c0-6.6-5.4-12-12-12z" fill="#e11d48" stroke="#9f1239" strokeWidth="1" />
         <circle cx="12" cy="12" r="5" fill="white" />
       </svg>
     </div>`,
     iconSize: [24, 36],
     iconAnchor: [12, 36],
     popupAnchor: [0, -36],
+  })
+
+  const selectedCheckpointIcon = new L.DivIcon({
+    className: 'custom-div-icon',
+    html: `<div style="position: relative;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="28" height="42">
+        <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24c0-6.6-5.4-12-12-12z" fill="#0284c7" stroke="#0c4a6e" strokeWidth="1" />
+        <circle cx="12" cy="12" r="5" fill="white" />
+      </svg>
+    </div>`,
+    iconSize: [28, 42],
+    iconAnchor: [14, 42],
+    popupAnchor: [0, -42],
   })
 
   const tempMarkerIcon = new L.DivIcon({
@@ -135,19 +151,26 @@ export default function DraggableBusRoutePlanner({ busStops, onUpdateBusStop, on
   }, [])
 
   // Search location from OpenStreetMap
+  // Cập nhật các thông báo toast
   const searchLocation = async () => {
     if (!searchQuery.trim()) return
     setIsLoading(true)
     try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&limit=5`)
-      setSearchResults(response.data)
-      if (response.data.length > 0) {
-        const coords: [number, number] = [Number.parseFloat(response.data[0].lat), Number.parseFloat(response.data[0].lon)]
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`)
+      const data = await response.json()
+      setSearchResults(data)
+
+      if (data.length > 0) {
+        const coords: [number, number] = [Number.parseFloat(data[0].lat), Number.parseFloat(data[0].lon)]
         setMapCenter(coords)
       }
     } catch (error) {
       console.error('Error searching location:', error)
-      alert('Error searching location. Please try again.')
+      toast({
+        title: 'Tìm Kiếm Thất Bại',
+        description: 'Không thể tìm kiếm địa điểm. Vui lòng thử lại.',
+        variant: 'deny',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -157,38 +180,59 @@ export default function DraggableBusRoutePlanner({ busStops, onUpdateBusStop, on
   const selectLocation = (location: any) => {
     const coords: [number, number] = [Number.parseFloat(location.lat), Number.parseFloat(location.lon)]
     setTempMarker(coords)
-    setNewStopName(location.display_name.split(',')[0])
+    setNewCheckpointName(location.display_name.split(',')[0])
     setMapCenter(coords)
     setSearchResults([])
     setSearchQuery('')
+    setIsAddingCheckpoint(true)
   }
 
   // Handle marker drag end
-  const handleMarkerDragEnd = (stopId: number, newPosition: [number, number]) => {
-    onUpdateBusStop(stopId, newPosition)
+  const handleMarkerDragEnd = (checkpointId: string, newPosition: [number, number]) => {
+    onUpdateCheckpoint(checkpointId, newPosition)
   }
 
   // Handle map click to add temporary marker
   const MapClickHandler = () => {
     useMapEvents({
       click: (e) => {
-        const { lat, lng } = e.latlng
-        const coords: [number, number] = [lat, lng]
-        setTempMarker(coords)
+        if (isAddingCheckpoint) {
+          const { lat, lng } = e.latlng
+          const coords: [number, number] = [lat, lng]
+          setTempMarker(coords)
+        }
       },
     })
     return null
   }
 
-  // Add new bus stop
-  const addNewBusStop = () => {
-    if (tempMarker && newStopName) {
-      onAddBusStop(tempMarker, newStopName)
+  // Add new checkpoint
+  const addNewCheckpoint = () => {
+    if (tempMarker && newCheckpointName) {
+      onAddCheckpoint(tempMarker, newCheckpointName)
       setTempMarker(null)
-      setNewStopName('')
+      setNewCheckpointName('')
+      setIsAddingCheckpoint(false)
+
+      toast({
+        title: 'Đã Thêm Trạm Dừng',
+        description: `Trạm dừng mới "${newCheckpointName}" đã được tạo`,
+        variant: 'success',
+      })
     } else {
-      alert('Please provide a name for the new bus stop')
+      toast({
+        title: 'Thiếu Thông Tin',
+        description: 'Vui lòng nhập tên cho trạm dừng mới',
+        variant: 'deny',
+      })
     }
+  }
+
+  // Cancel adding new checkpoint
+  const cancelAddCheckpoint = () => {
+    setTempMarker(null)
+    setNewCheckpointName('')
+    setIsAddingCheckpoint(false)
   }
 
   // Set route loading state when selectedBus changes
@@ -207,73 +251,144 @@ export default function DraggableBusRoutePlanner({ busStops, onUpdateBusStop, on
 
   return (
     <div className='flex h-full flex-col'>
-      {/* Search Bar - Moved to top and reduced size to 1/2 */}
-      <div className='mb-2 flex justify-center'>
-        <div className='flex w-1/2 gap-2'>
-          <Input id='location-search' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search for location...' className='flex-1' onKeyDown={(e) => e.key === 'Enter' && searchLocation()} />
-          <Button onClick={searchLocation} disabled={isLoading}>
-            {isLoading ? <Loader2 className='h-4 w-4 animate-spin' /> : <Search className='h-4 w-4' />}
+      {/* Search Bar */}
+      <div className='mb-2 flex justify-between gap-2'>
+        <div className='flex flex-1 gap-2'>
+          <div className='relative flex-1'>
+            <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder='Tìm kiếm địa điểm...' className='pl-8' onKeyDown={(e) => e.key === 'Enter' && searchLocation()} />
+          </div>
+          <Button onClick={searchLocation} disabled={isLoading || !searchQuery.trim()}>
+            {isLoading ? <Loader2 className='h-4 w-4 animate-spin' /> : 'Tìm Kiếm'}
           </Button>
         </div>
+
+        <Button variant={isAddingCheckpoint ? 'destructive' : 'outline'} onClick={isAddingCheckpoint ? cancelAddCheckpoint : () => setIsAddingCheckpoint(true)} className='gap-1'>
+          {isAddingCheckpoint ? (
+            <>
+              <X className='h-4 w-4' />
+              Hủy
+            </>
+          ) : (
+            <>
+              <Plus className='h-4 w-4' />
+              Thêm Trạm Dừng
+            </>
+          )}
+        </Button>
       </div>
 
-      {/* Search Results - now below search bar but above map */}
-      {searchResults.length > 0 && (
-        <div className='mb-2 flex justify-center'>
-          <div className='max-h-48 w-1/2 overflow-y-auto rounded-md border bg-background shadow-sm'>
-            {searchResults.map((result, index) => (
-              <div key={index} className='cursor-pointer border-b p-2 transition-colors last:border-b-0 hover:bg-muted/50'>
-                <p className='font-medium'>{result.display_name}</p>
-                <div className='mt-1'>
-                  <Button size='sm' variant='outline' onClick={() => selectLocation(result)}>
-                    <MapPin className='mr-1 h-4 w-4' /> Set as stop
-                  </Button>
-                </div>
+      {/* Add Checkpoint Instructions */}
+      {isAddingCheckpoint && (
+        <Card className='mb-2 p-3'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <h4 className='text-sm font-medium'>Đang Thêm Trạm Dừng Mới</h4>
+              <p className='text-xs text-muted-foreground'>Nhấp vào bản đồ để đặt trạm dừng hoặc tìm kiếm một địa điểm</p>
+            </div>
+            {tempMarker && (
+              <div className='flex items-center gap-2'>
+                <Input placeholder='Tên trạm dừng' value={newCheckpointName} onChange={(e) => setNewCheckpointName(e.target.value)} className='h-8 w-40' />
+                <Button size='sm' onClick={addNewCheckpoint} disabled={!newCheckpointName.trim()} className='h-8 gap-1'>
+                  <Check className='h-3 w-3' />
+                  Thêm
+                </Button>
               </div>
-            ))}
+            )}
           </div>
-        </div>
+        </Card>
+      )}
+
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <Card className='mb-2 max-h-48 overflow-y-auto'>
+          <div className='p-2 text-sm font-medium'>Kết Quả Tìm Kiếm ({searchResults.length})</div>
+          {searchResults.map((result, index) => (
+            <div key={index} className='cursor-pointer border-t p-2 transition-colors hover:bg-muted/50'>
+              <p className='text-sm font-medium'>{result.display_name.split(',')[0]}</p>
+              <p className='truncate text-xs text-muted-foreground'>{result.display_name}</p>
+              <div className='mt-1 flex gap-2'>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  className='h-7 text-xs'
+                  onClick={() => {
+                    const coords: [number, number] = [Number.parseFloat(result.lat), Number.parseFloat(result.lon)]
+                    setMapCenter(coords)
+                  }}
+                >
+                  Xem Trên Bản Đồ
+                </Button>
+                <Button size='sm' className='h-7 text-xs' onClick={() => selectLocation(result)}>
+                  <MapPin className='mr-1 h-3 w-3' />
+                  Đặt Làm Trạm Dừng
+                </Button>
+              </div>
+            </div>
+          ))}
+        </Card>
       )}
 
       {/* Map */}
-      <div className='relative flex-1 overflow-hidden rounded-lg'>
+      <div className='relative flex-1 overflow-hidden rounded-lg border'>
         <MapContainer center={DEFAULT_POSITION} zoom={13} className='h-full w-full' scrollWheelZoom={true} ref={mapRef} attributionControl={false} zoomControl={true}>
           <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' attribution='' />
           <MapController center={mapCenter} zoom={14} />
           <MapClickHandler />
 
-          {/* Existing bus stops */}
-          {busStops.map((stop) => (
-            <DraggableMarker
-              key={stop.id}
-              position={[stop.lat, stop.lng]}
-              onDragEnd={(pos) => handleMarkerDragEnd(stop.id, pos)}
-              icon={busStopIcon}
-              popupContent={
-                <div className='text-center'>
-                  <h3 className='font-medium'>{stop.name}</h3>
-                  <p className='text-sm text-muted-foreground'>Students: {stop.studentCount}</p>
-                  <p className='mt-1 text-xs'>Drag to change position</p>
-                </div>
-              }
-            />
-          ))}
+          {/* Existing checkpoints */}
+          {checkpoints.map((checkpoint) => {
+            const isInSelectedBusRoute = selectedBus && selectedBus.route ? selectedBus.route.includes(checkpoint.id) : false
+            const isActive = checkpoint.status === 'ACTIVE'
 
-          {/* Temporary marker for new stop */}
+            return (
+              <DraggableMarker
+                key={checkpoint.id}
+                position={[checkpoint.lat, checkpoint.lng]}
+                onDragEnd={(pos) => handleMarkerDragEnd(checkpoint.id, pos)}
+                icon={isInSelectedBusRoute ? selectedCheckpointIcon : checkpointIcon}
+                popupContent={
+                  <div className='text-center'>
+                    <h3 className='font-medium'>{checkpoint.name}</h3>
+                    {checkpoint.description && <p className='text-xs text-muted-foreground'>{checkpoint.description}</p>}
+                    <p className='text-sm text-muted-foreground'>Students: {checkpoint.studentCount || 0}</p>
+                    {!isActive && <Badge className='mt-1 bg-gray-100 text-gray-800'>Inactive</Badge>}
+                    {isInSelectedBusRoute && selectedBus && <Badge className='mt-1 bg-blue-100 text-blue-800'>On {selectedBus.name || `Bus ${selectedBus.id.substring(0, 6)}`} Route</Badge>}
+                    <p className='mt-1 text-xs'>Drag to change position</p>
+                  </div>
+                }
+              />
+            )
+          })}
+
+          {/* Temporary marker for new checkpoint */}
           {tempMarker && (
-            <DraggableMarker
+            <Marker
               position={tempMarker}
-              onDragEnd={(pos) => setTempMarker(pos)}
+              draggable={true}
+              eventHandlers={{
+                dragend: (e) => {
+                  const marker = e.target
+                  const position = marker.getLatLng()
+                  setTempMarker([position.lat, position.lng])
+                },
+              }}
               icon={tempMarkerIcon}
-              popupContent={
-                <div className='flex flex-col gap-2 p-2'>
-                  <Input placeholder='Stop name' value={newStopName} onChange={(e) => setNewStopName(e.target.value)} className='min-w-[200px]' />
-                  <Button size='sm' onClick={addNewBusStop}>
-                    <Plus className='mr-1 h-4 w-4' /> Add Stop
-                  </Button>
+            >
+              <Popup>
+                <div className='flex flex-col gap-2 p-1'>
+                  <Input placeholder='Checkpoint name' value={newCheckpointName} onChange={(e) => setNewCheckpointName(e.target.value)} className='min-w-[200px]' />
+                  <div className='flex gap-2'>
+                    <Button size='sm' variant='outline' onClick={cancelAddCheckpoint} className='flex-1'>
+                      Cancel
+                    </Button>
+                    <Button size='sm' onClick={addNewCheckpoint} disabled={!newCheckpointName.trim()} className='flex-1'>
+                      Add Checkpoint
+                    </Button>
+                  </div>
                 </div>
-              }
-            />
+              </Popup>
+            </Marker>
           )}
 
           {/* OSRM route with loading state */}
@@ -288,12 +403,15 @@ export default function DraggableBusRoutePlanner({ busStops, onUpdateBusStop, on
 
           {/* OSRM Route Polyline */}
           {routeGeometry && routeGeometry.length > 1 && (
-            <Polyline positions={routeGeometry} color='#ea580c' weight={5} opacity={0.9}>
+            <Polyline positions={routeGeometry} color='#0284c7' weight={5} opacity={0.8} dashArray='5, 10'>
               <Popup>
-                <div className='font-medium'>OSRM Route</div>
+                <div className='font-medium'>{selectedBus?.name || (selectedBus?.id ? `Bus ${selectedBus.id.substring(0, 6)}` : 'Bus Route')}</div>
                 {selectedBus && (
                   <div className='mt-1 text-sm'>
-                    Bus {selectedBus.id} (Capacity: {selectedBus.registeredCount}/{selectedBus.capacity})
+                    <p>
+                      Capacity: {selectedBus.registeredCount || 0}/{selectedBus.capacity || 30}
+                    </p>
+                    <p className='mt-1'>Stops: {selectedBus.route ? selectedBus.route.length : 0}</p>
                   </div>
                 )}
               </Popup>
