@@ -159,7 +159,7 @@ export default function DraggableBusRoutePlanner({ checkpoints, onUpdateCheckpoi
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`)
       const data = await response.json()
       setSearchResults(data)
-  
+
       if (data.length > 0) {
         const coords: [number, number] = [Number.parseFloat(data[0].lat), Number.parseFloat(data[0].lon)]
         setMapCenter(coords)
@@ -169,7 +169,7 @@ export default function DraggableBusRoutePlanner({ checkpoints, onUpdateCheckpoi
       toast({
         title: 'Tìm Kiếm Thất Bại',
         description: 'Không thể tìm kiếm địa điểm. Vui lòng thử lại.',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setIsLoading(false)
@@ -213,16 +213,17 @@ export default function DraggableBusRoutePlanner({ checkpoints, onUpdateCheckpoi
       setTempMarker(null)
       setNewCheckpointName('')
       setIsAddingCheckpoint(false)
-  
+
       toast({
         title: 'Đã Thêm Trạm Dừng',
         description: `Trạm dừng mới "${newCheckpointName}" đã được tạo`,
+        variant: 'success',
       })
     } else {
       toast({
         title: 'Thiếu Thông Tin',
         description: 'Vui lòng nhập tên cho trạm dừng mới',
-        variant: 'destructive',
+        variant: 'deny',
       })
     }
   }
