@@ -88,7 +88,7 @@ export default function RightPanel({ buses, students, selectedCheckpoint, select
                           title='Xem chi tiết'
                           onClick={(e) => {
                             e.stopPropagation()
-                            window.location.href = `buses/list/${bus.id}`
+                            window.location.href = `/buses/list/${bus.id}`
                           }}
                         >
                           <Eye size={16} />

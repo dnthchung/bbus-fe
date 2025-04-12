@@ -1,5 +1,6 @@
 //path : src/features/transportation/routes/data/function.ts
 import { API_SERVICES } from '@/api/api-services'
+import { toast } from '@/hooks/use-toast'
 
 //chọn DS tuyến đường ở sidebar => thấy được DS checkpoint và có hiển thị số lượng học sinh đã đăng ký checkpoint đó cho mỗi checkpoint
 //admin chọn 1 checkpoint bất kì => sẽ thấy được DS xe bus tại checkpoint và DS student tại check point đó
@@ -58,7 +59,36 @@ export async function getNumberOfStudentInEachCheckpoint(checkpointId: string) {
     throw error
   }
 }
+//function get a route by busId - url : /route/by-bus?busId=5824f7ed-2a08-4701-8ed3-255481a77ff3
+//we can get get path (list checkpoint that be sort - thứ tự di chuyển) of route through this api
+//result in listCheckpointInRoute : "080e0ee6-a265-48c1-a8d5-f00cc28fbe47 90cd0ab6-9bc0-42be-a996-6f47cfe2b04c 9c7dc267-6dc8-49b5-9f4c-1ba317cc516d 346b48c3-912f-456f-b2e2-4469260962e6"
+//đây là chuỗi các id của các checkpoint trong route đó
+//sau đó ta sẽ split chuỗi này thành mảng và lấy ra từng checkpointId theo thứ tự trong listCheckpoint (getCheckpointDetailByCheckpointId)
+//để hiển thị trên map <= muốn hiển thị trên map haowjc lấy thông tin thì cần call hàm get checkpoint by checkpoinId trước đã
+export async function getCheckpointsInARouteByBusId(checkpointId: string) {
+  try {
+    const req = await API_SERVICES.route.get_a_route_by_bus_id(checkpointId)
+    const listCheckpointInRoute = req.data
+    console.log('5. list checkpoint in route => ', listCheckpointInRoute)
+    return listCheckpointInRoute
+  } catch (error) {
+    toast({
+      title: 'Error fetching list checkpoint in route',
+      description: 'Error fetching list checkpoint in route',
+      variant: 'deny',
+    })
+    console.error('Error fetching list checkpoint in route:', error)
+    throw error
+  }
+}
 
-//function get danh sách buses by routeId - url /bus/by-route?routeId=037cc590-ff8f-432e-8dde-b61858a99b9a
-
-//function get path of route by busId -
+//function get checkpoint detail by checkpointId - url : /checkpoint/987ac0dd-4864-4f09-a165-caa41f52ec71
+//result like : { "id": "987ac0dd-4864-4f09-a165-caa41f52ec71", "name": "Bến xe Mỹ Đình", "description": "Điểm đón xe buýt gần Bến xe Mỹ Đình", "latitude": "21.033781", "longitude": "105.782362", "status": "ACTIVE" }
+export async function getCheckpointDetailByCheckpointId(checkpointId: string) {
+  try {
+    const req = await API_SERVICES.checkpoints.get_a_checkpoint_by_checkpoint_id(checkpointId)
+    const checkpointDetail = req.data.data
+    console.log('6. checkpoint detail => ', checkpointDetail)
+    return checkpointDetail
+  } catch (error) {}
+}
