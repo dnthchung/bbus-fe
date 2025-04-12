@@ -1,7 +1,7 @@
 //path : fe/src/data/sample-data.tsx
 import type { BusStop, Bus, Student } from '@/types/bus'
 
-// Sample data for bus stops
+// Sample data for bus stops | bus stop is checkpoint
 export const busStops: BusStop[] = [
   {
     id: 1,
