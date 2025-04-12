@@ -428,7 +428,7 @@ export default function TransportationRouteManagement() {
           <ProfileDropdown />
         </div>
       </Header>
-      <Main>
+      <div className='mt-16'>
         <div className='flex h-[calc(100vh-64px)]'>
           <LeftSidebar checkpoints={checkpoints} onSelectCheckpoint={setSelectedCheckpoint} selectedCheckpoint={selectedCheckpoint} />
           <div className='flex h-full flex-1 flex-col overflow-hidden p-4'>
@@ -436,7 +436,7 @@ export default function TransportationRouteManagement() {
           </div>
           <RightPanel buses={filteredBuses} students={checkpointStudents} selectedCheckpoint={selectedCheckpoint} onAutoFill={autoAssignStudents} onRegisterStudent={registerStudent} onSelectBus={setSelectedBus} selectedBus={selectedBus} isLoadingBuses={isLoadingBuses} isLoadingStudents={isLoadingStudents} />
         </div>
-      </Main>
+      </div>
     </>
   )
 }
