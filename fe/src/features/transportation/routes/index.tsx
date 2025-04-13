@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
 import LeftSidebar from './components/left-sidebar'
 import DraggableBusRoutePlanner from './components/map/draggable-bus-route-planner'
 import RightPanel from './components/right-panel'
@@ -193,45 +192,6 @@ export default function TransportationRouteManagement() {
         description: 'Could not generate the route. Please try again.',
         variant: 'destructive',
       })
-    }
-  }
-
-  // Auto-assign students to buses
-  const autoAssignStudents = async () => {
-    if (!selectedCheckpoint) return
-
-    setIsSaving(true)
-    try {
-      // In a real implementation, you would call an API to assign students to buses
-      // For now, we'll just show a success message
-
-      toast({
-        title: 'Auto-Assignment Complete',
-        description: `Students have been assigned to available buses at ${selectedCheckpoint.name}`,
-      })
-
-      // Refresh the students data after assignment
-      const studentsData = await getStudentsByCheckpointId(selectedCheckpoint.id)
-
-      const transformedStudents: Student[] = studentsData.map((student: any) => ({
-        id: student.studentId,
-        name: student.studentName,
-        rollNumber: student.rollNumber,
-        status: student.registered ? 'registered' : 'waiting',
-        busId: student.busId,
-        busName: student.busName,
-      }))
-
-      setCheckpointStudents(transformedStudents)
-    } catch (error) {
-      console.error('Error assigning students:', error)
-      toast({
-        title: 'Assignment Failed',
-        description: 'Could not assign students to buses. Please try again.',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -434,7 +394,7 @@ export default function TransportationRouteManagement() {
           <div className='flex h-full flex-1 flex-col overflow-hidden p-4'>
             <DraggableBusRoutePlanner checkpoints={checkpoints} onUpdateCheckpoint={handleUpdateCheckpoint} onAddCheckpoint={handleAddCheckpoint} selectedBusId={selectedBus?.id} selectedBus={selectedBus} routeGeometry={selectedBus ? busRoutesGeometry[selectedBus.id] : undefined} />
           </div>
-          <RightPanel buses={filteredBuses} students={checkpointStudents} selectedCheckpoint={selectedCheckpoint} onAutoFill={autoAssignStudents} onRegisterStudent={registerStudent} onSelectBus={setSelectedBus} selectedBus={selectedBus} isLoadingBuses={isLoadingBuses} isLoadingStudents={isLoadingStudents} />
+          <RightPanel buses={filteredBuses} students={checkpointStudents} selectedCheckpoint={selectedCheckpoint} onRegisterStudent={registerStudent} onSelectBus={setSelectedBus} selectedBus={selectedBus} isLoadingBuses={isLoadingBuses} isLoadingStudents={isLoadingStudents} />
         </div>
       </div>
     </>

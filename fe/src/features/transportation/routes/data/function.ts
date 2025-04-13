@@ -68,7 +68,7 @@ export async function getNumberOfStudentInEachCheckpoint(checkpointId: string) {
 export async function getCheckpointsInARouteByBusId(checkpointId: string) {
   try {
     const req = await API_SERVICES.route.get_a_route_by_bus_id(checkpointId)
-    const listCheckpointInRoute = req.data
+    const listCheckpointInRoute = req.data.data
     console.log('5. list checkpoint in route => ', listCheckpointInRoute)
     return listCheckpointInRoute
   } catch (error) {
