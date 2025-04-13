@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUsers } from '../../context/users-context'
 
@@ -56,7 +55,7 @@ interface Props {
 // Hàm tạo username tự động bằng uuid
 const generateUsername = (): string => uuidv4()
 
-// Hàm tạo password tự động với độ dài ngẫu nhiên từ 8 đến 36 ký tự, đảm bảo có ít nhất 1 chữ hoa, 1 chữ thường và 1 số.
+// Hàm tạo password tự động với độ dài ngẫu nhiên từ 8 đến 36 ký tự
 const generatePassword = (): string => {
   const length = Math.floor(Math.random() * (36 - 8 + 1)) + 8
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -100,7 +99,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   useEffect(() => {
     try {
       const role = localStorage.getItem('role')
-      // console.log('role => ', role)
       setCurrentUserRole(role || null)
     } catch (error) {
       console.error('Error reading user role from localStorage:', error)
@@ -126,7 +124,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   })
 
   const { control, handleSubmit, reset, watch, setValue, formState } = form
-
   const provinceValue = watch('province')
   const districtValue = watch('district')
   const wardValue = watch('ward')
@@ -160,7 +157,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
       const provinceName = addressSimple.find((p) => p.Id === provinceValue)?.Name || ''
       const districtName = districts.find((d) => d.Id === districtValue)?.Name || ''
       const wardName = wards.find((w) => w.Id === wardValue)?.Name || ''
-
       const fullAddress = `${specificAddressValue}, ${wardName}, ${districtName}, ${provinceName}`
       setValue('address', fullAddress)
     }
@@ -244,12 +240,11 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
       }
 
       // Gọi API thêm người dùng mới với FormData
-      // const response = await API_SERVICES.users.addOne(formData)
       await API_SERVICES.users.addOne(formData)
-      // console.log("response => ", response)
-      // console.log("formData", formData)
+
       // Đảm bảo gọi xong refreshUsers trước khi onSuccess
       await refreshUsers()
+
       toast({
         title: 'Thêm người dùng thành công',
         description: 'Người dùng mới đã được thêm vào hệ thống',
@@ -290,18 +285,19 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
         onOpenChange(state)
       }}
     >
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='max-w-5xl'>
         <DialogHeader className='text-left'>
           <DialogTitle>Thêm người dùng mới</DialogTitle>
           <DialogDescription>Tạo người dùng mới.</DialogDescription>
         </DialogHeader>
-        <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
-          <Form {...form}>
-            <form id='user-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
+
+        <Form {...form}>
+          <form id='user-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+            <div className='grid grid-cols-12 gap-4'>
               {/* Avatar upload */}
-              <div className='mb-4 flex flex-col items-center space-y-2'>
+              <div className='col-span-3 flex flex-col items-center space-y-2'>
                 <div className='relative'>
-                  <Avatar className='h-24 w-24'>
+                  <Avatar className='h-32 w-32'>
                     {avatarPreview ? <AvatarImage src={avatarPreview} alt='Avatar preview' /> : <AvatarImage src={DEFAULT_AVATAR_PATH} alt='Default avatar' />}
                     <AvatarFallback>
                       <span className='text-2xl'>👤</span>
@@ -323,58 +319,146 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                 {formState.errors.avatar && <p className='text-sm text-destructive'>{formState.errors.avatar.message as string}</p>}
               </div>
 
-              {/* Họ và tên */}
-              <FormField
-                control={control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Họ và tên</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Nguyễn Quang Lợi' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+              {/* Thông tin cá nhân */}
+              <div className='col-span-9 grid grid-cols-3 gap-4'>
+                {/* Hàng 1: Họ tên + Email */}
+                <FormField
+                  control={control}
+                  name='name'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Họ và tên</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Nguyễn Quang Lợi' autoComplete='off' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Email */}
-              <FormField
-                control={control}
-                name='email'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder='loinq@gmail.com' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={control}
+                  name='email'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder='loinq@gmail.com' autoComplete='off' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Số điện thoại */}
-              <FormField
-                control={control}
-                name='phone'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Số điện thoại</FormLabel>
-                    <FormControl>
-                      <Input placeholder='0912345000' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={control}
+                  name='phone'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Số điện thoại</FormLabel>
+                      <FormControl>
+                        <Input placeholder='0912345000' autoComplete='off' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Tỉnh/Thành phố */}
+                {/* Hàng 2: Ngày sinh + Giới tính + Vai trò */}
+                <FormField
+                  control={control}
+                  name='dob'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ngày sinh</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='date'
+                          min='1900-01-01'
+                          max={new Date().toISOString().split('T')[0]}
+                          value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value) : undefined
+                            field.onChange(date)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name='gender'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Giới tính</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Chọn giới tính' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='MALE'>Nam</SelectItem>
+                          <SelectItem value='FEMALE'>Nữ</SelectItem>
+                          <SelectItem value='OTHER'>Khác</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name='role'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vai trò</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Chọn vai trò' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {currentUserRole === 'ADMIN' && (
+                            <>
+                              <SelectItem value='PARENT'>Phụ huynh</SelectItem>
+                              <SelectItem value='TEACHER'>Giáo viên</SelectItem>
+                              <SelectItem value='DRIVER'>Tài xế xe buýt</SelectItem>
+                              <SelectItem value='ASSISTANT'>Phụ tá tài xế</SelectItem>
+                            </>
+                          )}
+                          {currentUserRole === 'SYSADMIN' && (
+                            <>
+                              <SelectItem value='ADMIN'>Quản lý</SelectItem>
+                              {/* <SelectItem value="SYSADMIN">Quản trị hệ thống</SelectItem> */}
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Địa chỉ */}
+            <div className='grid grid-cols-12 gap-4'>
+              <div className='col-span-12'>
+                <h3 className='mb-2 font-medium'>Thông tin địa chỉ</h3>
+              </div>
+
               <FormField
                 control={control}
                 name='province'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Tỉnh/Thành phố</FormLabel>
+                  <FormItem className='col-span-3'>
+                    <FormLabel>Tỉnh/Thành phố</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -389,18 +473,17 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Quận/Huyện */}
               <FormField
                 control={control}
                 name='district'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Quận/Huyện</FormLabel>
+                  <FormItem className='col-span-3'>
+                    <FormLabel>Quận/Huyện</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} disabled={!provinceValue}>
                       <FormControl>
                         <SelectTrigger>
@@ -415,18 +498,17 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Phường/Xã */}
               <FormField
                 control={control}
                 name='ward'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Phường/Xã</FormLabel>
+                  <FormItem className='col-span-3'>
+                    <FormLabel>Phường/Xã</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} disabled={!districtValue}>
                       <FormControl>
                         <SelectTrigger>
@@ -441,112 +523,29 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Địa chỉ cụ thể */}
               <FormField
                 control={control}
                 name='specificAddress'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Địa chỉ cụ thể</FormLabel>
+                  <FormItem className='col-span-3'>
+                    <FormLabel>Địa chỉ cụ thể</FormLabel>
                     <FormControl>
                       <Input placeholder='Số nhà, đường, ngõ...' {...field} disabled={!wardValue} />
                     </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+          </form>
+        </Form>
 
-              {/* Ngày sinh */}
-              <FormField
-                control={control}
-                name='dob'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Ngày sinh</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='date'
-                        min='1900-01-01'
-                        max={new Date().toISOString().split('T')[0]}
-                        value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                        onChange={(e) => {
-                          const date = e.target.value ? new Date(e.target.value) : undefined
-                          field.onChange(date)
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Giới tính */}
-              <FormField
-                control={control}
-                name='gender'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Giới tính</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Chọn giới tính' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value='MALE'>Nam</SelectItem>
-                        <SelectItem value='FEMALE'>Nữ</SelectItem>
-                        <SelectItem value='OTHER'>Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Vai trò */}
-              <FormField
-                control={control}
-                name='role'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className='col-span-2 text-right'>Vai trò</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Chọn vai trò' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {currentUserRole === 'ADMIN' && (
-                          <>
-                            <SelectItem value='PARENT'>Phụ huynh</SelectItem>
-                            <SelectItem value='TEACHER'>Giáo viên</SelectItem>
-                            <SelectItem value='DRIVER'>Tài xế xe buýt</SelectItem>
-                            <SelectItem value='ASSISTANT'>Phụ tá tài xế</SelectItem>
-                          </>
-                        )}
-                        {currentUserRole === 'SYSADMIN' && (
-                          <>
-                            <SelectItem value='ADMIN'>Quản lý</SelectItem>
-                            {/* <SelectItem value='SYSADMIN'>Quản trị hệ thống</SelectItem> */}
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </ScrollArea>
-        <DialogFooter>
+        <DialogFooter className='mt-4'>
           <Button type='submit' form='user-form' disabled={isSubmitting}>
             {isSubmitting ? 'Đang tạo...' : 'Tạo người dùng'}
           </Button>

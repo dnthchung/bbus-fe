@@ -26,6 +26,7 @@ interface ApiServices {
     get_all: () => Promise<any>
     add_one: (checkpoint: any) => Promise<any>
     count_students_of_one_checkpoint: (checkpointId: string) => Promise<any>
+    get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -60,6 +61,9 @@ interface ApiServices {
     get_dates_by_month: (month: string) => Promise<any>
     assign_batch: (dates: string[]) => Promise<any>
     delete_batch: (date: string) => Promise<any>
+  }
+  route: {
+    get_a_route_by_bus_id: (busId: string) => Promise<any>
   }
 }
 
@@ -118,6 +122,7 @@ export const API_SERVICES: ApiServices = {
     get_all: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
     add_one: (checkpoint: any) => apiClient.post(API_ENDPOINTS.CHECKPOINTS.ADD_ONE, checkpoint),
     count_students_of_one_checkpoint: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.COUNT_STUDENTS_OF_ONE_CHECKPOINT}?checkpointId=${checkpointId}`),
+    get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.GET_A_CHECKPOINT_BY_CHECKPOINT_ID}/${checkpointId}`),
   },
   //-------------------------
   // 4) STUDENTS
@@ -198,5 +203,11 @@ export const API_SERVICES: ApiServices = {
     get_dates_by_month: (month: string) => apiClient.get(`${API_ENDPOINTS.SCHEDULE.GET_DATES_BY_MONTH}?month=${month}&size=1000`),
     assign_batch: (dates: string[]) => apiClient.post(API_ENDPOINTS.SCHEDULE.ASSIGN_BATCH, { dates }),
     delete_batch: (date: string) => apiClient.delete(`${API_ENDPOINTS.SCHEDULE.DELETE_BATCH}?date=${date}`),
+  },
+  //--------------------------
+  // 11) route
+  //--------------------------
+  route: {
+    get_a_route_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_BUS_ID}?busId=${busId}`),
   },
 }
