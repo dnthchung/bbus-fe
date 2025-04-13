@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
     GET_ALL: '/checkpoint/list',
     ADD_ONE: '/checkpoint/add',
     COUNT_STUDENTS_OF_ONE_CHECKPOINT: '/checkpoint/count-students',
+    GET_A_CHECKPOINT_BY_CHECKPOINT_ID: '/checkpoint',
   },
   STUDENTS: {
     LIST: '/student/list?size=10000',
@@ -55,10 +56,12 @@ export const API_ENDPOINTS = {
   ASSISTANT: {
     GET_ALL: '/assistant/list',
   },
-
   SCHEDULE: {
     GET_DATES_BY_MONTH: '/bus-schedule/dates',
     ASSIGN_BATCH: '/bus-schedule/assign-batch',
     DELETE_BATCH: '/bus-schedule',
+  },
+  ROUTE: {
+    GET_A_ROUTE_BY_BUS_ID: '/route/by-bus',
   },
 } as const
