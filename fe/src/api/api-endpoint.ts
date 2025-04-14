@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     GET_STUDENT_LIST_BY_ENTITY_ID: (entityId: string) => `/student/list/${entityId}`,
     IMPORT_STUDENT: '/student/import',
     GET_LIST_STUDENT_BY_CHECKPOINT_ID: '/checkpoint/students',
+    GET_LIST_STUDENT_BY_BUS_ID: '/student/by-bus',
   },
   PARENTS: {
     GET_PARENT_LIST: '/parent/list?size=10000',

@@ -29,10 +29,8 @@ export const studentSchema = z.object({
   address: z.string(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
   status: studentStatusSchema,
-
   parentId: z.string().uuid().optional(),
   parent: parentSchema.nullable().optional(),
-
   checkpointId: z.string().uuid().nullable().optional(),
   // Làm cho các trường checkpoint optional vì có thể chưa có điểm đón
   checkpointName: z.string().optional(),

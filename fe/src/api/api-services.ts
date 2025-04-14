@@ -50,6 +50,7 @@ interface ApiServices {
     update_status: (busId: string, status: string) => Promise<any>
     update_max_capacity_for_all: (params: { maxCapacity: number; checkpointId?: string }) => Promise<any>
     get_list_bus_by_checkpoint_id: (checkpointId: string) => Promise<any>
+    get_list_student_by_bus_id: (busId: string) => Promise<any>
   }
   drivers: {
     get_all: () => Promise<any>
@@ -183,6 +184,7 @@ export const API_SERVICES: ApiServices = {
       return apiClient.post(url.pathname + url.search)
     },
     get_list_bus_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.BUSES.GET_LIST_BUS_BY_CHECKPOINT_ID}?checkpointId=${checkpointId}`),
+    get_list_student_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_LIST_STUDENT_BY_BUS_ID}?busId=${busId}`),
   },
   //--------------------------
   // 8) Driver
