@@ -20,7 +20,7 @@ import { useCheckpoints } from '@/features/transportation/checkpoints/context/ch
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
 
-// Component để cập nhật vị trí và zoom của bản đồ từ xa
+// Component to update the map view remotely
 const MapController = ({ center, zoom }: { center?: [number, number]; zoom?: number }) => {
   const map = useMap()
   useEffect(() => {
@@ -31,7 +31,7 @@ const MapController = ({ center, zoom }: { center?: [number, number]; zoom?: num
   return null
 }
 
-// Component xử lý khi người dùng click trên bản đồ
+// Component to handle user clicks on the map
 const MapClickHandler = ({ setCheckpoint }: { setCheckpoint: (coords: [number, number]) => void }) => {
   useMapEvents({
     click: (e) => {
@@ -50,24 +50,23 @@ export default function CreateCheckpointPage() {
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const mapRef = useRef(null)
-
   // Use the context instead of local state for checkpoints
   const { checkpoints, refreshCheckpoints } = useCheckpoints()
 
-  // Lấy vị trí hiện tại và zoom đến vị trí đó
+  // Get current location and zoom to it
   const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords: [number, number] = [position.coords.latitude, position.coords.longitude]
         setCheckpoint(coords)
-        setMapCenter(coords) // Cập nhật trung tâm bản đồ để zoom vào điểm
+        setMapCenter(coords)
       },
       (error) => console.error('Error getting location:', error),
       { enableHighAccuracy: true }
     )
   }
 
-  // Tìm kiếm địa điểm
+  // Search for a location using Nominatim API
   const searchLocation = async () => {
     if (!searchQuery.trim()) return
     setIsLoading(true)
@@ -77,7 +76,7 @@ export default function CreateCheckpointPage() {
       if (response.data.length > 0) {
         const coords: [number, number] = [Number.parseFloat(response.data[0].lat), Number.parseFloat(response.data[0].lon)]
         setCheckpoint(coords)
-        setMapCenter(coords) // Cập nhật vị trí trung tâm bản đồ
+        setMapCenter(coords)
       }
     } catch (error) {
       console.error('Error searching location:', error)
@@ -86,16 +85,16 @@ export default function CreateCheckpointPage() {
     }
   }
 
-  // Chọn địa điểm từ kết quả tìm kiếm
+  // Select a location from the search results
   const selectLocation = (location: any) => {
     const coords: [number, number] = [Number.parseFloat(location.lat), Number.parseFloat(location.lon)]
     setCheckpoint(coords)
-    setMapCenter(coords) // Zoom tới vị trí
+    setMapCenter(coords)
     setSearchResults([])
     setSearchQuery('')
   }
 
-  // Lưu điểm dừng mới vào hệ thống
+  // Save a new checkpoint via the API
   const saveCheckpoint = async () => {
     if (!checkpoint || !checkpointName.trim() || !description.trim()) {
       toast({
@@ -105,36 +104,25 @@ export default function CreateCheckpointPage() {
       })
       return
     }
-
     setIsLoading(true)
-
     try {
-      // Chuẩn bị dữ liệu gửi lên API
       const checkpointData = {
         checkpointName: checkpointName,
         description: description,
         latitude: checkpoint[0].toString(),
         longitude: checkpoint[1].toString(),
       }
-
-      // Gọi API để thêm điểm dừng mới
       await API_SERVICES.checkpoints.add_one(checkpointData)
-
-      // Refresh the checkpoint list
       await refreshCheckpoints()
-
-      // Reset form
       setCheckpointName('')
       setDescription('')
       setCheckpoint(null)
-
       toast({
         title: 'Đã lưu thành công!',
         description: 'Điểm dừng mới đã được lưu thành công.',
         variant: 'success',
       })
     } catch (error) {
-      // console.error('Lỗi khi tạo điểm dừng:', error)
       toast({
         title: 'Lỗi khi tạo điểm dừng!',
         description: 'Đã xảy ra lỗi khi lưu điểm dừng. Vui lòng thử lại sau.',
@@ -147,9 +135,10 @@ export default function CreateCheckpointPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col gap-4 md:flex-row'>
-        {/* Map and Form Section */}
-        <div className='w-full space-y-4 md:w-3/5'>
+      {/* Top Section: Map and Form */}
+      <div className='flex flex-col md:flex-row md:space-x-6'>
+        {/* Left: Map */}
+        <div className='w-full md:w-1/2'>
           <Card className='relative border-border'>
             <CardHeader className='pb-2'>
               <CardTitle className='flex items-center gap-2'>
@@ -172,7 +161,6 @@ export default function CreateCheckpointPage() {
                       })}
                     />
                   )}
-                  {/* Existing checkpoints */}
                   {checkpoints.map((cp) => (
                     <Marker
                       key={cp.id}
@@ -184,7 +172,7 @@ export default function CreateCheckpointPage() {
                     />
                   ))}
                 </MapContainer>
-                {/* Search bar */}
+                {/* Search Bar */}
                 <div className='absolute right-4 top-4 z-[10] w-64 space-y-2 rounded-md border border-border bg-card p-3 shadow-lg'>
                   <div className='flex gap-2'>
                     <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder='Tìm kiếm địa điểm...' className='h-9 flex-1' onKeyDown={(e) => e.key === 'Enter' && searchLocation()} />
@@ -202,14 +190,16 @@ export default function CreateCheckpointPage() {
                     </ScrollArea>
                   )}
                 </div>
-                {/* Current location button */}
+                {/* Current Location Button */}
                 <Button variant='secondary' onClick={getCurrentLocation} title='Sử dụng vị trí hiện tại' className='absolute bottom-4 left-4 z-[10] h-9 px-3 shadow-lg'>
                   <Navigation className='mr-2 h-4 w-4' /> Vị trí hiện tại
                 </Button>
               </div>
             </CardContent>
           </Card>
-          {/* Checkpoint Form */}
+        </div>
+        {/* Right: Checkpoint Form */}
+        <div className='w-full md:w-1/2'>
           <Card className='border-border'>
             <CardHeader className='pb-2'>
               <CardTitle className='flex items-center gap-2'>
@@ -219,29 +209,29 @@ export default function CreateCheckpointPage() {
             </CardHeader>
             <CardContent className='space-y-4'>
               <div className='grid grid-cols-1 gap-4'>
-                {/* Tên điểm dừng */}
+                {/* Checkpoint Name */}
                 <div className='space-y-2'>
                   <Label htmlFor='checkpoint-name'>Tên điểm dừng</Label>
                   <Input id='checkpoint-name' value={checkpointName} onChange={(e) => setCheckpointName(e.target.value)} placeholder='Nhập tên điểm dừng' />
                 </div>
-                {/* Mô tả điểm dừng */}
+                {/* Description */}
                 <div className='space-y-2'>
                   <Label htmlFor='checkpoint-description'>Mô tả</Label>
                   <Textarea id='checkpoint-description' value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Nhập mô tả ngắn gọn' rows={3} />
                 </div>
-                {/* Tọa độ điểm dừng - Separated as requested */}
+                {/* Coordinates */}
                 <div className='space-y-2'>
                   <Label>Vị trí</Label>
                   <div className='grid grid-cols-2 gap-3'>
                     <div className='space-y-1'>
                       <Label htmlFor='latitude' className='text-xs text-muted-foreground'>
-                        Latitude
+                        Vĩ độ
                       </Label>
                       <Input id='latitude' value={checkpoint ? checkpoint[0].toFixed(6) : ''} readOnly placeholder='Chọn điểm trên bản đồ' />
                     </div>
                     <div className='space-y-1'>
                       <Label htmlFor='longitude' className='text-xs text-muted-foreground'>
-                        Longitude
+                        Kinh độ
                       </Label>
                       <Input id='longitude' value={checkpoint ? checkpoint[1].toFixed(6) : ''} readOnly placeholder='Chọn điểm trên bản đồ' />
                     </div>
@@ -256,12 +246,10 @@ export default function CreateCheckpointPage() {
                 </div>
               </div>
               <Separator />
-              {/* Nút lưu điểm dừng */}
               <Button onClick={saveCheckpoint} className='w-full' disabled={!checkpoint || !checkpointName.trim() || !description.trim() || isLoading}>
                 {isLoading ? (
                   <>
-                    <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                    Đang lưu...
+                    <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div> Đang lưu...
                   </>
                 ) : (
                   'Lưu điểm dừng'
@@ -270,63 +258,62 @@ export default function CreateCheckpointPage() {
             </CardContent>
           </Card>
         </div>
-        {/* Checkpoint List - Simplified */}
-        <div className='w-full md:w-2/5'>
-          <div className='rounded-lg border'>
-            <div className='border-b p-4'>
-              <h3 className='flex items-center gap-2 text-lg font-semibold'>
-                <MapPin className='h-5 w-5 text-primary' /> Danh sách điểm dừng
-              </h3>
-              <p className='text-sm text-muted-foreground'>Các điểm dừng hiện có trong hệ thống</p>
-            </div>
-            <ScrollArea className='h-[850px]'>
-              <table className='w-full'>
-                <thead className='sticky top-0 bg-muted text-left'>
-                  <tr>
-                    <th className='p-3 text-sm font-medium'>Tên điểm dừng</th>
-                    <th className='p-3 text-sm font-medium'>Trạng thái</th>
-                    <th className='p-3 text-sm font-medium'>Vị trí</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {checkpoints.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className='p-4 text-center text-muted-foreground'>
-                        Chưa có điểm dừng nào
-                      </td>
-                    </tr>
-                  ) : (
-                    checkpoints.map((cp) => (
-                      <tr key={cp.id} className='border-b hover:bg-muted/50'>
-                        <td className='p-3'>
-                          <div>
-                            <p className='font-medium'>{cp.name}</p>
-                            <p className='text-xs text-muted-foreground'>{cp.description}</p>
-                          </div>
-                        </td>
-                        <td className='p-3'>
-                          <Badge variant={cp.status === 'ACTIVE' ? 'default' : 'secondary'} className='text-xs'>
-                            {cp.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
-                          </Badge>
-                        </td>
-                        <td className='p-3'>
-                          <div className='text-xs'>
-                            <p>
-                              <span className='font-medium'>Lat:</span> {cp.latitude}
-                            </p>
-                            <p>
-                              <span className='font-medium'>Long:</span> {cp.longitude}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </ScrollArea>
-          </div>
+      </div>
+
+      {/* Bottom Section: Checkpoint List */}
+      <div className='rounded-lg border'>
+        <div className='border-b p-4'>
+          <h3 className='flex items-center gap-2 text-lg font-semibold'>
+            <MapPin className='h-5 w-5 text-primary' /> Danh sách điểm dừng
+          </h3>
+          <p className='text-sm text-muted-foreground'>Các điểm dừng hiện có trong hệ thống</p>
         </div>
+        <ScrollArea className='h-[850px]'>
+          <table className='w-full'>
+            <thead className='sticky top-0 bg-muted text-left'>
+              <tr>
+                <th className='p-3 text-sm font-medium'>Tên điểm dừng</th>
+                <th className='p-3 text-sm font-medium'>Trạng thái</th>
+                <th className='p-3 text-sm font-medium'>Vị trí</th>
+              </tr>
+            </thead>
+            <tbody>
+              {checkpoints.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className='p-4 text-center text-muted-foreground'>
+                    Chưa có điểm dừng nào
+                  </td>
+                </tr>
+              ) : (
+                checkpoints.map((cp) => (
+                  <tr key={cp.id} className='border-b hover:bg-muted/50'>
+                    <td className='p-3'>
+                      <div>
+                        <p className='font-medium'>{cp.name}</p>
+                        <p className='text-xs text-muted-foreground'>{cp.description}</p>
+                      </div>
+                    </td>
+                    <td className='p-3'>
+                      <Badge variant={cp.status === 'ACTIVE' ? 'default' : 'secondary'} className='text-xs'>
+                        {cp.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                      </Badge>
+                    </td>
+                    <td className='p-3'>
+                      <div className='text-xs'>
+                        <p>
+                          <span className='font-medium'>Lat:</span> {cp.latitude}
+                        </p>
+                        <p>
+                          <span className='font-medium'>Long:</span> {cp.longitude}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </ScrollArea>
       </div>
     </div>
   )
