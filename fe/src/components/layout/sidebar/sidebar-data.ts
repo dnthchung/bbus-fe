@@ -62,6 +62,11 @@ export const sidebarData: SidebarData = {
               icon: MapPinPlus,
             },
             {
+              title: 'DS tuyến đường 2',
+              url: '/transportation/routes2/list',
+              icon: MapPinPlus,
+            },
+            {
               title: 'Lịch trình',
               url: '/transportation/schedules',
               icon: CalendarCheck,
