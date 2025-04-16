@@ -59,6 +59,7 @@ export async function getNumberOfStudentInEachCheckpoint(checkpointId: string) {
     throw error
   }
 }
+
 //function get a route by busId - url : /route/by-bus?busId=5824f7ed-2a08-4701-8ed3-255481a77ff3
 //we can get get path (list checkpoint that be sort - thứ tự di chuyển) of route through this api
 //result in listCheckpointInRoute : "080e0ee6-a265-48c1-a8d5-f00cc28fbe47 90cd0ab6-9bc0-42be-a996-6f47cfe2b04c 9c7dc267-6dc8-49b5-9f4c-1ba317cc516d 346b48c3-912f-456f-b2e2-4469260962e6"

@@ -25,3 +25,26 @@ export const checkpointSchema = z.object({
 export type Checkpoint = z.infer<typeof checkpointSchema>
 export type CheckpointStatus = z.infer<typeof checkpointStatusSchema>
 export const checkpointListSchema = z.array(checkpointSchema)
+
+// Define schema for route
+export const routeSchema = z.object({
+  id: z.string().uuid(), // UUID of the route
+  code: z.string(), // Route code (e.g., R001)
+  description: z.string(), // Description of the route
+  path: z.string(), // Path as space-separated checkpoint IDs
+  periodStart: z.string(), // Start date of the route period
+  periodEnd: z.string(), // End date of the route period
+})
+
+// Define schema for paginated routes response
+export const paginatedRoutesSchema = z.object({
+  pageNumber: z.number(),
+  pageSize: z.number(),
+  totalPages: z.number(),
+  totalElements: z.number(),
+  routes: z.array(routeSchema),
+})
+
+// Export types
+export type Route = z.infer<typeof routeSchema>
+export type PaginatedRoutes = z.infer<typeof paginatedRoutesSchema>
