@@ -65,6 +65,10 @@ interface ApiServices {
   }
   route: {
     get_a_route_by_bus_id: (busId: string) => Promise<any>
+    get_all_route: () => Promise<any>
+    get_a_route_by_route_id: (routeId: string) => Promise<any>
+    get_bus_list_by_route_id: (routeId: string) => Promise<any>
+    get_list_checkpoint_by_route_id: (routeId: string) => Promise<any>
   }
 }
 
@@ -211,5 +215,9 @@ export const API_SERVICES: ApiServices = {
   //--------------------------
   route: {
     get_a_route_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_BUS_ID}?busId=${busId}`),
+    get_all_route: () => apiClient.get(API_ENDPOINTS.ROUTE.GET_ALL_ROUTE),
+    get_a_route_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_ROUTE_ID}?routeId=${routeId}`),
+    get_bus_list_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_BUS_LIST_BY_ROUTE_ID}?routeId=${routeId}`),
+    get_list_checkpoint_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_LIST_CHECKPOINT_BY_ROUTE_ID}?routeId=${routeId}`),
   },
 }

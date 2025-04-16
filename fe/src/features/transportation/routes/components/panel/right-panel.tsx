@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getCheckpointsInARouteByBusId, getCheckpointDetailByCheckpointId } from '@/features/transportation/routes/data/function'
+import { getCheckpointsInARouteByBusId, getCheckpointDetailByCheckpointId } from '@/features/transportation/function'
 
 interface RightPanelProps {
   buses: Bus[]

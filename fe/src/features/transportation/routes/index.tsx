@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
+import { getListCheckpoint, getBusesByCheckpointId, getStudentsByCheckpointId, getNumberOfStudentInEachCheckpoint } from '../function'
 import DraggableBusRoutePlanner from './components/map/draggable-bus-route-planner'
 import LeftSidebar from './components/panel/left-panel'
 import RightPanel from './components/panel/right-panel'
-import { getListCheckpoint, getBusesByCheckpointId, getStudentsByCheckpointId, getNumberOfStudentInEachCheckpoint } from './data/function'
 
 export default function TransportationRouteManagement() {
   const { toast } = useToast()

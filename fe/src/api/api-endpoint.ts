@@ -64,5 +64,9 @@ export const API_ENDPOINTS = {
   },
   ROUTE: {
     GET_A_ROUTE_BY_BUS_ID: '/route/by-bus',
+    GET_ALL_ROUTE: '/route/list',
+    GET_A_ROUTE_BY_ROUTE_ID: '/route',
+    GET_BUS_LIST_BY_ROUTE_ID: '/bus/by_route',
+    GET_LIST_CHECKPOINT_BY_ROUTE_ID: '/checkpoint/by-route',
   },
 } as const

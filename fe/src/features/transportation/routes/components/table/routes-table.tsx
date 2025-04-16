@@ -1,10 +1,10 @@
-// Đường dẫn: fe/src/features/users/components/users-table.tsx
+// Đường dẫn: d:\Workspace\Github_folder\bbus-fe\fe\src\features\transportation\routes\list\index.tsx
 import { useState } from 'react'
 import { ColumnDef, ColumnFiltersState, RowData, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { User } from '../data/schema'
-import { DataTablePagination } from './table/data-table-pagination'
-import { DataTableToolbar } from './table/data-table-toolbar'
+import { DataTablePagination } from '@/features/transportation/routes/components/table/data-table-pagination'
+import { DataTableToolbar } from '@/features/transportation/routes/components/table/data-table-toolbar'
+import { Route } from '@/features/transportation/schema'
 
 // Mở rộng module '@tanstack/react-table' để thêm thuộc tính `className` cho `ColumnMeta`
 declare module '@tanstack/react-table' {
@@ -13,17 +13,23 @@ declare module '@tanstack/react-table' {
   }
 }
 
-// Định nghĩa interface cho `UsersTable`
+// Định nghĩa interface cho `RoutesTable`
 interface DataTableProps {
-  columns: ColumnDef<User>[] // Mảng các cột của bảng
-  data: User[] // Dữ liệu hiển thị trong bảng
+  columns: ColumnDef<Route>[] // Mảng các cột của bảng
+  data: Route[] // Dữ liệu hiển thị trong bảng
+  onRowClick?: (route: Route) => void // Callback khi click vào hàng
+  highlightedRowId?: string | null // ID của hàng được highlight
+  hideCheckboxes?: boolean // Tùy chọn ẩn checkbox
+  className?: string // Class bổ sung cho container
 }
 
-// Component chính: UsersTable
-export function UsersTable({ columns, data }: DataTableProps) {
+// Component chính: RoutesTable
+export function RoutesTable({ columns, data, onRowClick, highlightedRowId, hideCheckboxes = false, className = '' }: DataTableProps) {
   // State quản lý các trạng thái của bảng
   const [rowSelection, setRowSelection] = useState({}) // Trạng thái chọn dòng
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({}) // Trạng thái hiển thị cột
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    ...(hideCheckboxes ? { select: false } : {}),
+  }) // Trạng thái hiển thị cột
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]) // Trạng thái bộ lọc
   const [sorting, setSorting] = useState<SortingState>([]) // Trạng thái sắp xếp
 
@@ -37,7 +43,7 @@ export function UsersTable({ columns, data }: DataTableProps) {
       rowSelection,
       columnFilters,
     },
-    enableRowSelection: true, // Cho phép chọn dòng
+    enableRowSelection: !hideCheckboxes, // Chỉ cho phép chọn dòng khi không ẩn checkbox
     onRowSelectionChange: setRowSelection, // Cập nhật trạng thái khi chọn dòng
     onSortingChange: setSorting, // Cập nhật trạng thái khi sắp xếp
     onColumnFiltersChange: setColumnFilters, // Cập nhật trạng thái bộ lọc
@@ -51,21 +57,19 @@ export function UsersTable({ columns, data }: DataTableProps) {
   })
 
   return (
-    <div className='space-y-4'>
+    <div className={`space-y-4 ${className}`}>
       {/* Thanh công cụ của bảng */}
       <DataTableToolbar table={table} />
 
       {/* Bảng dữ liệu */}
       <div className='rounded-md border'>
         <Table>
-          {/* Phần tiêu đề bảng */}
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className='group/row'>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} colSpan={header.colSpan} className={header.column.columnDef.meta?.className ?? ''}>
-                      {/* Hiển thị tiêu đề cột, sử dụng flexRender để render dữ liệu */}
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
@@ -73,26 +77,21 @@ export function UsersTable({ columns, data }: DataTableProps) {
               </TableRow>
             ))}
           </TableHeader>
-
-          {/* Phần thân bảng */}
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              // Duyệt qua danh sách hàng và hiển thị dữ liệu
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className='group/row'>
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={`group/row ${highlightedRowId === row.original.id ? 'bg-muted' : ''}`} onClick={() => onRowClick && onRowClick(row.original)}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className={cell.column.columnDef.meta?.className ?? ''}>
-                      {/* Render nội dung của ô */}
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
-              // Hiển thị thông báo nếu không có dữ liệu
               <TableRow>
                 <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No results.
+                  Không có kết quả.
                 </TableCell>
               </TableRow>
             )}
@@ -100,7 +99,6 @@ export function UsersTable({ columns, data }: DataTableProps) {
         </Table>
       </div>
 
-      {/* Thành phần phân trang */}
       <DataTablePagination table={table} />
     </div>
   )

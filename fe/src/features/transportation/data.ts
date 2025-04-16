@@ -1,5 +1,5 @@
 //path : fe/src/features/transportation/data.ts
-import { CheckpointStatus } from '@/features/transportation/schema'
+import { CheckpointStatus } from './schema'
 
 // Map màu sắc cho trạng thái checkpoint
 export const checkpointStatuses = new Map<CheckpointStatus, string>([

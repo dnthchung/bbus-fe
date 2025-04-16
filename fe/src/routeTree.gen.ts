@@ -18,13 +18,12 @@ import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
-import { Route as AuthenticatedTransportationRoutesImport } from './routes/_authenticated/transportation/routes'
-import { Route as AuthenticatedTransportationRoutes2IndexImport } from './routes/_authenticated/transportation/routes2/index'
+import { Route as AuthenticatedTransportationRoutesIndexImport } from './routes/_authenticated/transportation/routes/index'
 import { Route as AuthenticatedStudentsDetailsIdImport } from './routes/_authenticated/students/details/$id'
 import { Route as AuthenticatedBusesListIdImport } from './routes/_authenticated/buses/list/$id'
-import { Route as AuthenticatedTransportationRoutes2ListIndexImport } from './routes/_authenticated/transportation/routes2/list/index'
+import { Route as AuthenticatedTransportationRoutesListIndexImport } from './routes/_authenticated/transportation/routes/list/index'
 import { Route as AuthenticatedBusesListStudentListIdImport } from './routes/_authenticated/buses/list/student-list/$id'
-import { Route as AuthenticatedTransportationRoutes2ListDetailsIdImport } from './routes/_authenticated/transportation/routes2/list/details/$id'
+import { Route as AuthenticatedTransportationRoutesListDetailsIdImport } from './routes/_authenticated/transportation/routes/list/details/$id'
 
 // Create Virtual Routes
 
@@ -340,13 +339,6 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
-const AuthenticatedTransportationRoutesRoute =
-  AuthenticatedTransportationRoutesImport.update({
-    id: '/transportation/routes',
-    path: '/transportation/routes',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-
 const AuthenticatedBusesScheduleIndexLazyRoute =
   AuthenticatedBusesScheduleIndexLazyImport.update({
     id: '/buses/schedule/',
@@ -369,10 +361,10 @@ const AuthenticatedBusesListIndexLazyRoute =
     ),
   )
 
-const AuthenticatedTransportationRoutes2IndexRoute =
-  AuthenticatedTransportationRoutes2IndexImport.update({
-    id: '/transportation/routes2/',
-    path: '/transportation/routes2/',
+const AuthenticatedTransportationRoutesIndexRoute =
+  AuthenticatedTransportationRoutesIndexImport.update({
+    id: '/transportation/routes/',
+    path: '/transportation/routes/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -389,10 +381,10 @@ const AuthenticatedBusesListIdRoute = AuthenticatedBusesListIdImport.update({
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
-const AuthenticatedTransportationRoutes2ListIndexRoute =
-  AuthenticatedTransportationRoutes2ListIndexImport.update({
-    id: '/transportation/routes2/list/',
-    path: '/transportation/routes2/list/',
+const AuthenticatedTransportationRoutesListIndexRoute =
+  AuthenticatedTransportationRoutesListIndexImport.update({
+    id: '/transportation/routes/list/',
+    path: '/transportation/routes/list/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -403,10 +395,10 @@ const AuthenticatedBusesListStudentListIdRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
-const AuthenticatedTransportationRoutes2ListDetailsIdRoute =
-  AuthenticatedTransportationRoutes2ListDetailsIdImport.update({
-    id: '/transportation/routes2/list/details/$id',
-    path: '/transportation/routes2/list/details/$id',
+const AuthenticatedTransportationRoutesListDetailsIdRoute =
+  AuthenticatedTransportationRoutesListDetailsIdImport.update({
+    id: '/transportation/routes/list/details/$id',
+    path: '/transportation/routes/list/details/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -519,13 +511,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/transportation/routes': {
-      id: '/_authenticated/transportation/routes'
-      path: '/transportation/routes'
-      fullPath: '/transportation/routes'
-      preLoaderRoute: typeof AuthenticatedTransportationRoutesImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
     '/_authenticated/settings/account': {
       id: '/_authenticated/settings/account'
       path: '/account'
@@ -631,11 +616,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudentsDetailsIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/transportation/routes2/': {
-      id: '/_authenticated/transportation/routes2/'
-      path: '/transportation/routes2'
-      fullPath: '/transportation/routes2'
-      preLoaderRoute: typeof AuthenticatedTransportationRoutes2IndexImport
+    '/_authenticated/transportation/routes/': {
+      id: '/_authenticated/transportation/routes/'
+      path: '/transportation/routes'
+      fullPath: '/transportation/routes'
+      preLoaderRoute: typeof AuthenticatedTransportationRoutesIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/buses/list/': {
@@ -659,18 +644,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBusesListStudentListIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/transportation/routes2/list/': {
-      id: '/_authenticated/transportation/routes2/list/'
-      path: '/transportation/routes2/list'
-      fullPath: '/transportation/routes2/list'
-      preLoaderRoute: typeof AuthenticatedTransportationRoutes2ListIndexImport
+    '/_authenticated/transportation/routes/list/': {
+      id: '/_authenticated/transportation/routes/list/'
+      path: '/transportation/routes/list'
+      fullPath: '/transportation/routes/list'
+      preLoaderRoute: typeof AuthenticatedTransportationRoutesListIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/transportation/routes2/list/details/$id': {
-      id: '/_authenticated/transportation/routes2/list/details/$id'
-      path: '/transportation/routes2/list/details/$id'
-      fullPath: '/transportation/routes2/list/details/$id'
-      preLoaderRoute: typeof AuthenticatedTransportationRoutes2ListDetailsIdImport
+    '/_authenticated/transportation/routes/list/details/$id': {
+      id: '/_authenticated/transportation/routes/list/details/$id'
+      path: '/transportation/routes/list/details/$id'
+      fullPath: '/transportation/routes/list/details/$id'
+      preLoaderRoute: typeof AuthenticatedTransportationRoutesListDetailsIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
   }
@@ -704,7 +689,6 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedTransportationRoutesRoute: typeof AuthenticatedTransportationRoutesRoute
   AuthenticatedStudentsAttendanceLazyRoute: typeof AuthenticatedStudentsAttendanceLazyRoute
   AuthenticatedTransportationCheckpointsLazyRoute: typeof AuthenticatedTransportationCheckpointsLazyRoute
   AuthenticatedTransportationSchedulesLazyRoute: typeof AuthenticatedTransportationSchedulesLazyRoute
@@ -716,20 +700,18 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
   AuthenticatedBusesListIdRoute: typeof AuthenticatedBusesListIdRoute
   AuthenticatedStudentsDetailsIdRoute: typeof AuthenticatedStudentsDetailsIdRoute
-  AuthenticatedTransportationRoutes2IndexRoute: typeof AuthenticatedTransportationRoutes2IndexRoute
+  AuthenticatedTransportationRoutesIndexRoute: typeof AuthenticatedTransportationRoutesIndexRoute
   AuthenticatedBusesListIndexLazyRoute: typeof AuthenticatedBusesListIndexLazyRoute
   AuthenticatedBusesScheduleIndexLazyRoute: typeof AuthenticatedBusesScheduleIndexLazyRoute
   AuthenticatedBusesListStudentListIdRoute: typeof AuthenticatedBusesListStudentListIdRoute
-  AuthenticatedTransportationRoutes2ListIndexRoute: typeof AuthenticatedTransportationRoutes2ListIndexRoute
-  AuthenticatedTransportationRoutes2ListDetailsIdRoute: typeof AuthenticatedTransportationRoutes2ListDetailsIdRoute
+  AuthenticatedTransportationRoutesListIndexRoute: typeof AuthenticatedTransportationRoutesListIndexRoute
+  AuthenticatedTransportationRoutesListDetailsIdRoute: typeof AuthenticatedTransportationRoutesListDetailsIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedTransportationRoutesRoute:
-    AuthenticatedTransportationRoutesRoute,
   AuthenticatedStudentsAttendanceLazyRoute:
     AuthenticatedStudentsAttendanceLazyRoute,
   AuthenticatedTransportationCheckpointsLazyRoute:
@@ -745,17 +727,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
   AuthenticatedBusesListIdRoute: AuthenticatedBusesListIdRoute,
   AuthenticatedStudentsDetailsIdRoute: AuthenticatedStudentsDetailsIdRoute,
-  AuthenticatedTransportationRoutes2IndexRoute:
-    AuthenticatedTransportationRoutes2IndexRoute,
+  AuthenticatedTransportationRoutesIndexRoute:
+    AuthenticatedTransportationRoutesIndexRoute,
   AuthenticatedBusesListIndexLazyRoute: AuthenticatedBusesListIndexLazyRoute,
   AuthenticatedBusesScheduleIndexLazyRoute:
     AuthenticatedBusesScheduleIndexLazyRoute,
   AuthenticatedBusesListStudentListIdRoute:
     AuthenticatedBusesListStudentListIdRoute,
-  AuthenticatedTransportationRoutes2ListIndexRoute:
-    AuthenticatedTransportationRoutes2ListIndexRoute,
-  AuthenticatedTransportationRoutes2ListDetailsIdRoute:
-    AuthenticatedTransportationRoutes2ListDetailsIdRoute,
+  AuthenticatedTransportationRoutesListIndexRoute:
+    AuthenticatedTransportationRoutesListIndexRoute,
+  AuthenticatedTransportationRoutesListDetailsIdRoute:
+    AuthenticatedTransportationRoutesListDetailsIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -776,7 +758,6 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
@@ -792,12 +773,12 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/buses/list/$id': typeof AuthenticatedBusesListIdRoute
   '/students/details/$id': typeof AuthenticatedStudentsDetailsIdRoute
-  '/transportation/routes2': typeof AuthenticatedTransportationRoutes2IndexRoute
+  '/transportation/routes': typeof AuthenticatedTransportationRoutesIndexRoute
   '/buses/list': typeof AuthenticatedBusesListIndexLazyRoute
   '/buses/schedule': typeof AuthenticatedBusesScheduleIndexLazyRoute
   '/buses/list/student-list/$id': typeof AuthenticatedBusesListStudentListIdRoute
-  '/transportation/routes2/list': typeof AuthenticatedTransportationRoutes2ListIndexRoute
-  '/transportation/routes2/list/details/$id': typeof AuthenticatedTransportationRoutes2ListDetailsIdRoute
+  '/transportation/routes/list': typeof AuthenticatedTransportationRoutesListIndexRoute
+  '/transportation/routes/list/details/$id': typeof AuthenticatedTransportationRoutesListDetailsIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -813,7 +794,6 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
@@ -829,12 +809,12 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/buses/list/$id': typeof AuthenticatedBusesListIdRoute
   '/students/details/$id': typeof AuthenticatedStudentsDetailsIdRoute
-  '/transportation/routes2': typeof AuthenticatedTransportationRoutes2IndexRoute
+  '/transportation/routes': typeof AuthenticatedTransportationRoutesIndexRoute
   '/buses/list': typeof AuthenticatedBusesListIndexLazyRoute
   '/buses/schedule': typeof AuthenticatedBusesScheduleIndexLazyRoute
   '/buses/list/student-list/$id': typeof AuthenticatedBusesListStudentListIdRoute
-  '/transportation/routes2/list': typeof AuthenticatedTransportationRoutes2ListIndexRoute
-  '/transportation/routes2/list/details/$id': typeof AuthenticatedTransportationRoutes2ListDetailsIdRoute
+  '/transportation/routes/list': typeof AuthenticatedTransportationRoutesListIndexRoute
+  '/transportation/routes/list/details/$id': typeof AuthenticatedTransportationRoutesListDetailsIdRoute
 }
 
 export interface FileRoutesById {
@@ -854,7 +834,6 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/transportation/routes': typeof AuthenticatedTransportationRoutesRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
@@ -870,12 +849,12 @@ export interface FileRoutesById {
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
   '/_authenticated/buses/list/$id': typeof AuthenticatedBusesListIdRoute
   '/_authenticated/students/details/$id': typeof AuthenticatedStudentsDetailsIdRoute
-  '/_authenticated/transportation/routes2/': typeof AuthenticatedTransportationRoutes2IndexRoute
+  '/_authenticated/transportation/routes/': typeof AuthenticatedTransportationRoutesIndexRoute
   '/_authenticated/buses/list/': typeof AuthenticatedBusesListIndexLazyRoute
   '/_authenticated/buses/schedule/': typeof AuthenticatedBusesScheduleIndexLazyRoute
   '/_authenticated/buses/list/student-list/$id': typeof AuthenticatedBusesListStudentListIdRoute
-  '/_authenticated/transportation/routes2/list/': typeof AuthenticatedTransportationRoutes2ListIndexRoute
-  '/_authenticated/transportation/routes2/list/details/$id': typeof AuthenticatedTransportationRoutes2ListDetailsIdRoute
+  '/_authenticated/transportation/routes/list/': typeof AuthenticatedTransportationRoutesListIndexRoute
+  '/_authenticated/transportation/routes/list/details/$id': typeof AuthenticatedTransportationRoutesListDetailsIdRoute
 }
 
 export interface FileRouteTypes {
@@ -895,7 +874,6 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/transportation/routes'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/notifications'
@@ -911,12 +889,12 @@ export interface FileRouteTypes {
     | '/users'
     | '/buses/list/$id'
     | '/students/details/$id'
-    | '/transportation/routes2'
+    | '/transportation/routes'
     | '/buses/list'
     | '/buses/schedule'
     | '/buses/list/student-list/$id'
-    | '/transportation/routes2/list'
-    | '/transportation/routes2/list/details/$id'
+    | '/transportation/routes/list'
+    | '/transportation/routes/list/details/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -931,7 +909,6 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/transportation/routes'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/notifications'
@@ -947,12 +924,12 @@ export interface FileRouteTypes {
     | '/users'
     | '/buses/list/$id'
     | '/students/details/$id'
-    | '/transportation/routes2'
+    | '/transportation/routes'
     | '/buses/list'
     | '/buses/schedule'
     | '/buses/list/student-list/$id'
-    | '/transportation/routes2/list'
-    | '/transportation/routes2/list/details/$id'
+    | '/transportation/routes/list'
+    | '/transportation/routes/list/details/$id'
   id:
     | '__root__'
     | '/_authenticated'
@@ -970,7 +947,6 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
-    | '/_authenticated/transportation/routes'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/notifications'
@@ -986,12 +962,12 @@ export interface FileRouteTypes {
     | '/_authenticated/users/'
     | '/_authenticated/buses/list/$id'
     | '/_authenticated/students/details/$id'
-    | '/_authenticated/transportation/routes2/'
+    | '/_authenticated/transportation/routes/'
     | '/_authenticated/buses/list/'
     | '/_authenticated/buses/schedule/'
     | '/_authenticated/buses/list/student-list/$id'
-    | '/_authenticated/transportation/routes2/list/'
-    | '/_authenticated/transportation/routes2/list/details/$id'
+    | '/_authenticated/transportation/routes/list/'
+    | '/_authenticated/transportation/routes/list/details/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -1057,7 +1033,6 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
-        "/_authenticated/transportation/routes",
         "/_authenticated/students/attendance",
         "/_authenticated/transportation/checkpoints",
         "/_authenticated/transportation/schedules",
@@ -1069,12 +1044,12 @@ export const routeTree = rootRoute
         "/_authenticated/users/",
         "/_authenticated/buses/list/$id",
         "/_authenticated/students/details/$id",
-        "/_authenticated/transportation/routes2/",
+        "/_authenticated/transportation/routes/",
         "/_authenticated/buses/list/",
         "/_authenticated/buses/schedule/",
         "/_authenticated/buses/list/student-list/$id",
-        "/_authenticated/transportation/routes2/list/",
-        "/_authenticated/transportation/routes2/list/details/$id"
+        "/_authenticated/transportation/routes/list/",
+        "/_authenticated/transportation/routes/list/details/$id"
       ]
     },
     "/(auth)/500": {
@@ -1125,10 +1100,6 @@ export const routeTree = rootRoute
     },
     "/_authenticated/": {
       "filePath": "_authenticated/index.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/transportation/routes": {
-      "filePath": "_authenticated/transportation/routes.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/account": {
@@ -1191,8 +1162,8 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/students/details/$id.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/transportation/routes2/": {
-      "filePath": "_authenticated/transportation/routes2/index.tsx",
+    "/_authenticated/transportation/routes/": {
+      "filePath": "_authenticated/transportation/routes/index.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/buses/list/": {
@@ -1207,12 +1178,12 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/buses/list/student-list/$id.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/transportation/routes2/list/": {
-      "filePath": "_authenticated/transportation/routes2/list/index.tsx",
+    "/_authenticated/transportation/routes/list/": {
+      "filePath": "_authenticated/transportation/routes/list/index.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/transportation/routes2/list/details/$id": {
-      "filePath": "_authenticated/transportation/routes2/list/details/$id.tsx",
+    "/_authenticated/transportation/routes/list/details/$id": {
+      "filePath": "_authenticated/transportation/routes/list/details/$id.tsx",
       "parent": "/_authenticated"
     }
   }

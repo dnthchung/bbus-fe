@@ -56,14 +56,14 @@ export const sidebarData: SidebarData = {
           title: 'Quản lý tuyến đường',
           icon: Route,
           items: [
+            // {
+            //   title: 'DS tuyến đường',
+            //   url: '/transportation/routes',
+            //   icon: MapPinPlus,
+            // },
             {
               title: 'DS tuyến đường',
-              url: '/transportation/routes',
-              icon: MapPinPlus,
-            },
-            {
-              title: 'DS tuyến đường 2',
-              url: '/transportation/routes2/list',
+              url: '/transportation/routes/list',
               icon: MapPinPlus,
             },
             {
