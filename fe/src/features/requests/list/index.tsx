@@ -17,8 +17,8 @@ import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { getAllRequest, getAllRequestType } from '../function'
-import { RequestDetailModal } from '../list/components/request-detail-modal'
+import { getAllRequest, getAllRequestType, processChangeCheckpoint, replyRequest } from '../function'
+import { RequestDetailModal } from './components/request-detail-modal'
 import { RequestTable } from './components/request-table'
 
 // Định nghĩa các loại đơn dựa trên requestTypeId
@@ -36,6 +36,7 @@ export default function RequestContent() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
   const [currentTab, setCurrentTab] = useState('leave')
   const [isLoading, setIsLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [requests, setRequests] = useState<any[]>([])
   const [requestTypes, setRequestTypes] = useState<any[]>([])
 
@@ -78,55 +79,95 @@ export default function RequestContent() {
     })
   }
 
-  const handleAutoProcessAll = () => {
-    toast({
-      title: 'Xử lý tự động',
-      description: 'Đã xử lý tự động tất cả đơn thành công',
-    })
+  const handleAutoProcessAll = async () => {
+    try {
+      setIsProcessing(true)
+      // Lấy tất cả các đơn đổi điểm đón/trả đang chờ duyệt
+      const pendingPickupRequests = requests.filter((request) => request.requestTypeId === REQUEST_TYPES.PICKUP && request.status === 'PENDING')
+
+      // Xử lý tuần tự từng đơn
+      for (const request of pendingPickupRequests) {
+        await processChangeCheckpoint(request.requestId)
+      }
+
+      toast({
+        title: 'Xử lý tự động',
+        description: `Đã xử lý tự động ${pendingPickupRequests.length} đơn thành công`,
+      })
+
+      // Refresh dữ liệu sau khi xử lý
+      await refreshData()
+    } catch (error) {
+      console.error('Error processing all requests:', error)
+      toast({
+        title: 'Lỗi',
+        description: 'Đã xảy ra lỗi khi xử lý tự động các đơn',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleApproveRequest = (id: string, response: string) => {
-    // Gọi API phê duyệt đơn ở đây
-    toast({
-      title: 'Phê duyệt đơn',
-      description: 'Đã phê duyệt đơn thành công',
-    })
-    setIsDetailModalOpen(false)
-    // Refresh dữ liệu sau khi phê duyệt
-    refreshData()
+  const handleApproveRequest = async (id: string, response: string) => {
+    try {
+      setIsProcessing(true)
+      await replyRequest(id, response, 'APPROVED')
+      setIsDetailModalOpen(false)
+      // Refresh dữ liệu sau khi phê duyệt
+      await refreshData()
+    } catch (error) {
+      console.error('Error approving request:', error)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleRejectRequest = (id: string, response: string) => {
-    // Gọi API từ chối đơn ở đây
-    toast({
-      title: 'Từ chối đơn',
-      description: 'Đã từ chối đơn thành công',
-    })
-    setIsDetailModalOpen(false)
-    // Refresh dữ liệu sau khi từ chối
-    refreshData()
+  const handleRejectRequest = async (id: string, response: string) => {
+    try {
+      setIsProcessing(true)
+      await replyRequest(id, response, 'REJECTED')
+      setIsDetailModalOpen(false)
+      // Refresh dữ liệu sau khi từ chối
+      await refreshData()
+    } catch (error) {
+      console.error('Error rejecting request:', error)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleMarkAsRead = (id: string) => {
-    // Gọi API đánh dấu đã xem ở đây
-    toast({
-      title: 'Đánh dấu đã xem',
-      description: 'Đã đánh dấu đơn đã xem thành công',
-    })
-    setIsDetailModalOpen(false)
-    // Refresh dữ liệu sau khi đánh dấu đã xem
-    refreshData()
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      setIsProcessing(true)
+      // Gọi API đánh dấu đã xem ở đây (nếu có)
+      // Hiện tại chưa có API cụ thể cho chức năng này
+      toast({
+        title: 'Đánh dấu đã xem',
+        description: 'Đã đánh dấu đơn đã xem thành công',
+      })
+      setIsDetailModalOpen(false)
+      // Refresh dữ liệu sau khi đánh dấu đã xem
+      await refreshData()
+    } catch (error) {
+      console.error('Error marking request as read:', error)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleAutoProcess = (id: string) => {
-    // Gọi API xử lý tự động đơn ở đây
-    toast({
-      title: 'Xử lý tự động',
-      description: 'Đã xử lý tự động đơn thành công',
-    })
-    setIsDetailModalOpen(false)
-    // Refresh dữ liệu sau khi xử lý tự động
-    refreshData()
+  const handleAutoProcess = async (id: string) => {
+    try {
+      setIsProcessing(true)
+      await processChangeCheckpoint(id)
+      setIsDetailModalOpen(false)
+      // Refresh dữ liệu sau khi xử lý tự động
+      await refreshData()
+    } catch (error) {
+      console.error('Error auto processing request:', error)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const refreshData = async () => {
@@ -208,7 +249,9 @@ export default function RequestContent() {
 
             <TabsContent value='pickup'>
               <div className='mb-4 flex justify-end'>
-                <Button onClick={handleAutoProcessAll}>Tự động xử lý tất cả đơn</Button>
+                <Button onClick={handleAutoProcessAll} disabled={isProcessing}>
+                  {isProcessing ? 'Đang xử lý...' : 'Tự động xử lý tất cả đơn'}
+                </Button>
               </div>
               <RequestTable requests={pickupRequests} onViewRequest={handleViewRequest} />
             </TabsContent>
@@ -224,7 +267,7 @@ export default function RequestContent() {
         )}
       </Main>
 
-      {isDetailModalOpen && selectedRequest && <RequestDetailModal request={selectedRequest} requestType={currentTab} onClose={handleCloseModal} onApprove={handleApproveRequest} onReject={handleRejectRequest} onMarkAsRead={handleMarkAsRead} onAutoProcess={handleAutoProcess} />}
+      {isDetailModalOpen && selectedRequest && <RequestDetailModal request={selectedRequest} requestType={currentTab} onClose={handleCloseModal} onApprove={handleApproveRequest} onReject={handleRejectRequest} onMarkAsRead={handleMarkAsRead} onAutoProcess={handleAutoProcess} isProcessing={isProcessing} />}
     </>
   )
 }
