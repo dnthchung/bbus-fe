@@ -95,20 +95,9 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: 'Quản lý báo cáo',
+          title: 'Quản lý yêu cầu',
+          url: '/requests/list',
           icon: IconReport,
-          items: [
-            {
-              title: 'DS báo cáo',
-              url: '/401',
-              icon: IconFlag,
-            },
-            {
-              title: 'Báo cáo điểm danh',
-              url: '/403',
-              icon: IconUserOff,
-            },
-          ],
         },
       ],
     },

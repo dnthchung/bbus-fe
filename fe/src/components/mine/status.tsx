@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
+//path : fe/src/components/common/mine/status.tsx
+
 type StatusProps = {
   children: ReactNode
   color?: 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink'

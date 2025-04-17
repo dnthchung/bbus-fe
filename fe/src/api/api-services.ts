@@ -70,6 +70,13 @@ interface ApiServices {
     get_bus_list_by_route_id: (routeId: string) => Promise<any>
     get_list_checkpoint_by_route_id: (routeId: string) => Promise<any>
   }
+  requests: {
+    get_all_request: () => Promise<any>
+    get_all_request_type: () => Promise<any>
+    get_a_request_details_by_request_id: (requestId: string) => Promise<any>
+    reply_request: (request: any) => Promise<any>
+    process_change_checkpoint: (requestId: string) => Promise<any>
+  }
 }
 
 // Add the implementation in the students section of API_SERVICES
@@ -219,5 +226,12 @@ export const API_SERVICES: ApiServices = {
     get_a_route_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_ROUTE_ID}?routeId=${routeId}`),
     get_bus_list_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_BUS_LIST_BY_ROUTE_ID}?routeId=${routeId}`),
     get_list_checkpoint_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_LIST_CHECKPOINT_BY_ROUTE_ID}?routeId=${routeId}`),
+  },
+  requests: {
+    get_all_request: () => apiClient.get(API_ENDPOINTS.REQUESTS.GET_ALL_REQUEST),
+    get_all_request_type: () => apiClient.get(API_ENDPOINTS.REQUESTS.GET_ALL_REQUEST_TYPE),
+    get_a_request_details_by_request_id: (requestId: string) => apiClient.get(`${API_ENDPOINTS.REQUESTS.GET_A_REQUEST_DETAILS_BY_REQUEST_ID}/${requestId}`),
+    reply_request: (request: any) => apiClient.patch(API_ENDPOINTS.REQUESTS.REPLY_REQUEST, request),
+    process_change_checkpoint: (requestId: string) => apiClient.post(`${API_ENDPOINTS.REQUESTS.PROCESS_CHANGE_CHECKPOINT}/${requestId}`),
   },
 }

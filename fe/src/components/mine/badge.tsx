@@ -1,6 +1,7 @@
 import type React from 'react'
 import { cn } from '@/lib/utils'
 
+//path : fe/src/components/mine/badge.tsx
 type BadgeProps = {
   children: React.ReactNode
   color?: 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink'

@@ -13,7 +13,10 @@ export const routePermissionMap: Record<string, string[]> = {
   '/students/attendance': ['ADMIN'],
   '/transportation/schedules': ['ADMIN'],
   '/transportation/routes': ['ADMIN'],
+  '/transportation/routes/list': ['ADMIN'],
   '/transportation/checkpoints': ['ADMIN'],
   '/buses/list': ['ADMIN'],
   '/buses/schedule': ['ADMIN'],
+  '/requests': ['ADMIN'],
+  '/requests/list': ['ADMIN'],
 }
