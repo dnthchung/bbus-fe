@@ -1,4 +1,3 @@
-//path : src/features/transportation/routes/data/function.ts
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 
@@ -91,7 +90,10 @@ export async function getCheckpointDetailByCheckpointId(checkpointId: string) {
     const checkpointDetail = req.data.data
     console.log('6. checkpoint detail => ', checkpointDetail)
     return checkpointDetail
-  } catch (error) {}
+  } catch (error) {
+    console.error('Error fetching checkpoint detail:', error)
+    return null
+  }
 }
 
 //============================= route function ================================
@@ -121,7 +123,8 @@ export async function getRouteByRouteId(routeId: string) {
     return route
   } catch (error) {
     console.log('error get route by routeId => ', error)
-    throw error
+    // Return a default object instead of throwing
+    return { path: '' }
   }
 }
 
@@ -143,11 +146,12 @@ export async function getBusListByRouteId(routeId: string) {
 export async function getListCheckpointByRouteId(routeId: string) {
   try {
     const req = await API_SERVICES.route.get_list_checkpoint_by_route_id(routeId)
-    const listCheckpoint = req.data || req.data.data
+    // Handle different response structures
+    const listCheckpoint = req.data?.data || req.data || []
     console.log('10. list checkpoint => ', listCheckpoint)
     return listCheckpoint
   } catch (error) {
     console.log('error get list checkpoint by route id => ', error)
-    throw error
+    return []
   }
 }
