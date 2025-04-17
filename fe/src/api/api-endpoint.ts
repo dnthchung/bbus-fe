@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     GET_STUDENT_LIST_BY_ENTITY_ID: (entityId: string) => `/student/list/${entityId}`,
     IMPORT_STUDENT: '/student/import',
     GET_LIST_STUDENT_BY_CHECKPOINT_ID: '/checkpoint/students',
+    GET_LIST_STUDENT_BY_BUS_ID: '/student/by-bus',
   },
   PARENTS: {
     GET_PARENT_LIST: '/parent/list?size=10000',
@@ -63,5 +64,16 @@ export const API_ENDPOINTS = {
   },
   ROUTE: {
     GET_A_ROUTE_BY_BUS_ID: '/route/by-bus',
+    GET_ALL_ROUTE: '/route/list',
+    GET_A_ROUTE_BY_ROUTE_ID: '/route',
+    GET_BUS_LIST_BY_ROUTE_ID: '/bus/by_route',
+    GET_LIST_CHECKPOINT_BY_ROUTE_ID: '/checkpoint/by-route',
+  },
+  REQUESTS: {
+    GET_ALL_REQUEST: '/request/list',
+    GET_ALL_REQUEST_TYPE: '/request-type/list',
+    GET_A_REQUEST_DETAILS_BY_REQUEST_ID: '/request',
+    REPLY_REQUEST: '/request/reply',
+    PROCESS_CHANGE_CHECKPOINT: '/request/process-change-checkpoint',
   },
 } as const

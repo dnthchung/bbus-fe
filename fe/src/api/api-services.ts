@@ -50,6 +50,7 @@ interface ApiServices {
     update_status: (busId: string, status: string) => Promise<any>
     update_max_capacity_for_all: (params: { maxCapacity: number; checkpointId?: string }) => Promise<any>
     get_list_bus_by_checkpoint_id: (checkpointId: string) => Promise<any>
+    get_list_student_by_bus_id: (busId: string) => Promise<any>
   }
   drivers: {
     get_all: () => Promise<any>
@@ -64,6 +65,17 @@ interface ApiServices {
   }
   route: {
     get_a_route_by_bus_id: (busId: string) => Promise<any>
+    get_all_route: () => Promise<any>
+    get_a_route_by_route_id: (routeId: string) => Promise<any>
+    get_bus_list_by_route_id: (routeId: string) => Promise<any>
+    get_list_checkpoint_by_route_id: (routeId: string) => Promise<any>
+  }
+  requests: {
+    get_all_request: () => Promise<any>
+    get_all_request_type: () => Promise<any>
+    get_a_request_details_by_request_id: (requestId: string) => Promise<any>
+    reply_request: (request: any) => Promise<any>
+    process_change_checkpoint: (requestId: string) => Promise<any>
   }
 }
 
@@ -183,6 +195,7 @@ export const API_SERVICES: ApiServices = {
       return apiClient.post(url.pathname + url.search)
     },
     get_list_bus_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.BUSES.GET_LIST_BUS_BY_CHECKPOINT_ID}?checkpointId=${checkpointId}`),
+    get_list_student_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_LIST_STUDENT_BY_BUS_ID}?busId=${busId}`),
   },
   //--------------------------
   // 8) Driver
@@ -209,5 +222,16 @@ export const API_SERVICES: ApiServices = {
   //--------------------------
   route: {
     get_a_route_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_BUS_ID}?busId=${busId}`),
+    get_all_route: () => apiClient.get(API_ENDPOINTS.ROUTE.GET_ALL_ROUTE),
+    get_a_route_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_ROUTE_ID}?routeId=${routeId}`),
+    get_bus_list_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_BUS_LIST_BY_ROUTE_ID}?routeId=${routeId}`),
+    get_list_checkpoint_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_LIST_CHECKPOINT_BY_ROUTE_ID}?routeId=${routeId}`),
+  },
+  requests: {
+    get_all_request: () => apiClient.get(API_ENDPOINTS.REQUESTS.GET_ALL_REQUEST),
+    get_all_request_type: () => apiClient.get(API_ENDPOINTS.REQUESTS.GET_ALL_REQUEST_TYPE),
+    get_a_request_details_by_request_id: (requestId: string) => apiClient.get(`${API_ENDPOINTS.REQUESTS.GET_A_REQUEST_DETAILS_BY_REQUEST_ID}/${requestId}`),
+    reply_request: (request: any) => apiClient.patch(API_ENDPOINTS.REQUESTS.REPLY_REQUEST, request),
+    process_change_checkpoint: (requestId: string) => apiClient.post(`${API_ENDPOINTS.REQUESTS.PROCESS_CHANGE_CHECKPOINT}/${requestId}`),
   },
 }

@@ -135,7 +135,7 @@ export default function PageViewDetails() {
                 <TabsTrigger value='device'>Thông tin thiết bị</TabsTrigger>
               </TabsList>
 
-              <TabsContent className='w-1/2' value='basic'>
+              <TabsContent className='w-full' value='basic'>
                 <BasicInfoTab bus={bus} onBusUpdate={handleBusUpdate} />
               </TabsContent>
 

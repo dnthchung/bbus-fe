@@ -3,15 +3,15 @@ import { Row } from '@tanstack/react-table'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { useUsers } from '../../context/routes-context'
-import { User } from '../../data/schema'
+import { Route } from '../../../schema'
+import { useRoutes } from '../../context/routes-context'
 
 interface DataTableRowActionsProps {
-  row: Row<User>
+  row: Row<Route>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const { setOpen, setCurrentRow } = useUsers()
+  const { setOpen, setCurrentRow } = useRoutes()
   return (
     <>
       <DropdownMenu modal={false}>
