@@ -7,6 +7,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import RouteMap from '@/features/transportation/routes/components/map/route-map'
+import { RoutesPrimaryButtons } from '@/features/transportation/routes/components/routes-primary-buttons'
 import { columns } from '../components/table/routes-columns'
 import { RoutesTable } from '../components/table/routes-table'
 import RoutesProvider, { useRoutes } from '../context/routes-context'
@@ -29,7 +30,7 @@ function RoutesContent() {
             <h2 className='text-2xl font-bold tracking-tight'>Danh sách tuyến đường</h2>
             <p className='text-muted-foreground'>Quản lý thông tin tuyến đường trên hệ thống</p>
           </div>
-          {/* <StudentsPrimaryButtons /> */}
+          <RoutesPrimaryButtons />
         </div>
 
         <div className='flex h-[calc(100vh-180px)] flex-col gap-4 lg:flex-row'>

@@ -1,5 +1,6 @@
 'use client'
 
+//url : fe/src/features/students/attendance/components/student-list.tsx
 import { useState } from 'react'
 import { Search, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'

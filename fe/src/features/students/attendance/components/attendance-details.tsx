@@ -1,5 +1,6 @@
 'use client'
 
+//url file : d:\Workspace\Github_folder\bbus-fe\fe\src\features\students\attendance\components\attendance-details.tsx
 import { useState } from 'react'
 import { Bus, Calendar, Camera, Clock, FileText, Filter, MapPin, User, CheckCircle, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
