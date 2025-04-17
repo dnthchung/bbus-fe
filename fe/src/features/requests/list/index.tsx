@@ -27,27 +27,37 @@ function RequestContent() {
   }
 
   const handleExportExcel = () => {
-    // Implement Excel export functionality
+    // TODO: Implement Excel export functionality
   }
 
   return (
     <>
-      <Header fixed className='z-50'>
-        <div className='ml-auto flex items-center gap-4'>
+      {/* -------- Header -------- */}
+      <Header fixed>
+        <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
       </Header>
-      <Main className='container mx-auto mt-20 py-6'>
-        <div className='mb-6 flex flex-col space-y-4'>
-          <h1 className='text-2xl font-bold'>Quản lý đơn người dùng</h1>
 
-          <div className='flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0'>
+      {/* -------- Main -------- */}
+      <Main>
+        {/* --- Tiêu đề + Thanh công cụ tìm kiếm --- */}
+        <div className='mb-6 flex flex-wrap items-center justify-between space-y-4'>
+          <div>
+            <h2 className='text-2xl font-bold tracking-tight'>Quản lý đơn người dùng</h2>
+            <p className='text-muted-foreground'>Quản lý thông tin đơn xin nghỉ học, đổi điểm đón/trả và các đơn khác của học sinh.</p>
+          </div>
+          <div className='flex flex-col gap-4 space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0'>
+            {/* --- Tìm kiếm & Chọn ngày --- */}
             <div className='flex flex-1 items-center space-x-2'>
+              {/* ô tìm kiếm */}
               <div className='relative w-full max-w-sm'>
                 <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input type='search' placeholder='Tìm kiếm theo tên học sinh...' className='pl-8' value={searchQuery} onChange={handleSearch} />
               </div>
+
+              {/* bộ chọn ngày */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant='outline' className={cn('w-[240px] justify-start text-left font-normal', !selectedDate && 'text-muted-foreground')}>
@@ -55,11 +65,21 @@ function RequestContent() {
                     {selectedDate ? format(selectedDate, 'PPP', { locale: vi }) : 'Chọn ngày'}
                   </Button>
                 </PopoverTrigger>
+
                 <PopoverContent className='w-auto p-0' align='start'>
                   <Calendar mode='single' selected={selectedDate} onSelect={setSelectedDate} initialFocus />
+
+                  {/* Nút xoá lọc ngày */}
+                  {selectedDate && (
+                    <Button variant='ghost' size='sm' className='mt-2 w-full' onClick={() => setSelectedDate(undefined)}>
+                      Xoá lọc ngày
+                    </Button>
+                  )}
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* nút xuất excel */}
             <Button onClick={handleExportExcel} className='gap-2'>
               <Download className='h-4 w-4' />
               Xuất file Excel
@@ -67,6 +87,7 @@ function RequestContent() {
           </div>
         </div>
 
+        {/* --- Nội dung bảng dữ liệu --- */}
         {loading ? (
           <div className='space-y-4'>
             <Skeleton className='h-10 w-full' />
@@ -103,6 +124,7 @@ function RequestContent() {
         )}
       </Main>
 
+      {/* --- Modal chi tiết đơn --- */}
       {open === 'view' && currentRequest && <RequestDetailModal request={currentRequest} requestType={currentTab} onClose={handleCloseModal} onApprove={handleApproveRequest} onReject={handleRejectRequest} onMarkAsRead={handleMarkAsRead} onAutoProcess={handleAutoProcess} />}
     </>
   )

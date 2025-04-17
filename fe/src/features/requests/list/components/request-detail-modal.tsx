@@ -49,6 +49,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
   const isPending = requestData.status === 'PENDING'
   const isApproved = requestData.status === 'APPROVED'
 
+  /* ----------------- Helpers ----------------- */
   const getRequestTypeLabel = () => {
     const typeName = requestData.requestTypeName || ''
     if (typeName.includes('nghỉ học')) return 'leave'
@@ -67,6 +68,10 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
   }
 
+  // Ngày gửi – ưu tiên createdAt, sau đó fromDate
+  const getSubmissionDate = () => requestData.createdAt || requestData.createdDate || requestData.submissionDate || requestData.fromDate
+
+  /* -------------- Loading skeleton -------------- */
   if (isLoading) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
@@ -85,6 +90,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     )
   }
 
+  /* ------------------ Render ------------------ */
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
@@ -92,11 +98,13 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
           <DialogTitle className='text-xl'>Chi tiết đơn</DialogTitle>
         </DialogHeader>
 
+        {/* ---------- Bảng thông tin ---------- */}
         <div className='py-4'>
           <table className='w-full overflow-hidden rounded border border-gray-300 text-sm dark:border-gray-600'>
             <tbody>
               <InfoRow label='Học sinh' value={requestData.studentName || `Người dùng: ${requestData.sendByUserId?.substring(0, 8)}...`} />
-              <InfoRow label='Ngày gửi' value={formatDate(requestData.fromDate)} />
+              {/* ---- SỬA HÀNG NÀY ---- */}
+              <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
               <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
 
               {isPickup && requestData.checkpointName && <InfoRow label='Điểm đón/trả mới' value={requestData.checkpointName} />}
@@ -115,7 +123,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
             </tbody>
           </table>
 
-          {/* Hiển thị Textarea luôn, nhưng disabled nếu đã duyệt */}
+          {/* Ô phản hồi (ẩn khi đã duyệt hoặc là đơn report) */}
           {!isReport && (
             <div className='mt-4'>
               <div className='mb-1 font-medium'>Phản hồi:</div>
@@ -124,6 +132,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
           )}
         </div>
 
+        {/* ---------- Action buttons ---------- */}
         <div className='flex justify-end gap-2'>
           {isReport ? (
             <Button onClick={() => onMarkAsRead(requestData.requestId)} disabled={processing}>
@@ -158,7 +167,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
   )
 }
 
-// 2 cột: trái có nền - phải là nội dung
+/* -------- Row helper -------- */
 function InfoRow({ label, value, multiline = false }: { label: string; value: React.ReactNode; multiline?: boolean }) {
   return (
     <tr className='border-t border-gray-300 dark:border-gray-600'>

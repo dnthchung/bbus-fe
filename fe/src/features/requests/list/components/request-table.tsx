@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/mine/badge'
 import { RequestStatusBadge } from '../components/request-status-badge'
 
 interface RequestTableProps {
@@ -12,10 +13,12 @@ interface RequestTableProps {
 }
 
 export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
+  /* ---------------- State ---------------- */
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
-  const totalPages = Math.ceil(requests.length / itemsPerPage)
+  const [itemsPerPage, setItemsPerPage] = useState(10) // mặc định 10 hàng
 
+  /* -------------- Pagination -------------- */
+  const totalPages = Math.ceil(requests.length / itemsPerPage)
   const paginatedRequests = requests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const handlePreviousPage = () => {
@@ -30,24 +33,19 @@ export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
     }
   }
 
-  // Hàm để lấy ngày gửi đơn (có thể cần điều chỉnh tùy thuộc vào API)
-  const getSubmissionDate = (request: any) => {
-    // Giả định rằng API không trả về trường submissionDate cụ thể
-    // Sử dụng fromDate hoặc một trường khác làm ngày gửi đơn
-    return request.fromDate || new Date().toISOString().split('T')[0]
-  }
+  /* -------------- Helpers -------------- */
+  const getSubmissionDate = (request: any) => request.fromDate || new Date().toISOString().split('T')[0]
 
-  // Hàm để lấy nội dung rút gọn
-  const getSummary = (request: any) => {
-    return request.reason || 'Không có nội dung'
-  }
+  const getSummary = (request: any) => request.reason || 'Không có nội dung'
 
+  /* -------------- Render -------------- */
   return (
     <div className='rounded-md border'>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className='w-[80px]'>STT</TableHead>
+            <TableHead>Người gửi</TableHead>
             <TableHead>Học sinh</TableHead>
             <TableHead>Ngày gửi</TableHead>
             <TableHead className='max-w-[300px]'>Nội dung rút gọn</TableHead>
@@ -55,12 +53,14 @@ export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
             <TableHead className='text-right'>Hành động</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {paginatedRequests.length > 0 ? (
             paginatedRequests.map((request, index) => (
               <TableRow key={request.requestId}>
                 <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                <TableCell className='font-medium'>{request.studentName || `Người dùng: ${request.sendByUserId.substring(0, 8)}...`}</TableCell>
+                <TableCell>{request.sendByUserName || `Người dùng: ${request.sendByUserId.substring(0, 8)}...`}</TableCell>
+                <TableCell className='font-medium'>{request.studentName || ` HS của người dùng: ${request.sendByUserId.substring(0, 8)}...`}</TableCell>
                 <TableCell>{new Date(getSubmissionDate(request)).toLocaleDateString('vi-VN')}</TableCell>
                 <TableCell className='max-w-[300px] truncate'>{getSummary(request)}</TableCell>
                 <TableCell>
@@ -76,7 +76,7 @@ export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className='h-24 text-center'>
+              <TableCell colSpan={7} className='h-24 text-center'>
                 Không có dữ liệu
               </TableCell>
             </TableRow>
@@ -84,21 +84,49 @@ export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
         </TableBody>
       </Table>
 
+      {/* ---------- Pagination footer ---------- */}
       {requests.length > 0 && (
         <div className='flex items-center justify-between border-t px-4 py-2'>
+          {/* Thông tin tổng */}
           <div className='text-sm text-muted-foreground'>
             Hiển thị {paginatedRequests.length} / {requests.length} đơn
           </div>
-          <div className='flex items-center space-x-2'>
-            <Button variant='outline' size='sm' onClick={handlePreviousPage} disabled={currentPage === 1}>
-              <ChevronLeft className='h-4 w-4' />
-            </Button>
-            <div className='text-sm'>
-              Trang {currentPage} / {totalPages || 1}
+
+          {/* Điều khiển phân trang + chọn kích thước trang */}
+          <div className='flex items-center space-x-4'>
+            {/* bộ chọn số hàng / trang */}
+            <div className='flex items-center space-x-2'>
+              <span className='whitespace-nowrap text-sm'>Số hàng / trang</span>
+              <select
+                className='rounded border px-2 py-1 text-sm dark:bg-[#0f172a]'
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value))
+                  setCurrentPage(1) // quay về trang đầu khi thay đổi
+                }}
+              >
+                {[5, 10, 20, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
             </div>
-            <Button variant='outline' size='sm' onClick={handleNextPage} disabled={currentPage === totalPages || totalPages === 0}>
-              <ChevronRight className='h-4 w-4' />
-            </Button>
+
+            {/* nút chuyển trang */}
+            <div className='flex items-center space-x-2'>
+              <Button variant='outline' size='sm' onClick={handlePreviousPage} disabled={currentPage === 1}>
+                <ChevronLeft className='h-4 w-4' />
+              </Button>
+
+              <div className='text-sm'>
+                Trang {currentPage} / {totalPages || 1}
+              </div>
+
+              <Button variant='outline' size='sm' onClick={handleNextPage} disabled={currentPage === totalPages || totalPages === 0}>
+                <ChevronRight className='h-4 w-4' />
+              </Button>
+            </div>
           </div>
         </div>
       )}
