@@ -2,11 +2,11 @@
 
 import type React from 'react'
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { useRequests } from '../../context/requests-context'
 import { getRequestById } from '../../function'
 import { RequestStatusBadge } from './request-status-badge'
 
@@ -18,10 +18,10 @@ interface RequestDetailModalProps {
   onReject: (id: string, response: string) => void
   onMarkAsRead: (id: string) => void
   onAutoProcess: (id: string) => void
-  isProcessing?: boolean
 }
 
-export function RequestDetailModal({ request, requestType, onClose, onApprove, onReject, onMarkAsRead, onAutoProcess, isProcessing = false }: RequestDetailModalProps) {
+export function RequestDetailModal({ request, requestType, onClose, onApprove, onReject, onMarkAsRead, onAutoProcess }: RequestDetailModalProps) {
+  const { processing } = useRequests()
   const [response, setResponse] = useState('')
   const [requestDetails, setRequestDetails] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -38,7 +38,6 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
         setIsLoading(false)
       }
     }
-
     fetchRequestDetails()
   }, [request.requestId])
 
@@ -46,15 +45,15 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     setResponse(e.target.value)
   }
 
-  // Sử dụng dữ liệu chi tiết nếu có, nếu không sử dụng dữ liệu từ danh sách
   const requestData = requestDetails || request
   const isPending = requestData.status === 'PENDING'
+  const isApproved = requestData.status === 'APPROVED'
 
-  // Xác định loại đơn dựa trên requestTypeName
   const getRequestTypeLabel = () => {
     const typeName = requestData.requestTypeName || ''
     if (typeName.includes('nghỉ học')) return 'leave'
     if (typeName.includes('đón/trả')) return 'pickup'
+    if (typeName.includes('báo cáo')) return 'report'
     return 'other'
   }
 
@@ -62,16 +61,18 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
   const isReport = currentRequestType === 'report'
   const isPickup = currentRequestType === 'pickup' || requestData.requestTypeName?.includes('đón/trả')
 
+  const formatDate = (date?: string) => {
+    if (!date) return ''
+    const d = new Date(date)
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
+  }
+
   if (isLoading) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className='sm:max-w-[500px]'>
+        <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[500px]'>
           <DialogHeader>
             <DialogTitle className='text-xl'>Chi tiết đơn</DialogTitle>
-            <Button variant='ghost' size='icon' className='absolute right-4 top-4' onClick={onClose}>
-              <X className='h-4 w-4' />
-              <span className='sr-only'>Đóng</span>
-            </Button>
           </DialogHeader>
           <div className='space-y-4 py-4'>
             <Skeleton className='h-6 w-3/4' />
@@ -86,106 +87,83 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[500px]'>
+      <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle className='text-xl'>Chi tiết đơn</DialogTitle>
-          <Button variant='ghost' size='icon' className='absolute right-4 top-4' onClick={onClose}>
-            <X className='h-4 w-4' />
-            <span className='sr-only'>Đóng</span>
-          </Button>
         </DialogHeader>
 
-        <div className='grid gap-4 py-4'>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <div className='font-medium'>Học sinh:</div>
-            <div className='col-span-3'>{requestData.studentName || `Người dùng: ${requestData.sendByUserId.substring(0, 8)}...`}</div>
-          </div>
+        <div className='py-4'>
+          <table className='w-full overflow-hidden rounded border border-gray-300 text-sm dark:border-gray-600'>
+            <tbody>
+              <InfoRow label='Học sinh' value={requestData.studentName || `Người dùng: ${requestData.sendByUserId?.substring(0, 8)}...`} />
+              <InfoRow label='Ngày gửi' value={formatDate(requestData.fromDate)} />
+              <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
 
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <div className='font-medium'>Ngày gửi:</div>
-            <div className='col-span-3'>{requestData.fromDate ? new Date(requestData.fromDate).toLocaleDateString('vi-VN') : 'Không có thông tin'}</div>
-          </div>
+              {isPickup && requestData.checkpointName && <InfoRow label='Điểm đón/trả mới' value={requestData.checkpointName} />}
 
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <div className='font-medium'>Loại đơn:</div>
-            <div className='col-span-3'>{requestData.requestTypeName}</div>
-          </div>
+              {currentRequestType === 'leave' && requestData.fromDate && requestData.toDate && (
+                <>
+                  <InfoRow label='Từ ngày' value={formatDate(requestData.fromDate)} />
+                  <InfoRow label='Đến ngày' value={formatDate(requestData.toDate)} />
+                </>
+              )}
 
-          {isPickup && requestData.checkpointName && (
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <div className='font-medium'>Điểm đón/trả mới:</div>
-              <div className='col-span-3'>{requestData.checkpointName}</div>
-            </div>
-          )}
+              <InfoRow label='Nội dung' value={requestData.reason} multiline />
+              <InfoRow label='Trạng thái' value={<RequestStatusBadge status={requestData.status} />} />
 
-          {currentRequestType === 'leave' && requestData.fromDate && requestData.toDate && (
-            <>
-              <div className='grid grid-cols-4 items-center gap-4'>
-                <div className='font-medium'>Từ ngày:</div>
-                <div className='col-span-3'>{new Date(requestData.fromDate).toLocaleDateString('vi-VN')}</div>
-              </div>
-              <div className='grid grid-cols-4 items-center gap-4'>
-                <div className='font-medium'>Đến ngày:</div>
-                <div className='col-span-3'>{new Date(requestData.toDate).toLocaleDateString('vi-VN')}</div>
-              </div>
-            </>
-          )}
+              {requestData.reply && <InfoRow label='Phản hồi' value={requestData.reply} multiline />}
+            </tbody>
+          </table>
 
-          <div className='grid grid-cols-4 gap-4'>
-            <div className='font-medium'>Nội dung:</div>
-            <div className='col-span-3 whitespace-pre-wrap'>{requestData.reason}</div>
-          </div>
-
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <div className='font-medium'>Trạng thái:</div>
-            <div className='col-span-3'>
-              <RequestStatusBadge status={requestData.status} />
-            </div>
-          </div>
-
-          {requestData.reply && (
-            <div className='grid grid-cols-4 gap-4'>
-              <div className='font-medium'>Phản hồi:</div>
-              <div className='col-span-3 whitespace-pre-wrap'>{requestData.reply}</div>
-            </div>
-          )}
-
-          {isPending && !isReport && (
-            <div className='grid grid-cols-1 gap-4'>
-              <div className='font-medium'>Phản hồi:</div>
-              <Textarea placeholder='Nhập phản hồi...' value={response} onChange={handleResponseChange} className='min-h-[100px]' disabled={isProcessing} />
+          {/* Hiển thị Textarea luôn, nhưng disabled nếu đã duyệt */}
+          {!isReport && (
+            <div className='mt-4'>
+              <div className='mb-1 font-medium'>Phản hồi:</div>
+              <Textarea placeholder='Nhập phản hồi...' value={response} onChange={handleResponseChange} className='min-h-[100px]' disabled={!isPending || processing} />
             </div>
           )}
         </div>
 
         <div className='flex justify-end gap-2'>
           {isReport ? (
-            <Button onClick={() => onMarkAsRead(requestData.requestId)} disabled={isProcessing}>
-              {isProcessing ? 'Đang xử lý...' : 'Đánh dấu đã xem'}
+            <Button onClick={() => onMarkAsRead(requestData.requestId)} disabled={processing}>
+              {processing ? 'Đang xử lý...' : 'Đánh dấu đã xem'}
             </Button>
           ) : isPickup && isPending ? (
             <>
-              <Button variant='outline' onClick={onClose} disabled={isProcessing}>
+              <Button variant='outline' onClick={onClose} disabled={processing}>
                 Hủy
               </Button>
-              <Button onClick={() => onAutoProcess(requestData.requestId)} disabled={isProcessing}>
-                {isProcessing ? 'Đang xử lý...' : 'Tự động xử lý đơn'}
+              <Button onClick={() => onAutoProcess(requestData.requestId)} disabled={processing}>
+                {processing ? 'Đang xử lý...' : 'Tự động xử lý đơn'}
               </Button>
             </>
           ) : isPending ? (
             <>
-              <Button variant='destructive' onClick={() => onReject(requestData.requestId, response)} disabled={isProcessing}>
-                {isProcessing ? 'Đang xử lý...' : 'Từ chối'}
+              <Button variant='destructive' onClick={() => onReject(requestData.requestId, response)} disabled={processing}>
+                {processing ? 'Đang xử lý...' : 'Từ chối'}
               </Button>
-              <Button onClick={() => onApprove(requestData.requestId, response)} disabled={isProcessing}>
-                {isProcessing ? 'Đang xử lý...' : 'Phê duyệt'}
+              <Button onClick={() => onApprove(requestData.requestId, response)} disabled={processing}>
+                {processing ? 'Đang xử lý...' : 'Phê duyệt'}
               </Button>
             </>
           ) : (
-            <Button onClick={onClose}>Đóng</Button>
+            <Button onClick={onClose} disabled={processing}>
+              Đóng
+            </Button>
           )}
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+// 2 cột: trái có nền - phải là nội dung
+function InfoRow({ label, value, multiline = false }: { label: string; value: React.ReactNode; multiline?: boolean }) {
+  return (
+    <tr className='border-t border-gray-300 dark:border-gray-600'>
+      <td className='w-1/3 whitespace-nowrap bg-gray-100 p-2 align-top text-sm font-medium dark:bg-gray-800'>{label}:</td>
+      <td className={`p-2 text-sm ${multiline ? 'whitespace-pre-wrap break-words' : 'whitespace-nowrap'}`}>{value}</td>
+    </tr>
   )
 }

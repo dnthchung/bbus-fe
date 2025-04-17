@@ -1,4 +1,4 @@
-//request schema
+// Path: d:\Workspace\Github_folder\bbus-fe\fe\src\features\requests\schema.ts
 import { z } from 'zod'
 
 const requestSchema = z.object({
