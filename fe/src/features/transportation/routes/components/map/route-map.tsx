@@ -36,7 +36,8 @@ function RoutingMachine({ checkpoints }: { checkpoints: Checkpoint[] }) {
     map.eachLayer((layer) => {
       // @ts-ignore - Type checking for instanceof L.Routing.Control
       if (layer instanceof L.Routing.Control) {
-        map.removeLayer(layer)
+        // map.removeLayer(layer)
+        map.removeControl(routingControl)
       }
     })
 

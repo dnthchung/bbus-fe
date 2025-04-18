@@ -4,7 +4,7 @@ import { checkpointListSchema, Checkpoint } from './schema'
 export async function getAllCheckpoints(): Promise<Checkpoint[]> {
   try {
     const response = await API_SERVICES.checkpoints.get_all()
-    console.log('response', response)
+    // console.log('response', response)
     const rawData = response.data
     const rawCheckpoints = rawData?.data?.checkpoints
     if (!rawCheckpoints) {

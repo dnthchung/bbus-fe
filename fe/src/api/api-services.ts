@@ -27,6 +27,8 @@ interface ApiServices {
     add_one: (checkpoint: any) => Promise<any>
     count_students_of_one_checkpoint: (checkpointId: string) => Promise<any>
     get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => Promise<any>
+    get_all_by_page_size: (page: number, size: number) => Promise<any>
+    get_all_checkpoint_no_route: () => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -40,6 +42,7 @@ interface ApiServices {
     updateAvatar: (studentId: string, avatarFile: File) => Promise<any>
     importStudentFile: (file: File) => Promise<any>
     get_list_student_by_checkpoint_id: (checkpointId: string) => Promise<any>
+    get_history_by_student_id: (studentId: string) => Promise<any>
   }
   parents: {
     getParentList: () => Promise<any>
@@ -51,6 +54,7 @@ interface ApiServices {
     update_max_capacity_for_all: (params: { maxCapacity: number; checkpointId?: string }) => Promise<any>
     get_list_bus_by_checkpoint_id: (checkpointId: string) => Promise<any>
     get_list_student_by_bus_id: (busId: string) => Promise<any>
+    update_bus: (bus: any) => Promise<any>
   }
   drivers: {
     get_all: () => Promise<any>
@@ -69,6 +73,7 @@ interface ApiServices {
     get_a_route_by_route_id: (routeId: string) => Promise<any>
     get_bus_list_by_route_id: (routeId: string) => Promise<any>
     get_list_checkpoint_by_route_id: (routeId: string) => Promise<any>
+    create_a_route: (route: any) => Promise<any>
   }
   requests: {
     get_all_request: () => Promise<any>
@@ -135,11 +140,17 @@ export const API_SERVICES: ApiServices = {
     add_one: (checkpoint: any) => apiClient.post(API_ENDPOINTS.CHECKPOINTS.ADD_ONE, checkpoint),
     count_students_of_one_checkpoint: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.COUNT_STUDENTS_OF_ONE_CHECKPOINT}?checkpointId=${checkpointId}`),
     get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.GET_A_CHECKPOINT_BY_CHECKPOINT_ID}/${checkpointId}`),
+    get_all_by_page_size: (page: number, size: number) => {
+      return apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.GET_ALL_BY_PAGE_SIZE}?page=${page}&size=${size}`)
+    },
+    get_all_checkpoint_no_route: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL_NO_ROUTE),
   },
   //-------------------------
   // 4) STUDENTS
   //-------------------------
   students: {
+    //GET_HISTORY_BY_STUDENT_ID
+    get_history_by_student_id: (studentId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_HISTORY_BY_STUDENT_ID}/studentId=${studentId}`),
     list: () => apiClient.get(API_ENDPOINTS.STUDENTS.LIST),
     addOne: (student: any) => apiClient.post(API_ENDPOINTS.STUDENTS.ADD_ONE, student),
     updateOne: (studentId: string, student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE_ONE(studentId), student),
@@ -196,6 +207,7 @@ export const API_SERVICES: ApiServices = {
     },
     get_list_bus_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.BUSES.GET_LIST_BUS_BY_CHECKPOINT_ID}?checkpointId=${checkpointId}`),
     get_list_student_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_LIST_STUDENT_BY_BUS_ID}?busId=${busId}`),
+    update_bus: (bus: any) => apiClient.put(API_ENDPOINTS.BUSES.UPDATE_BUS, bus),
   },
   //--------------------------
   // 8) Driver
@@ -226,6 +238,7 @@ export const API_SERVICES: ApiServices = {
     get_a_route_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_ROUTE_ID}?routeId=${routeId}`),
     get_bus_list_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_BUS_LIST_BY_ROUTE_ID}?routeId=${routeId}`),
     get_list_checkpoint_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_LIST_CHECKPOINT_BY_ROUTE_ID}?routeId=${routeId}`),
+    create_a_route: (route: any) => apiClient.post(API_ENDPOINTS.ROUTE.CREATE_A_ROUTE, route),
   },
   requests: {
     get_all_request: () => apiClient.get(API_ENDPOINTS.REQUESTS.GET_ALL_REQUEST),

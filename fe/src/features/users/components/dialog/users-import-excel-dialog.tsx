@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,14 +11,13 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImportErrorDialog } from '@/components/common/import-error-dialog'
-import { allUsersExceptAdminsTypes, allAdminUsersTypes } from '@/features/users/data'
-import { userTypes } from '@/features/users/data'
+import { allUsersExceptAdminsTypes, allAdminUsersTypes, userTypes } from '@/features/users/data'
 import { useUsers } from '../../context/users-context'
 
-// Các định dạng file cho phép
-const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm', 'csv', 'txt', 'tsv', 'xlsb', 'ods', 'xml', 'html', 'pdf', 'xla', 'xlam']
+// ✅ Chỉ cho phép định dạng Excel
+const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm']
 
-// Zod schema cho form
+// Zod schema validate file
 const fileSchema = z
   .instanceof(FileList)
   .refine((files) => files.length === 1, {
@@ -31,12 +30,12 @@ const fileSchema = z
       return extension ? allowedExtensions.includes(extension) : false
     },
     {
-      message: 'Định dạng file không được hỗ trợ.',
+      message: 'Chỉ chấp nhận định dạng Excel (.xls, .xlsx, .xlsm...)',
     }
   )
 
 const formSchema = z.object({
-  file: fileSchema.optional(), // Để xóa được file
+  file: fileSchema.optional(), // vẫn optional để form linh hoạt hơn
   role: z.string().min(1, 'Vui lòng chọn vai trò'),
 })
 
@@ -69,23 +68,19 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
     return []
   }, [currentUserRole])
 
-  // Hàm xử lý xóa file
   const handleClearFile = () => {
-    // Reset giá trị trong form
     form.setValue('file', undefined, { shouldValidate: true })
-
-    // Reset trực tiếp input element để UI cũng được cập nhật
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
 
   const onSubmit = async (values: UserImportForm) => {
-    // 🛑 Kiểm tra nếu chưa có file
+    // ✅ Kiểm tra thủ công vì file vẫn có thể undefined
     if (!values.file) {
       toast({
         title: 'Vui lòng chọn file',
-        description: 'Bạn cần tải lên file trước khi nhập.',
+        description: 'Bạn cần tải lên file Excel hợp lệ trước khi nhập.',
         variant: 'deny',
       })
       return
@@ -94,7 +89,6 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
     try {
       await API_SERVICES.users.importUserFile(values.file, values.role)
 
-      // Tìm label tiếng Việt của role đã chọn
       const roleLabel = userTypes.find((role) => role.value === values.role)?.labelVi || values.role
 
       toast({
@@ -111,15 +105,15 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
         ),
         variant: 'success',
       })
+
       form.reset()
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+      if (fileInputRef.current) fileInputRef.current.value = ''
       onOpenChange(false)
       refreshUsers()
     } catch (error: any) {
       const response = error?.response?.data
       const details = response?.details
+
       if (details && typeof details === 'object') {
         setImportErrors(details)
         setIsErrorDialogOpen(true)
@@ -144,9 +138,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
         open={open}
         onOpenChange={(state) => {
           form.reset()
-          if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-          }
+          if (fileInputRef.current) fileInputRef.current.value = ''
           onOpenChange(state)
         }}
       >
@@ -154,14 +146,15 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
           <DialogHeader className='text-left'>
             <DialogTitle>Nhập danh sách tài khoản</DialogTitle>
             <DialogDescription>
-              Tải lên file chứa danh sách tài khoản và chọn vai trò tương ứng.
+              Tải lên file <strong>Excel</strong> chứa danh sách tài khoản và chọn vai trò tương ứng.
               <br />
-              Hỗ trợ định dạng: <code>.xls, .xlsx, .csv, .txt, .pdf...</code>
+              Hỗ trợ định dạng: <code>.xls, .xlsx, .xlsm, .xltx, .xltm</code>
             </DialogDescription>
           </DialogHeader>
+
           <Form {...form}>
             <form id='user-import-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-              {/* Dropdown chọn role */}
+              {/* Chọn vai trò */}
               <FormField
                 control={form.control}
                 name='role'
@@ -187,7 +180,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
                 )}
               />
 
-              {/* File upload + xóa file */}
+              {/* File upload */}
               <FormField
                 control={form.control}
                 name='file'
@@ -213,6 +206,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
               />
             </form>
           </Form>
+
           <DialogFooter className='gap-y-2'>
             <DialogClose asChild>
               <Button variant='outline'>Hủy</Button>
@@ -223,6 +217,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <ImportErrorDialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen} errors={importErrors} />
     </>
   )
