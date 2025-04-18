@@ -17,9 +17,11 @@ export const API_ENDPOINTS = {
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoint/list',
+    GET_ALL_NO_ROUTE: '/checkpoint/no-route',
     ADD_ONE: '/checkpoint/add',
     COUNT_STUDENTS_OF_ONE_CHECKPOINT: '/checkpoint/count-students',
     GET_A_CHECKPOINT_BY_CHECKPOINT_ID: '/checkpoint',
+    GET_ALL_BY_PAGE_SIZE: '/checkpoint/list',
   },
   STUDENTS: {
     LIST: '/student/list?size=10000',
@@ -35,6 +37,7 @@ export const API_ENDPOINTS = {
     IMPORT_STUDENT: '/student/import',
     GET_LIST_STUDENT_BY_CHECKPOINT_ID: '/checkpoint/students',
     GET_LIST_STUDENT_BY_BUS_ID: '/student/by-bus',
+    GET_HISTORY_BY_STUDENT_ID: '/attendance',
   },
   PARENTS: {
     GET_PARENT_LIST: '/parent/list?size=10000',
@@ -50,6 +53,7 @@ export const API_ENDPOINTS = {
     UPDATE_STATUS: '/bus/status',
     UPDATE_MAX_CAPACITY_FOR_ALL: '/bus/upd-max-capacity-for-all-bus',
     GET_LIST_BUS_BY_CHECKPOINT_ID: '/bus/by-checkpoint',
+    UPDATE_BUS: '/bus/upd',
   },
   DRIVER: {
     GET_ALL: '/driver/list',

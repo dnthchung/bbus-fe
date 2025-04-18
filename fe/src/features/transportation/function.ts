@@ -172,3 +172,17 @@ export async function createRoute(route: any) {
     throw error
   }
 }
+
+//get all checkpoint but not in route
+//result :
+export async function getAllCheckpointButNotInRoute() {
+  try {
+    const req = await API_SERVICES.checkpoints.get_all_checkpoint_no_route()
+    const listCheckpoint = req.data.data || req.data
+    console.log('12. list checkpoint => ', listCheckpoint)
+    return listCheckpoint
+  } catch (error) {
+    console.log('error get all checkpoint but not in route => ', error)
+    return []
+  }
+}

@@ -21,3 +21,13 @@
 .leaflet-popup-tip-container {
   margin-top: -1px;
 }
+
+/* Hide routing machine control panel but keep the routes */
+.leaflet-routing-container {
+  display: none !important;
+}
+
+/* Style the route lines */
+.leaflet-routing-line {
+  pointer-events: none;
+}

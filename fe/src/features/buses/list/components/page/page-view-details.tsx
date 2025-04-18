@@ -50,9 +50,35 @@ export default function PageViewDetails() {
     navigate({ to: '/buses/list' })
   }
 
-  const handleBusUpdate = (updatedBus: Bus) => {
-    setBus(updatedBus)
-    // Here you would typically call an API to update the bus in the backend
+  const handleBusUpdate = async (updatedBus: Bus) => {
+    if (!id) return
+
+    try {
+      // Make sure the ID is included in the update payload
+      const busUpdatePayload = {
+        // Remove redundant id assignment since it will be spread from updatedBus
+        ...updatedBus,
+      }
+
+      // Call the API to update the bus
+      await API_SERVICES.buses.update_bus(busUpdatePayload)
+
+      // Update the local state with the updated bus data
+      setBus(updatedBus)
+
+      toast({
+        title: 'Thành công',
+        description: 'Thông tin xe buýt đã được cập nhật',
+        variant: 'success',
+      })
+    } catch (err) {
+      console.error('Error updating bus:', err)
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật thông tin xe buýt',
+        variant: 'deny',
+      })
+    }
   }
 
   const handleStatusUpdate = async () => {

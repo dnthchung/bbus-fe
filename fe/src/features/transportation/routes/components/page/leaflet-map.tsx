@@ -1,9 +1,11 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import L from "leaflet"
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet"
-import "leaflet/dist/leaflet.css"
+import { useEffect, useState, useRef } from 'react'
+import L from 'leaflet'
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+import 'leaflet/dist/leaflet.css'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 
 interface Checkpoint {
   id: string
@@ -33,10 +35,66 @@ function FitBounds({ checkpoints }: { checkpoints: Checkpoint[] }) {
   return null
 }
 
+// Component to handle routing between checkpoints
+function RoutingControl({ checkpoints }: { checkpoints: Checkpoint[] }) {
+  const map = useMap()
+  const routingControlRef = useRef<L.Routing.Control | null>(null)
+
+  useEffect(() => {
+    if (checkpoints.length < 2) {
+      // Remove existing routing control if there are fewer than 2 checkpoints
+      if (routingControlRef.current) {
+        map.removeControl(routingControlRef.current)
+        routingControlRef.current = null
+      }
+      return
+    }
+
+    // Create waypoints from checkpoints
+    const waypoints = checkpoints.map((cp) => L.Routing.waypoint(L.latLng(cp.latitude, cp.longitude), cp.name))
+
+    // Remove existing routing control
+    if (routingControlRef.current) {
+      map.removeControl(routingControlRef.current)
+    }
+
+    // Create new routing control
+    const routingControl = L.Routing.control({
+      waypoints,
+      routeWhileDragging: false,
+      showAlternatives: false,
+      fitSelectedRoutes: false,
+      show: false, // Hide the routing instructions panel
+      lineOptions: {
+        styles: [
+          { color: '#3b82f6', opacity: 0.8, weight: 5 },
+          { color: '#2563eb', opacity: 0.9, weight: 3 },
+        ],
+        extendToWaypoints: true,
+        missingRouteTolerance: 0,
+      },
+      createMarker: () => {
+        return null // Don't create default markers, we'll add our own
+      },
+    }).addTo(map)
+
+    // Store the routing control reference
+    routingControlRef.current = routingControl
+
+    return () => {
+      if (routingControlRef.current) {
+        map.removeControl(routingControlRef.current)
+      }
+    }
+  }, [checkpoints, map])
+
+  return null
+}
+
 // Custom marker icon with number
 const createNumberedIcon = (number: number) => {
   return L.divIcon({
-    className: "custom-marker-icon",
+    className: 'custom-marker-icon',
     html: `<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">${number}</div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
@@ -48,13 +106,7 @@ export default function LeafletMap({ checkpoints }: LeafletMapProps) {
   const defaultCenter: [number, number] = [10.762622, 106.660172]
 
   // Calculate center if checkpoints exist
-  const center =
-    checkpoints.length > 0
-      ? ([
-          checkpoints.reduce((sum, cp) => sum + cp.latitude, 0) / checkpoints.length,
-          checkpoints.reduce((sum, cp) => sum + cp.longitude, 0) / checkpoints.length,
-        ] as [number, number])
-      : defaultCenter
+  const center = checkpoints.length > 0 ? ([checkpoints.reduce((sum, cp) => sum + cp.latitude, 0) / checkpoints.length, checkpoints.reduce((sum, cp) => sum + cp.longitude, 0) / checkpoints.length] as [number, number]) : defaultCenter
 
   const [isClient, setIsClient] = useState(false)
 
@@ -68,43 +120,33 @@ export default function LeafletMap({ checkpoints }: LeafletMapProps) {
       delete (L.Icon.Default.prototype as any)._getIconUrl
 
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
       })
     }
   }, [isClient])
 
-  // Create polyline positions from checkpoints
-  const polylinePositions = checkpoints.map((cp) => [cp.latitude, cp.longitude] as [number, number])
-
   return (
-    <MapContainer center={center} zoom={13} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
+      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
 
       {/* Fit map to markers */}
       {checkpoints.length > 0 && <FitBounds checkpoints={checkpoints} />}
 
-      {/* Draw route line */}
-      {checkpoints.length > 1 && <Polyline positions={polylinePositions} pathOptions={{ color: "blue", weight: 4 }} />}
+      {/* Add routing between checkpoints */}
+      {checkpoints.length > 1 && <RoutingControl checkpoints={checkpoints} />}
 
       {/* Place markers for each checkpoint */}
       {checkpoints.map((checkpoint, index) => (
-        <Marker
-          key={checkpoint.id}
-          position={[checkpoint.latitude, checkpoint.longitude]}
-          icon={createNumberedIcon(index + 1)}
-        >
+        <Marker key={checkpoint.id} position={[checkpoint.latitude, checkpoint.longitude]} icon={createNumberedIcon(index + 1)}>
           <Popup>
-            <div className="p-1">
-              <h3 className="font-medium">{checkpoint.name}</h3>
-              <p className="text-xs text-gray-600">{checkpoint.description}</p>
+            <div className='p-1'>
+              <h3 className='font-medium'>{checkpoint.name}</h3>
+              <p className='text-xs text-gray-600'>{checkpoint.description}</p>
               {checkpoint.studentCount !== undefined && (
-                <p className="text-xs mt-1">
-                  <span className="font-medium">Students:</span> {checkpoint.studentCount}
+                <p className='mt-1 text-xs'>
+                  <span className='font-medium'>Students:</span> {checkpoint.studentCount}
                 </p>
               )}
             </div>
@@ -114,9 +156,9 @@ export default function LeafletMap({ checkpoints }: LeafletMapProps) {
 
       {/* Show message when no checkpoints */}
       {checkpoints.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-[1000] pointer-events-none">
-          <div className="text-center p-4">
-            <p className="text-gray-500">Add checkpoints to preview route</p>
+        <div className='pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-white bg-opacity-70'>
+          <div className='p-4 text-center'>
+            <p className='text-gray-500'>Add checkpoints to preview route</p>
           </div>
         </div>
       )}

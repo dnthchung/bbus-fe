@@ -5,6 +5,7 @@ import { Main } from '@/components/layout/main'
 import AttendanceDetails from './components/attendance-details'
 import StudentList from './components/student-list'
 
+//path : fe/src/features/students/attendance/index.tsx
 export default function Attendance() {
   return (
     <>
