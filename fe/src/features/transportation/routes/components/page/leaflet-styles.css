@@ -1,0 +1,23 @@
+/* Custom styles for Leaflet map */
+.custom-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+}
+
+.leaflet-popup-content {
+  margin: 0.5rem;
+  min-width: 150px;
+}
+
+.leaflet-popup-tip-container {
+  margin-top: -1px;
+}

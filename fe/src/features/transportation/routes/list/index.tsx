@@ -14,6 +14,7 @@ import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { getListCheckpointByRouteId, getNumberOfStudentInEachCheckpoint } from '@/features/transportation/function'
 import RouteMap from '../components/map/route-map'
+import { RoutesPrimaryButtons } from '../components/routes-primary-buttons'
 import { columns } from '../components/table/routes-columns'
 import { RoutesTable } from '../components/table/routes-table'
 import RoutesProvider, { useRoutes } from '../context/routes-context'
@@ -136,6 +137,7 @@ function RoutesContent() {
             <h2 className='text-2xl font-bold tracking-tight'>Danh sách tuyến đường</h2>
             <p className='text-muted-foreground'>Quản lý thông tin tuyến đường trên hệ thống</p>
           </div>
+          <RoutesPrimaryButtons />
         </div>
 
         <div className='flex h-[calc(100vh-180px)] flex-col gap-4 lg:flex-row'>

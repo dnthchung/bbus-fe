@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
     GET_A_ROUTE_BY_ROUTE_ID: '/route',
     GET_BUS_LIST_BY_ROUTE_ID: '/bus/by_route',
     GET_LIST_CHECKPOINT_BY_ROUTE_ID: '/checkpoint/by-route',
+    CREATE_A_ROUTE: '/route/add',
   },
   REQUESTS: {
     GET_ALL_REQUEST: '/request/list',
