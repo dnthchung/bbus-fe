@@ -2,9 +2,11 @@
 
 import type React from 'react'
 import { format } from 'date-fns'
+import { IconSearch } from '@tabler/icons-react'
 import { vi } from 'date-fns/locale'
-import { CalendarIcon, Download, Search } from 'lucide-react'
+import { CalendarIcon, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
@@ -12,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -34,9 +37,34 @@ function RequestContent() {
     <>
       {/* -------- Header -------- */}
       <Header fixed>
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
+        <div className='flex w-full items-center'>
+          <Breadcrumb className='flex-1'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <span className='text-muted-foreground'>Quản lý yêu cầu</span>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>
+                  <BreadcrumbPage>
+                    {currentTab === 'leave' && 'Đơn xin nghỉ học'}
+                    {currentTab === 'pickup' && 'Đổi điểm đón/trả'}
+                    {currentTab === 'report' && 'Báo cáo'}
+                    {currentTab === 'other' && 'Đơn khác'}
+                  </BreadcrumbPage>
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className='flex items-center space-x-4'>
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
         </div>
       </Header>
 
@@ -53,7 +81,7 @@ function RequestContent() {
             <div className='flex flex-1 items-center space-x-2'>
               {/* ô tìm kiếm */}
               <div className='relative w-full max-w-sm'>
-                <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
+                <IconSearch className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input type='search' placeholder='Tìm kiếm theo tên học sinh...' className='pl-8' value={searchQuery} onChange={handleSearch} />
               </div>
 
@@ -98,8 +126,8 @@ function RequestContent() {
             <TabsList className='grid w-1/2 grid-cols-4'>
               <TabsTrigger value='leave'>Đơn xin nghỉ học</TabsTrigger>
               <TabsTrigger value='pickup'>Đổi điểm đón/trả</TabsTrigger>
+              <TabsTrigger value='report'>Báo cáo</TabsTrigger>
               <TabsTrigger value='other'>Đơn khác</TabsTrigger>
-              <TabsTrigger value='report'>Đơn báo cáo</TabsTrigger>
             </TabsList>
 
             <TabsContent value='leave'>
@@ -113,12 +141,12 @@ function RequestContent() {
               <RequestTable requests={pickupRequests} onViewRequest={handleViewRequest} />
             </TabsContent>
 
-            <TabsContent value='other'>
-              <RequestTable requests={otherRequests} onViewRequest={handleViewRequest} />
-            </TabsContent>
-
             <TabsContent value='report'>
               <RequestTable requests={reportRequests} onViewRequest={handleViewRequest} />
+            </TabsContent>
+
+            <TabsContent value='other'>
+              <RequestTable requests={otherRequests} onViewRequest={handleViewRequest} />
             </TabsContent>
           </Tabs>
         )}

@@ -5,10 +5,12 @@ import { Loader2, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -126,9 +128,27 @@ function RoutesContent() {
   return (
     <>
       <Header fixed className='z-50'>
-        <div className='ml-auto flex items-center gap-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
+        <div className='flex w-full items-center'>
+          <Breadcrumb className='flex-1'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <span className='text-muted-foreground'>Quản lý tuyến đường</span>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Danh sách tuyến đường</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className='flex items-center gap-4'>
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
         </div>
       </Header>
       <Main>

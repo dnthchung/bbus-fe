@@ -63,6 +63,9 @@ const AuthenticatedReportsIndexLazyImport = createFileRoute(
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
+const AuthenticatedBusesIndexLazyImport = createFileRoute(
+  '/_authenticated/buses/',
+)()
 const AuthenticatedAppsIndexLazyImport = createFileRoute(
   '/_authenticated/apps/',
 )()
@@ -255,6 +258,15 @@ const AuthenticatedHelpCenterIndexLazyRoute =
     import('./routes/_authenticated/help-center/index.lazy').then(
       (d) => d.Route,
     ),
+  )
+
+const AuthenticatedBusesIndexLazyRoute =
+  AuthenticatedBusesIndexLazyImport.update({
+    id: '/buses/',
+    path: '/buses/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/buses/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
@@ -576,6 +588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/buses/': {
+      id: '/_authenticated/buses/'
+      path: '/buses'
+      fullPath: '/buses'
+      preLoaderRoute: typeof AuthenticatedBusesIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -724,6 +743,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTransportationSchedulesLazyRoute: typeof AuthenticatedTransportationSchedulesLazyRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
+  AuthenticatedBusesIndexLazyRoute: typeof AuthenticatedBusesIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedReportsIndexLazyRoute: typeof AuthenticatedReportsIndexLazyRoute
   AuthenticatedStudentsIndexLazyRoute: typeof AuthenticatedStudentsIndexLazyRoute
@@ -753,6 +773,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedTransportationSchedulesLazyRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
+  AuthenticatedBusesIndexLazyRoute: AuthenticatedBusesIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedReportsIndexLazyRoute: AuthenticatedReportsIndexLazyRoute,
   AuthenticatedStudentsIndexLazyRoute: AuthenticatedStudentsIndexLazyRoute,
@@ -802,6 +823,7 @@ export interface FileRoutesByFullPath {
   '/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/buses': typeof AuthenticatedBusesIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/reports': typeof AuthenticatedReportsIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
@@ -840,6 +862,7 @@ export interface FileRoutesByTo {
   '/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/buses': typeof AuthenticatedBusesIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/reports': typeof AuthenticatedReportsIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
@@ -882,6 +905,7 @@ export interface FileRoutesById {
   '/_authenticated/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
+  '/_authenticated/buses/': typeof AuthenticatedBusesIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
@@ -924,6 +948,7 @@ export interface FileRouteTypes {
     | '/transportation/schedules'
     | '/requests'
     | '/apps'
+    | '/buses'
     | '/help-center'
     | '/reports'
     | '/settings/'
@@ -961,6 +986,7 @@ export interface FileRouteTypes {
     | '/transportation/schedules'
     | '/requests'
     | '/apps'
+    | '/buses'
     | '/help-center'
     | '/reports'
     | '/settings'
@@ -1001,6 +1027,7 @@ export interface FileRouteTypes {
     | '/_authenticated/transportation/schedules'
     | '/_authenticated/requests/'
     | '/_authenticated/apps/'
+    | '/_authenticated/buses/'
     | '/_authenticated/help-center/'
     | '/_authenticated/reports/'
     | '/_authenticated/settings/'
@@ -1084,6 +1111,7 @@ export const routeTree = rootRoute
         "/_authenticated/transportation/schedules",
         "/_authenticated/requests/",
         "/_authenticated/apps/",
+        "/_authenticated/buses/",
         "/_authenticated/help-center/",
         "/_authenticated/reports/",
         "/_authenticated/students/",
@@ -1178,6 +1206,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/apps/": {
       "filePath": "_authenticated/apps/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/buses/": {
+      "filePath": "_authenticated/buses/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/help-center/": {

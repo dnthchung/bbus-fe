@@ -10,6 +10,8 @@ type StatusProps = {
   showDot?: boolean
 }
 
+//using example without dot  : <Status color='red' showDot={false}>Đang chờ</Status>
+
 const colorStyles = {
   gray: {
     colors: 'bg-gray-50 text-gray-600 ring-gray-500/10 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700/30',

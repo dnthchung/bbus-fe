@@ -66,11 +66,11 @@ export const sidebarData: SidebarData = {
               url: '/transportation/routes/list',
               icon: MapPinPlus,
             },
-            {
-              title: 'Lịch trình',
-              url: '/transportation/schedules',
-              icon: CalendarCheck,
-            },
+            // {
+            //   title: 'Lịch trình',
+            //   url: '/transportation/schedules',
+            //   icon: CalendarCheck,
+            // },
             {
               title: 'DS các điểm dừng',
               url: '/transportation/checkpoints',
@@ -118,15 +118,15 @@ export const sidebarData: SidebarData = {
               url: '/settings/appearance',
               icon: IconPalette,
             },
-            {
-              title: 'Thông báo',
-              url: '/settings/notifications',
-              icon: IconNotification,
-            },
+            // {
+            //   title: 'Thông báo',
+            //   url: '/settings/notifications',
+            //   icon: IconNotification,
+            // },
           ],
         },
         {
-          title: 'Trợ giúp',
+          title: 'Trợ giúp & hướng dẫn',
           url: '/help-center',
           icon: IconHelp,
         },

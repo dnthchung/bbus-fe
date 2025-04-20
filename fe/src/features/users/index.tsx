@@ -1,6 +1,8 @@
 // fe/src/features/users/index.tsx
 import { useEffect, useState } from 'react'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -9,35 +11,58 @@ import { UsersDialogs } from '@/features/users/components/users-dialogs'
 import { UsersPrimaryButtons } from '@/features/users/components/users-primary-buttons'
 import { UsersTable } from '@/features/users/components/users-table'
 import UsersProvider, { useUsers } from '@/features/users/context/users-context'
-// Create a wrapper component that uses the context
+
+// Wrapper component that uses the context
 function UsersContent() {
   const { users, loading } = useUsers()
   const [title, setTitle] = useState('Danh sách người dùng')
   const [description, setDescription] = useState('Quản lý thông tin các tài khoản người dùng trong hệ thống.')
-  
+  // Add state for userRole
+  const [userRole, setUserRole] = useState<string>(localStorage.getItem('role') ?? '')
+
   useEffect(() => {
-    // Update title and description based on user role
-    const userRole = localStorage.getItem('role')
-    if (userRole === 'ADMIN') {
+    const role = localStorage.getItem('role')
+    // Update title, description and userRole based on role
+    if (role === 'ADMIN') {
       setTitle('Danh sách người dùng')
       setDescription('Quản lý tài khoản người dùng trong hệ thống.')
-    } else if (userRole === 'SYSADMIN') {
+    } else if (role === 'SYSADMIN') {
       setTitle('Danh sách quản trị viên')
       setDescription('Quản lý các tài khoản quản trị viên trong hệ thống.')
     } else {
       setTitle('Danh sách người dùng')
       setDescription('Quản lý tất cả tài khoản trong hệ thống.')
     }
+    setUserRole(role ?? '')
   }, [])
 
   return (
     <>
       <Header fixed>
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
+        <div className='flex w-full items-center'>
+          <Breadcrumb className='flex-1'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <span className='text-muted-foreground'>Quản lý người dùng</span>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{userRole === 'SYSADMIN' ? 'Danh sách quản trị viên' : 'Danh sách người dùng hệ thống'}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className='flex items-center space-x-4'>
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
         </div>
       </Header>
+
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
           <div>
@@ -48,7 +73,7 @@ function UsersContent() {
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           {loading ? (
-            <div className="flex justify-center items-center h-64">
+            <div className='flex h-64 items-center justify-center'>
               <p>Đang tải dữ liệu...</p>
             </div>
           ) : (
@@ -56,6 +81,7 @@ function UsersContent() {
           )}
         </div>
       </Main>
+
       <UsersDialogs />
     </>
   )

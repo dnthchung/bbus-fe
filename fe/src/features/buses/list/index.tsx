@@ -1,6 +1,8 @@
 //path : fe/src/features/buses/list/index.tsx
 import { useEffect, useState } from 'react'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -31,9 +33,34 @@ export default function BusList() {
   return (
     <BusesProvider>
       <Header fixed>
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
+        <div className='flex w-full items-center'>
+          <Breadcrumb className='flex-1'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              {/* <BreadcrumbItem>
+                <BreadcrumbEllipsis />
+              </BreadcrumbItem> */}
+              {/* <BreadcrumbSeparator /> */}
+              {/* <BreadcrumbItem>
+                <span className='text-muted-foreground'>Xe buýt</span>
+              </BreadcrumbItem> */}
+              <BreadcrumbItem>
+                <span className='text-muted-foreground'>Quản lý xe bus</span>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Danh sách</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className='flex items-center space-x-4'>
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
         </div>
       </Header>
 

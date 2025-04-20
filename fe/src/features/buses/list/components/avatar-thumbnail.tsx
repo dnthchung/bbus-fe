@@ -27,7 +27,7 @@ export function AvatarThumbnail({ url, alt, className }: AvatarThumbnailProps) {
       <DialogContent className='max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>Avatar Preview</DialogTitle>
-          <DialogDescription>Hình ảnh học sinh</DialogDescription>
+          <DialogDescription>Hình ảnh dùng</DialogDescription>
         </DialogHeader>
         <div className='flex justify-center'>
           <img src={url} alt={alt ?? 'avatar-full'} className='max-h-[70vh] object-contain' />
