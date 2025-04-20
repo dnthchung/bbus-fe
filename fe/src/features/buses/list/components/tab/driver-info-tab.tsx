@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/mine/badge'
-import { getAllDrivers, getAllAssistants, getAvailableAssistants, getAvailableDrivers } from '@/features/buses/buses'
+import { getAvailableAssistants, getAvailableDrivers } from '@/features/buses/buses'
 import type { Bus } from '@/features/buses/schema'
 
 interface DriverInfoTabProps {
