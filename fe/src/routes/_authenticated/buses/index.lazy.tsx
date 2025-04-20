@@ -1,11 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
-
-// import Users from '@/features/users'
+import { Navigate } from '@tanstack/react-router'
 
 export const Route = createLazyFileRoute('/_authenticated/buses/')({
-  component: RouteComponent,
+  component: () => <Navigate to="/buses/list" />,
+  errorComponent: () => <div>Something went wrong</div>,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated/buses/"!</div>
-}

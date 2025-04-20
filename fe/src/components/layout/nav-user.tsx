@@ -1,7 +1,8 @@
 //path : fe/src/components/layout/nav-user.tsx
 import { Link } from '@tanstack/react-router'
+import { IconUserCog } from '@tabler/icons-react'
 import { extractUsername } from '@/helpers/extract-user-name'
-import { Bell, ChevronsUpDown, LogOut, Palette } from 'lucide-react'
+import { Bell, ChevronsUpDown, LogOut, Palette, User } from 'lucide-react'
 import { useAuthQuery } from '@/hooks/use-auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -65,15 +66,20 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
+                <Link to='/settings'>
+                  <IconUserCog /> Hồ sơ
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to='/settings/appearance'>
                   <Palette /> Giao diện
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <Link to='/settings/notifications'>
                   <Bell /> Thông báo
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className='cursor-pointer'>

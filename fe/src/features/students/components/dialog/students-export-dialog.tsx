@@ -1,4 +1,4 @@
-//path : fe/src/features/students/components/dialog/students-export-dialog.tsx
+// path : fe/src/features/students/components/dialog/students-export-dialog.tsx
 import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -11,13 +11,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Student } from '../../data/schema'
 
 /**
- * Example Zod schema: user chooses an export format ("csv" or "json").
+ * We let the user choose an export format ("csv" or "json").
  * You can add more formats if desired.
  */
 const formSchema = z.object({
   format: z.enum(['csv', 'json']),
 })
-
 type ExportFormValues = z.infer<typeof formSchema>
 
 interface StudentsExportDialogProps {
@@ -27,29 +26,36 @@ interface StudentsExportDialogProps {
 }
 
 export function StudentsExportDialog({ open, onOpenChange, students }: StudentsExportDialogProps) {
+  // ---------------------------
+  // React Hook Form setup
   const form = useForm<ExportFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      format: 'csv',
-    },
+    defaultValues: { format: 'csv' },
   })
 
-  // Helper function to convert students data to CSV string
+  // ---------------------------
+  // Convert students data to CSV string
+  // (Updated columns matching your new schema fields)
   function convertToCsv(data: Student[]): string {
-    // Example columns: studentId, fullName, birthDate, grade, class, busServiceStatus
-    // Adjust columns as needed
-    const headers = ['studentId', 'fullName', 'birthDate', 'grade', 'class', 'busServiceStatus']
+    // You can adjust column order / naming as desired:
+    const headers = ['id', 'rollNumber', 'name', 'dob', 'address', 'gender', 'status', 'parentName', 'parentPhone', 'checkpointName', 'checkpointDescription']
+
     const rows = data.map((s) => [
-      s.studentId ?? '',
-      s.fullName,
-      // Format birthDate as ISO or your local format
-      s.birthDate.toISOString().substring(0, 10),
-      s.grade.toString(),
-      s.class,
-      s.busServiceStatus,
+      s.id,
+      s.rollNumber,
+      s.name,
+      // Convert ISO datetime to simple YYYY-MM-DD or keep full ISO
+      new Date(s.dob).toISOString().substring(0, 10),
+      s.address,
+      s.gender,
+      s.status,
+      s.parentName,
+      s.parentPhone,
+      s.checkpointName,
+      s.checkpointDescription,
     ])
 
-    // Build CSV
+    // Build the CSV file lines
     const csvContent = [
       headers.join(','), // header row
       ...rows.map((row) =>
@@ -63,16 +69,16 @@ export function StudentsExportDialog({ open, onOpenChange, students }: StudentsE
     return csvContent
   }
 
-  // Download a text file (e.g., CSV, JSON) in the browser
+  // ---------------------------
+  // Download a text file (e.g., CSV or JSON)
   function downloadFile(filename: string, content: string) {
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
-
     const link = document.createElement('a')
     link.href = url
     link.download = filename
 
-    // Append link to body, click it, remove it
+    // Append the link, click it, remove it
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -81,6 +87,8 @@ export function StudentsExportDialog({ open, onOpenChange, students }: StudentsE
     URL.revokeObjectURL(url)
   }
 
+  // ---------------------------
+  // Handle form submission
   function handleExport(values: ExportFormValues) {
     if (!students || !students.length) {
       toast({ title: 'Không có dữ liệu để xuất!' })
@@ -92,7 +100,7 @@ export function StudentsExportDialog({ open, onOpenChange, students }: StudentsE
       const filename = `students_${Date.now()}.csv`
       downloadFile(filename, csvData)
     } else if (values.format === 'json') {
-      // Convert students array to JSON
+      // Convert the students array to JSON
       const jsonData = JSON.stringify(students, null, 2)
       const filename = `students_${Date.now()}.json`
       downloadFile(filename, jsonData)
@@ -100,28 +108,32 @@ export function StudentsExportDialog({ open, onOpenChange, students }: StudentsE
 
     toast({
       title: 'Xuất dữ liệu thành công',
-      description: `Xuất file dạng ${values.format.toUpperCase()}`,
+      description: `Đã xuất file dạng ${values.format.toUpperCase()}`,
     })
-
     onOpenChange(false)
   }
 
-  // Reset form on open/close
+  // ---------------------------
+  // Reset the form whenever we close the dialog
   useEffect(() => {
     if (!open) {
       form.reset()
     }
   }, [open, form])
 
+  // ---------------------------
+  // Render dialog
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle>Xuất danh sách học sinh</DialogTitle>
-          <DialogDescription>Chọn định dạng file xuất và nhấn nút “Xuất”</DialogDescription>
+          <DialogDescription>Chọn định dạng file xuất và nhấn nút “Xuất”.</DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
           <form id='student-export-form' onSubmit={form.handleSubmit(handleExport)} className='space-y-4'>
+            {/* Radio buttons to choose CSV or JSON */}
             <FormField
               control={form.control}
               name='format'

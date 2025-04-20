@@ -1,13 +1,5 @@
 import { cn } from '@/lib/utils'
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 
 interface ConfirmDialogProps {
@@ -26,19 +18,7 @@ interface ConfirmDialogProps {
 }
 
 export function ConfirmDialog(props: ConfirmDialogProps) {
-  const {
-    title,
-    desc,
-    children,
-    className,
-    confirmText,
-    cancelBtnText,
-    destructive,
-    isLoading,
-    disabled = false,
-    handleConfirm,
-    ...actions
-  } = props
+  const { title, desc, children, className, confirmText, cancelBtnText, destructive, isLoading, disabled = false, handleConfirm, ...actions } = props
   return (
     <AlertDialog {...actions}>
       <AlertDialogContent className={cn(className && className)}>
@@ -50,15 +30,9 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
         </AlertDialogHeader>
         {children}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
-            {cancelBtnText ?? 'Cancel'}
-          </AlertDialogCancel>
-          <Button
-            variant={destructive ? 'destructive' : 'default'}
-            onClick={handleConfirm}
-            disabled={disabled || isLoading}
-          >
-            {confirmText ?? 'Continue'}
+          <AlertDialogCancel disabled={isLoading}>{cancelBtnText ?? 'Hủy'}</AlertDialogCancel>
+          <Button variant={destructive ? 'destructive' : 'default'} onClick={handleConfirm} disabled={disabled || isLoading}>
+            {confirmText ?? 'Tiếp tục'}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

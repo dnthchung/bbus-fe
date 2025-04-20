@@ -1,7 +1,9 @@
+'use client'
+
 import { useState } from 'react'
-import { ColumnDef, ColumnFiltersState, RowData, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
+import { type ColumnDef, type ColumnFiltersState, type RowData, type SortingState, type VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Checkpoint } from '../data/schema'
+import type { Checkpoint } from '../data/schema'
 import { DataTablePagination } from './table/data-table-pagination'
 import { DataTableToolbar } from './table/data-table-toolbar'
 
@@ -16,13 +18,19 @@ declare module '@tanstack/react-table' {
 interface DataTableProps {
   columns: ColumnDef<Checkpoint>[] // Mảng các cột của bảng
   data: Checkpoint[] // Dữ liệu hiển thị trong bảng
+  onRowClick?: (checkpoint: Checkpoint) => void // Callback khi click vào hàng
+  highlightedRowId?: string | null // ID của hàng được highlight
+  hideCheckboxes?: boolean // Tùy chọn ẩn checkbox
+  className?: string // Class bổ sung cho container
 }
 
 // Component chính: CheckpointsTable
-export function CheckpointsTable({ columns, data }: DataTableProps) {
+export function CheckpointsTable({ columns, data, onRowClick, highlightedRowId, hideCheckboxes = false, className = '' }: DataTableProps) {
   // State quản lý các trạng thái của bảng
   const [rowSelection, setRowSelection] = useState({}) // Trạng thái chọn dòng
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({}) // Trạng thái hiển thị cột
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    ...(hideCheckboxes ? { select: false } : {}),
+  }) // Trạng thái hiển thị cột
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]) // Trạng thái bộ lọc
   const [sorting, setSorting] = useState<SortingState>([]) // Trạng thái sắp xếp
 
@@ -36,7 +44,7 @@ export function CheckpointsTable({ columns, data }: DataTableProps) {
       rowSelection,
       columnFilters,
     },
-    enableRowSelection: true, // Cho phép chọn dòng
+    enableRowSelection: !hideCheckboxes, // Chỉ cho phép chọn dòng khi không ẩn checkbox
     onRowSelectionChange: setRowSelection, // Cập nhật trạng thái khi chọn dòng
     onSortingChange: setSorting, // Cập nhật trạng thái khi sắp xếp
     onColumnFiltersChange: setColumnFilters, // Cập nhật trạng thái bộ lọc
@@ -50,7 +58,7 @@ export function CheckpointsTable({ columns, data }: DataTableProps) {
   })
 
   return (
-    <div className='space-y-4'>
+    <div className={`space-y-4 ${className}`}>
       {/* Thanh công cụ của bảng */}
       <DataTableToolbar table={table} />
 
@@ -77,16 +85,21 @@ export function CheckpointsTable({ columns, data }: DataTableProps) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               // Duyệt qua danh sách hàng và hiển thị dữ liệu
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className='group/row'>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className={cell.column.columnDef.meta?.className ?? ''}>
-                      {/* Render nội dung của ô */}
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const checkpoint = row.original
+                const isHighlighted = highlightedRowId === checkpoint.id
+
+                return (
+                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={`group/row cursor-pointer ${isHighlighted ? 'bg-primary/10' : ''}`} onClick={() => onRowClick && onRowClick(checkpoint)}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className={cell.column.columnDef.meta?.className ?? ''}>
+                        {/* Render nội dung của ô */}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
             ) : (
               // Hiển thị thông báo nếu không có dữ liệu
               <TableRow>

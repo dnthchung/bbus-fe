@@ -1,44 +1,66 @@
-//path : fe/src/features/students/data/schema.ts
 import { z } from 'zod'
 
-// Định nghĩa schema cho trạng thái sử dụng dịch vụ xe buýt
-const busServiceStatusSchema = z.union([
-  z.literal('Đang sử dụng'), // Học sinh đang sử dụng dịch vụ xe buýt
-  z.literal('Tạm ngừng sử dụng'), // Học sinh tạm ngừng sử dụng dịch vụ
-])
+//path  : fe/src/features/students/data/schema.ts
+// Định nghĩa schema cho trạng thái học sinh
+export const studentStatusSchema = z.enum(['ACTIVE', 'INACTIVE'])
 
-export type BusServiceStatus = z.infer<typeof busServiceStatusSchema>
+// Định nghĩa schema cho parent (người giám hộ)
+const parentSchema = z.object({
+  userId: z.string().uuid(),
+  username: z.string(),
+  name: z.string(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
+  dob: z.coerce.date(),
+  email: z.string().email(),
+  avatar: z.string(),
+  phone: z.string(),
+  address: z.string(),
+  status: studentStatusSchema,
+  role: z.string(),
+})
 
-//Định nghĩa schema cho học sinh (chỉ học sinh đã đăng ký xe buýt)
-export const studentSchema = z
-  .object({
-    studentId: z.string().uuid().optional(),
-    avatar: z.string().url(),
-    fullName: z.string(),
-    birthDate: z.coerce.date(),
-    // Khối (1..9)
-    grade: z.number().int().min(1).max(9),
-    // class: Ví dụ "3B", "9J"… theo regex
-    class: z.string().regex(/^[1-9][A-J]$/, {
-      message: "Class must be like '1A', '2B', ... '9J'",
-    }),
-    busServiceStatus: busServiceStatusSchema,
-  })
-  // Thêm superRefine để kiểm tra match giữa grade và class
-  .superRefine(({ grade, class: classValue }, ctx) => {
-    // Ví dụ: classValue = "3B" => parseInt("3",10) = 3
-    const gradeFromClass = parseInt(classValue[0], 10)
-    if (gradeFromClass !== grade) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['class'],
-        message: `Class '${classValue}' doesn't match grade ${grade}.`,
-      })
-    }
-  })
+// Định nghĩa schema cho học sinh
+export const studentSchema = z.object({
+  id: z.string().uuid(),
+  rollNumber: z.string(),
+  name: z.string(),
+  avatar: z.string().optional(),
+  dob: z.coerce.date(),
+  address: z.string(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
+  status: studentStatusSchema,
+  parentId: z.string().uuid().optional(),
+  parent: parentSchema.nullable().optional(),
+  checkpointId: z.string().uuid().nullable().optional(),
+  // Làm cho các trường checkpoint optional vì có thể chưa có điểm đón
+  checkpointName: z.string().optional(),
+  checkpointDescription: z.string().optional(),
+})
 
-// Tạo kiểu TypeScript `Student` từ schema
+// Schema cho form cập nhật học sinh - chỉ bao gồm các trường cần thiết
+export const studentUpdateSchema = z.object({
+  id: z.string().uuid(),
+  rollNumber: z.string().optional(),
+  name: z.string().trim().min(1, { message: 'Tên không được để trống' }).optional(),
+  avatar: z.string().optional(),
+  dob: z.coerce.date().optional(),
+  address: z.string().optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  status: studentStatusSchema.optional(),
+  parentId: z
+    .string()
+    .uuid({
+      message: 'Vui lòng lựa chọn phụ huynh hợp lệ.',
+    })
+    .optional(),
+  checkpointId: z.string().uuid().nullable().optional(),
+})
+
+// Tạo kiểu TypeScript để tái sử dụng
+export type StudentStatus = z.infer<typeof studentStatusSchema>
+export type Parent = z.infer<typeof parentSchema>
 export type Student = z.infer<typeof studentSchema>
+export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 
-// Định nghĩa danh sách học sinh là một mảng các đối tượng Student
+// Danh sách học sinh là mảng Student
 export const studentListSchema = z.array(studentSchema)

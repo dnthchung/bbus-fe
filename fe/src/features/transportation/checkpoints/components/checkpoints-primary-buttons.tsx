@@ -10,10 +10,10 @@ export function CheckpointsPrimaryButtons() {
         <span>Nhập DS điểm dừng</span>
         <IconTableDown size={18} />
       </Button>
-      <Button className='space-x-1' onClick={() => setOpen('add')}>
+      {/* <Button className='space-x-1' onClick={() => setOpen('add')}>
         <span>Thêm điểm dừng mới</span>
         <IconUserPlus size={18} />
-      </Button>
+      </Button> */}
     </div>
   )
 }

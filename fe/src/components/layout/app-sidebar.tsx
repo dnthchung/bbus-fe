@@ -1,23 +1,28 @@
-// path: fe/src/components/layout/app-sidebar.tsx
+// src/components/layout/app-sidebar.tsx
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
 import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { TeamSwitcher } from '@/components/layout/team-switcher'
-import { sidebarData } from './sidebar/sidebar-data'
+import { sideBarFilterData } from './sidebar/sidebar-filter-data'
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  // Gọi hàm filterSidebarData để lấy menu đã lọc
+  const filteredSidebarData = sideBarFilterData()
+
   return (
-    <Sidebar collapsible='icon' variant='floating' {...props}>
+    <Sidebar collapsible="icon" variant="floating" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={sidebarData.teams} />
+        <TeamSwitcher teams={filteredSidebarData.teams} />
       </SidebarHeader>
+
       <SidebarContent>
-        {sidebarData.navGroups.map((navGroup) => (
+        {filteredSidebarData.navGroups.map((navGroup) => (
           <NavGroup key={navGroup.title} {...navGroup} />
         ))}
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={sidebarData.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
