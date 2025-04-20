@@ -96,9 +96,9 @@ export const columns: ColumnDef<Route>[] = [
   },
 
   // -- CỘT HÀNH ĐỘNG --
-  {
-    id: 'actions',
-    cell: DataTableRowActions,
-    meta: { className: 'w-14' },
-  },
+  // {
+  //   id: 'actions',
+  //   cell: DataTableRowActions,
+  //   meta: { className: 'w-14' },
+  // },
 ]

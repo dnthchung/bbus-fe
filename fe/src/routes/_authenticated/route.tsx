@@ -1,7 +1,7 @@
 // src/routes/_authenticated/route.tsx
 import { useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { createFileRoute, Outlet, useNavigate, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { useAuthQuery } from '@/hooks/use-auth'

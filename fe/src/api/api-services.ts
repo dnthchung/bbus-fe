@@ -150,7 +150,7 @@ export const API_SERVICES: ApiServices = {
   //-------------------------
   students: {
     //GET_HISTORY_BY_STUDENT_ID
-    get_history_by_student_id: (studentId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_HISTORY_BY_STUDENT_ID}/studentId=${studentId}`),
+    get_history_by_student_id: (studentId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_HISTORY_BY_STUDENT_ID}/${studentId}`),
     list: () => apiClient.get(API_ENDPOINTS.STUDENTS.LIST),
     addOne: (student: any) => apiClient.post(API_ENDPOINTS.STUDENTS.ADD_ONE, student),
     updateOne: (studentId: string, student: any) => apiClient.put(API_ENDPOINTS.STUDENTS.UPDATE_ONE(studentId), student),

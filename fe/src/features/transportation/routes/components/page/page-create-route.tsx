@@ -1,13 +1,15 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Search, MapPin, Trash2, ArrowUp, ArrowDown, Info } from 'lucide-react'
+import { IconSearch } from '@tabler/icons-react'
+import { MapPin, Trash2, ArrowUp, ArrowDown, Info } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
@@ -20,9 +22,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { Status } from '@/components/mine/status'
 import { createRoute } from '@/features/transportation/function'
 import { getListCheckpoint, getNumberOfStudentInEachCheckpoint, getAllCheckpointButNotInRoute } from './checkpoint-service'
 import LeafletMap from './leaflet-map'
@@ -71,7 +75,10 @@ export default function PageCreateRoute() {
       try {
         setLoading(true)
         // const data = await getAllCheckpointButNotInRoute()
-        const data = await getListCheckpoint()
+        // const data = await getListCheckpoint()
+        // const data = (await getListCheckpoint()).filter((checkpoint) => checkpoint.status !== 'INACTIVE')
+
+        const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
 
         const checkpointsWithStudentCount = await Promise.all(
           data.map(async (checkpoint: Checkpoint) => {
@@ -83,7 +90,7 @@ export default function PageCreateRoute() {
             }
           })
         )
-        setCheckpoints(checkpointsWithStudentCount)
+        setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
       } catch (error) {
         toast({
           title: 'Error',
@@ -170,9 +177,31 @@ export default function PageCreateRoute() {
   return (
     <>
       <Header fixed>
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ProfileDropdown />
+        <div className='flex w-full items-center'>
+          <Breadcrumb className='flex-1'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <span className='text-muted-foreground'>Quản lý tuyến đường</span>{' '}
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/transportation/routes'>Danh sách tuyến đường</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Tạo tuyến mới</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className='flex items-center space-x-4'>
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
         </div>
       </Header>
 
@@ -188,8 +217,8 @@ export default function PageCreateRoute() {
           {/* Checkpoints Panel */}
           <Card className='lg:col-span-1'>
             <CardHeader>
-              <CardTitle>Checkpoints</CardTitle>
-              <CardDescription>Search and select checkpoints to add to your route</CardDescription>
+              <CardTitle>Danh sách điểm dừng</CardTitle>
+              <CardDescription>Chọn và thêm điểm dừng vào tuyến đường của bạn</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -204,26 +233,28 @@ export default function PageCreateRoute() {
                     <PopoverTrigger asChild>
                       <Button variant='outline' className='w-full justify-between'>
                         <div className='flex items-center'>
-                          <Search className='mr-2 h-4 w-4 opacity-50' />
-                          <span className='text-muted-foreground'>Search for a checkpoint...</span>
+                          <IconSearch className='mr-2 h-4 w-4 opacity-50' />
+                          <span className='text-muted-foreground'>Tìm kiếm điểm dừng...</span>
                         </div>
                         <div className={open ? 'rotate-180' : ''}>▼</div>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className='w-[300px] p-0'>
                       <Command>
-                        <CommandInput placeholder='Search checkpoints...' />
+                        <CommandInput placeholder='Tìm kiếm điểm dừng...' />
                         <CommandList>
-                          <CommandEmpty>No checkpoints found.</CommandEmpty>
-                          <CommandGroup heading='Checkpoints'>
+                          <CommandEmpty>Không tìm thấy điểm dừng nào.</CommandEmpty>
+                          <CommandGroup heading='Danh sách điểm dừng'>
                             {checkpoints.map((checkpoint) => (
-                              <CommandItem key={checkpoint.id} value={checkpoint.name} onSelect={() => addCheckpoint(checkpoint)}>
+                              <CommandItem key={checkpoint.id} value={checkpoint.name ?? 'trống'} onSelect={() => addCheckpoint(checkpoint)}>
                                 <div className='flex w-full flex-col'>
                                   <div className='flex items-center justify-between'>
-                                    <span>{checkpoint.name}</span>
-                                    <Badge variant='outline'>{checkpoint.studentCount || 0} học sinh</Badge>
+                                    <span className='max-w-[160px] truncate'>{checkpoint.name ?? 'Trống'}</span>
+                                    <Status color={(checkpoint.studentCount ?? 0) > 0 ? 'green' : 'red'} showDot={false} className='text-sm'>
+                                      {checkpoint.studentCount ?? 0} học sinh
+                                    </Status>
                                   </div>
-                                  <span className='truncate text-xs text-muted-foreground'>{checkpoint.description}</span>
+                                  <span className='max-w-[210px] truncate text-xs text-muted-foreground'>{checkpoint.description ?? 'Không có mô tả'}</span>
                                 </div>
                               </CommandItem>
                             ))}
@@ -236,7 +267,7 @@ export default function PageCreateRoute() {
                   {/* Selected Checkpoints List */}
                   <div>
                     <div className='mb-2 flex items-center justify-between'>
-                      <h3 className='text-sm font-medium'>Selected Checkpoints ({selectedCheckpoints.length})</h3>
+                      <h3 className='text-sm font-medium'>Điểm dừng đã chọn ({selectedCheckpoints.length})</h3>
                       {selectedCheckpoints.length > 0 && (
                         <TooltipProvider>
                           <Tooltip>
