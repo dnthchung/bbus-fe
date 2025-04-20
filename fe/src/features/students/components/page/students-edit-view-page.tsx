@@ -1,6 +1,5 @@
 'use client'
 
-//path : fe/src/features/students/components/page/students-edit-view-page.tsx
 import { useEffect, useState } from 'react'
 import { Route } from '@/routes/_authenticated/students/details/$id'
 import { ChevronLeft } from 'lucide-react'
@@ -50,9 +49,35 @@ export default function StudentsDetailsContent() {
     window.history.back()
   }
 
-  const handleStudentUpdate = (updatedStudent: Student) => {
-    setStudent(updatedStudent)
-    // Here you would typically call an API to update the student in the backend
+  const handleStudentUpdate = async (payload: { id: string; parentId: string }) => {
+    try {
+      setLoading(true)
+
+      // ✅ Cập nhật parentId
+      await API_SERVICES.students.update({
+        id: payload.id,
+        parentId: payload.parentId,
+      })
+
+      // ✅ Refetch lại thông tin học sinh
+      const response = await API_SERVICES.students.getOne(payload.id)
+      setStudent(response.data.data)
+
+      toast({
+        title: 'Cập nhật thành công',
+        description: 'Thông tin phụ huynh đã được cập nhật.',
+        variant: 'success',
+      })
+    } catch (error) {
+      console.error('Error updating student:', error)
+      toast({
+        title: 'Cập nhật thất bại',
+        description: 'Đã xảy ra lỗi khi cập nhật thông tin phụ huynh: ' + error,
+        variant: 'deny',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleStatusUpdate = async () => {
@@ -60,16 +85,11 @@ export default function StudentsDetailsContent() {
     try {
       setUpdatingStatus(true)
       const newStatus = student.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
-      // Call API to update status
       await API_SERVICES.students.updateStatus(id, newStatus)
-
-      // Update local state
       setStudent({
         ...student,
         status: newStatus,
       })
-
       toast({
         title: 'Thành công',
         description: newStatus === 'ACTIVE' ? 'Học sinh đã được kích hoạt' : 'Học sinh đã bị vô hiệu hóa',
@@ -89,7 +109,7 @@ export default function StudentsDetailsContent() {
 
   const formatDate = (date: Date | string | undefined) => {
     if (!date) return 'N/A'
-    return date instanceof Date ? date.toLocaleDateString('vi-VN') : new Date(date).toLocaleDateString('vi-VN')
+    return new Date(date).toLocaleDateString('vi-VN')
   }
 
   return (
@@ -125,8 +145,7 @@ export default function StudentsDetailsContent() {
       <Main>
         <div className='mb-6'>
           <Button variant='outline' size='sm' onClick={handleBack}>
-            <ChevronLeft className='mr-2 h-4 w-4' />
-            Quay lại danh sách
+            <ChevronLeft className='mr-2 h-4 w-4' /> Quay lại danh sách
           </Button>
         </div>
 
@@ -166,8 +185,8 @@ export default function StudentsDetailsContent() {
                 <TabsTrigger value='pickup'>Thông tin đưa đón</TabsTrigger>
               </TabsList>
 
-              <TabsContent className='w-1/2' value='personal'>
-                <StudentsPersonalInfoTab student={student} onStudentUpdate={handleStudentUpdate} formatDate={formatDate} />
+              <TabsContent className='w-full' value='personal'>
+                <StudentsPersonalInfoTab student={student} onStudentUpdate={() => {}} formatDate={formatDate} />
               </TabsContent>
 
               <TabsContent value='parent'>
@@ -175,7 +194,7 @@ export default function StudentsDetailsContent() {
               </TabsContent>
 
               <TabsContent className='w-1/2' value='pickup'>
-                <StudentsPickupInfoTab student={student} onStudentUpdate={handleStudentUpdate} />
+                <StudentsPickupInfoTab student={student} onStudentUpdate={() => {}} />
               </TabsContent>
             </Tabs>
 

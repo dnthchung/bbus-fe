@@ -14,7 +14,11 @@ export async function getAllStudents(): Promise<Student[]> {
       return []
     }
     const parsedStudents = studentListSchema.parse(rawStudents)
-    return parsedStudents
+
+    // Sắp xếp học sinh theo createdAt mới nhất lên đầu - updatedAt
+    return parsedStudents.sort((a, b) => {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
   } catch (error) {
     console.error('Error getAllStudents in students.ts:', error)
     throw error

@@ -26,11 +26,17 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
     gender: student.gender || 'MALE',
     status: student.status || 'ACTIVE',
     rollNumber: student.rollNumber || '',
+    className: student.className || '',
   })
-
   const [avatarPreview, setAvatarPreview] = useState<string | null>(student.avatar || null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+
+  const gradeOptions = ['1', '2', '3', '4', '5']
+  const classLetterOptions = ['A', 'B', 'C', 'D']
+
+  const currentGrade = formData.className?.[0] || '1'
+  const currentClassLetter = formData.className?.[1] || 'A'
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -38,21 +44,49 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
   }
 
   const handleGenderChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, gender: value as Student['gender'] }))
+    setFormData((prev) => ({
+      ...prev,
+      gender: value as Student['gender'],
+    }))
   }
 
   const handleStatusChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, status: value as Student['status'] }))
+    setFormData((prev) => ({
+      ...prev,
+      status: value as Student['status'],
+    }))
+  }
+
+  const handleGradeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      className: value + (prev.className?.[1] ?? 'A'),
+    }))
+  }
+
+  const handleClassLetterChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      className: (prev.className?.[0] ?? '1') + value,
+    }))
   }
 
   const handleSave = async () => {
     try {
       const updatedStudent = { ...student, ...formData }
       onStudentUpdate(updatedStudent)
-      toast({ title: 'Thành công', description: 'Đã cập nhật thông tin cá nhân', variant: 'success' })
+      toast({
+        title: 'Thành công',
+        description: 'Đã cập nhật thông tin cá nhân',
+        variant: 'success',
+      })
       setEditing(false)
     } catch (error) {
-      toast({ title: 'Lỗi', description: 'Không thể cập nhật thông tin cá nhân', variant: 'destructive' })
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật thông tin cá nhân',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -64,6 +98,7 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
       gender: student.gender || 'MALE',
       status: student.status || 'ACTIVE',
       rollNumber: student.rollNumber || '',
+      className: student.className || '',
     })
     setEditing(false)
   }
@@ -74,7 +109,11 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
       setAvatarFile(file)
       setAvatarPreview(URL.createObjectURL(file))
     } else {
-      toast({ title: 'File không hợp lệ', description: 'Vui lòng chọn ảnh hợp lệ (.jpg, .png, ...)', variant: 'destructive' })
+      toast({
+        title: 'File không hợp lệ',
+        description: 'Vui lòng chọn ảnh hợp lệ (.jpg, .png, ...)',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -87,16 +126,12 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
     if (!avatarFile) return
     try {
       setUploadingAvatar(true)
-
-      // Pass the student ID and the avatar file directly to the API service
       await API_SERVICES.students.updateAvatar(student.id, avatarFile)
-
       toast({
         title: 'Thành công',
         description: 'Ảnh đại diện đã được cập nhật',
         variant: 'success',
       })
-
       setAvatarFile(null)
     } catch (error) {
       toast({
@@ -144,9 +179,47 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
             <div className='flex-1 px-4 py-3'>{editing ? <Input type='date' name='dob' value={typeof formData.dob === 'string' ? formData.dob : formatDate(formData.dob)} onChange={handleChange} className='h-8' /> : formatDate(student.dob)}</div>
           </div>
 
+          {/* Lớp */}
+          <div className='student-row student-class flex border-b'>
+            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Lớp</div>
+            <div className='flex-1 px-4 py-3'>
+              {editing ? (
+                <div className='flex gap-2'>
+                  <Select value={currentGrade} onValueChange={handleGradeChange}>
+                    <SelectTrigger className='h-8 w-20'>
+                      <SelectValue placeholder='Khối' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {gradeOptions.map((grade) => (
+                        <SelectItem key={grade} value={grade}>
+                          {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={currentClassLetter} onValueChange={handleClassLetterChange}>
+                    <SelectTrigger className='h-8 w-20'>
+                      <SelectValue placeholder='Lớp' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classLetterOptions.map((letter) => (
+                        <SelectItem key={letter} value={letter}>
+                          {letter}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                student.className || <Badge color='yellow'>Trống</Badge>
+              )}
+            </div>
+          </div>
+
           {/* Mã học sinh */}
           <div className='flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Mã học sinh</div>
+            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Mã HS</div>
             <div className='flex-1 px-4 py-3'>{editing ? <Input name='rollNumber' value={formData.rollNumber} onChange={handleChange} className='h-8' /> : student.rollNumber || <Badge color='yellow'>Trống</Badge>}</div>
           </div>
 

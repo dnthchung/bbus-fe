@@ -9,7 +9,7 @@ import { ParentSelectionTable } from './parent-selection-table'
 
 interface StudentsParentInfoTabProps {
   student: Student
-  onStudentUpdate: (updatedStudent: Student) => void
+  onStudentUpdate: (payload: { id: string; parentId: string }) => void
 }
 
 export function StudentsParentInfoTab({ student, onStudentUpdate }: StudentsParentInfoTabProps) {
@@ -22,19 +22,32 @@ export function StudentsParentInfoTab({ student, onStudentUpdate }: StudentsPare
 
   const handleSave = async () => {
     try {
-      const updatedStudent = { ...student, parentId: selectedParentId }
-      onStudentUpdate(updatedStudent)
+      if (!selectedParentId) {
+        toast({
+          title: 'Lỗi',
+          description: 'Vui lòng chọn phụ huynh',
+          variant: 'deny',
+        })
+        return
+      }
+
+      onStudentUpdate({
+        id: student.id,
+        parentId: selectedParentId,
+      })
+
       toast({
         title: 'Thành công',
-        description: 'Đã cập nhật thông tin phụ huynh',
+        description: 'Đã gửi yêu cầu cập nhật phụ huynh',
         variant: 'success',
       })
+
       setEditing(false)
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật thông tin phụ huynh',
-        variant: 'destructive',
+        description: 'Không thể gửi yêu cầu cập nhật phụ huynh: ' + error,
+        variant: 'deny',
       })
     }
   }
