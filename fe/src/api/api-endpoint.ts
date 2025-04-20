@@ -60,9 +60,11 @@ export const API_ENDPOINTS = {
   },
   DRIVER: {
     GET_ALL: '/driver/list',
+    GET_ALL_AVAILABLE: '/driver/available',
   },
   ASSISTANT: {
     GET_ALL: '/assistant/list',
+    GET_ALL_AVAILABLE: '/assistant/available',
   },
   SCHEDULE: {
     GET_DATES_BY_MONTH: '/bus-schedule/dates',

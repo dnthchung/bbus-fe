@@ -61,9 +61,11 @@ interface ApiServices {
   }
   drivers: {
     get_all: () => Promise<any>
+    get_all_available: () => Promise<any>
   }
   assistants: {
     get_all: () => Promise<any>
+    get_all_available: () => Promise<any>
   }
   bus_schedule: {
     get_dates_by_month: (month: string) => Promise<any>
@@ -234,12 +236,14 @@ export const API_SERVICES: ApiServices = {
   //--------------------------
   drivers: {
     get_all: () => apiClient.get(API_ENDPOINTS.DRIVER.GET_ALL),
+    get_all_available: () => apiClient.get(API_ENDPOINTS.DRIVER.GET_ALL_AVAILABLE),
   },
   //--------------------------
   // 9) Assistant
   //--------------------------
   assistants: {
     get_all: () => apiClient.get(API_ENDPOINTS.ASSISTANT.GET_ALL),
+    get_all_available: () => apiClient.get(API_ENDPOINTS.ASSISTANT.GET_ALL_AVAILABLE),
   },
   //--------------------------
   // 10) Schedule
