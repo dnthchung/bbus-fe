@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { IconEye } from '@tabler/icons-react'
-import { Eye, Loader2 } from 'lucide-react'
+import { isValidVietnamLicensePlate, validateVietnamLicensePlateParts } from '@/helpers/vietnamese-plate-check'
+import { Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Badge } from '@/components/mine/badge'
 import { Status } from '@/components/mine/status'
@@ -63,13 +63,8 @@ function truncateName(fullName: string, maxWords = 3) {
 
 export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
   const [editing, setEditing] = useState(false)
-  const [formData, setFormData] = useState({
-    name: bus.name || '',
-    licensePlate: bus.licensePlate || '',
-    routeCode: bus.routeCode || '',
-    busStatus: bus.busStatus,
-    amountOfStudents: bus.amountOfStudents,
-  })
+  const [licensePlate, setLicensePlate] = useState(bus.licensePlate || '')
+  const [licensePlateError, setLicensePlateError] = useState<string | null>(null)
 
   // Danh sách học sinh
   const [studentList, setStudentList] = useState<Student[]>([])
@@ -99,42 +94,58 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
     fetchStudents()
   }, [bus.id])
 
-  // Xử lý thay đổi input ở phần chỉnh sửa thông tin
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === 'amountOfStudents' ? Number.parseInt(value) || 0 : value,
-    }))
-  }
+  // Xử lý thay đổi biển số xe
+  const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim().toUpperCase()
+    setLicensePlate(value)
 
-  // Xử lý thay đổi trạng thái
-  const handleStatusChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      busStatus: value as 'ACTIVE' | 'INACTIVE',
-    }))
+    // Kiểm tra khi người dùng nhập
+    if (value) {
+      const validation = validateVietnamLicensePlateParts(value)
+      if (!validation.isValid) {
+        setLicensePlateError(validation.errors[0])
+      } else {
+        setLicensePlateError(null)
+      }
+    } else {
+      setLicensePlateError(null)
+    }
   }
 
   // Lưu thông tin
   const handleSave = async () => {
+    // Loại bỏ khoảng trắng đầu cuối
+    const trimmedLicensePlate = licensePlate.trim().toUpperCase()
+
+    // Validate biển số
+    if (!isValidVietnamLicensePlate(trimmedLicensePlate)) {
+      const validation = validateVietnamLicensePlateParts(trimmedLicensePlate)
+      setLicensePlateError(validation.errors[0])
+      toast({
+        title: 'Lỗi',
+        description: 'Biển số xe không hợp lệ: ' + validation.errors[0],
+        variant: 'destructive',
+      })
+      return
+    }
+
     try {
-      // Gọi API cập nhật bus nếu cần
+      // Cập nhật chỉ biển số xe
       const updatedBus = {
         ...bus,
-        ...formData,
+        licensePlate: trimmedLicensePlate,
       }
       onBusUpdate(updatedBus)
       toast({
         title: 'Thành công',
-        description: 'Đã cập nhật thông tin cơ bản',
+        description: 'Đã cập nhật biển số xe',
         variant: 'success',
       })
       setEditing(false)
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật thông tin cơ bản',
+        description: 'Không thể cập nhật biển số xe',
         variant: 'destructive',
       })
     }
@@ -142,13 +153,8 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
 
   // Hủy thay đổi
   const handleCancel = () => {
-    setFormData({
-      name: bus.name || '',
-      licensePlate: bus.licensePlate || '',
-      routeCode: bus.routeCode || '',
-      busStatus: bus.busStatus,
-      amountOfStudents: bus.amountOfStudents,
-    })
+    setLicensePlate(bus.licensePlate || '')
+    setLicensePlateError(null)
     setEditing(false)
   }
 
@@ -168,6 +174,7 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
       setCurrentPage(currentPage + 1)
     }
   }
+
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1)
@@ -187,7 +194,9 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
                 <Button variant='outline' onClick={handleCancel}>
                   Hủy
                 </Button>
-                <Button onClick={handleSave}>Lưu</Button>
+                <Button onClick={handleSave} disabled={!!licensePlateError}>
+                  Lưu
+                </Button>
               </div>
             ) : (
               <Button variant='secondary' onClick={() => setEditing(true)}>
@@ -202,45 +211,44 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
               {/* Tên xe buýt */}
               <div className='flex border-b'>
                 <div className='w-1/3 bg-muted/50 px-4 py-3 font-medium'>Tên xe buýt</div>
-                <div className='flex-1 px-4 py-3'>{editing ? <Input name='name' value={formData.name} onChange={handleChange} placeholder='Nhập tên xe buýt' className='h-8' /> : bus.name || 'Chưa có tên'}</div>
+                <div className='flex-1 px-4 py-3'>{bus.name || 'Chưa có tên'}</div>
               </div>
 
               {/* Biển số xe */}
               <div className='flex border-b'>
                 <div className='w-1/3 bg-muted/50 px-4 py-3 font-medium'>Biển số xe</div>
-                <div className='flex-1 px-4 py-3'>{editing ? <Input name='licensePlate' value={formData.licensePlate} onChange={handleChange} placeholder='Nhập biển số xe' className='h-8' /> : bus.licensePlate ? bus.licensePlate : <Badge color='yellow'>Trống</Badge>}</div>
+                <div className='flex-1 px-4 py-3'>
+                  {editing ? (
+                    <div>
+                      <Input name='licensePlate' value={licensePlate} onChange={handleLicensePlateChange} placeholder='Nhập biển số xe (VD: 30A-123.45)' className={`h-8 ${licensePlateError ? 'border-destructive' : ''}`} />
+                      {licensePlateError && <p className='mt-1 text-xs text-destructive'>{licensePlateError}</p>}
+                    </div>
+                  ) : bus.licensePlate ? (
+                    bus.licensePlate
+                  ) : (
+                    <Badge color='yellow'>Trống</Badge>
+                  )}
+                </div>
               </div>
 
               {/* Mã tuyến */}
               <div className='flex border-b'>
                 <div className='w-1/3 bg-muted/50 px-4 py-3 font-medium'>Mã tuyến</div>
-                <div className='flex-1 px-4 py-3'>{editing ? <Input name='routeCode' value={formData.routeCode} onChange={handleChange} placeholder='Nhập mã tuyến' className='h-8' /> : bus.routeCode ? bus.routeCode : <Badge color='yellow'>Trống</Badge>}</div>
+                <div className='flex-1 px-4 py-3'>{bus.routeCode ? bus.routeCode : <Badge color='yellow'>Trống</Badge>}</div>
               </div>
 
               {/* Trạng thái */}
               <div className='flex border-b'>
                 <div className='w-1/3 bg-muted/50 px-4 py-3 font-medium'>Trạng thái</div>
                 <div className='flex-1 px-4 py-3'>
-                  {editing ? (
-                    <Select value={formData.busStatus} onValueChange={handleStatusChange}>
-                      <SelectTrigger className='h-8 w-full'>
-                        <SelectValue placeholder='Chọn trạng thái' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='ACTIVE'>{statusLabels.ACTIVE}</SelectItem>
-                        <SelectItem value='INACTIVE'>{statusLabels.INACTIVE}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Status color={bus.busStatus === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[bus.busStatus] || bus.busStatus}</Status>
-                  )}
+                  <Status color={bus.busStatus === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[bus.busStatus] || bus.busStatus}</Status>
                 </div>
               </div>
 
               {/* Số học sinh */}
               <div className='flex'>
                 <div className='w-1/3 bg-muted/50 px-4 py-3 font-medium'>Số học sinh</div>
-                <div className='flex-1 px-4 py-3'>{editing ? <Input type='number' name='amountOfStudents' value={formData.amountOfStudents} onChange={handleChange} placeholder='Nhập số học sinh' className='h-8' /> : bus.amountOfStudents}</div>
+                <div className='flex-1 px-4 py-3'>{bus.amountOfStudents}</div>
               </div>
             </div>
           </div>
@@ -281,7 +289,6 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
                       <th className='px-4 py-2 text-left font-medium'>Tên</th>
                       <th className='px-4 py-2 text-left font-medium'>Giới tính</th>
                       <th className='px-4 py-2 text-left font-medium'>Tên phụ huynh</th>
-                      {/* Cột mới: Chi tiết */}
                       <th className='px-4 py-2 text-left font-medium'>Chi tiết</th>
                     </tr>
                   </thead>
@@ -310,7 +317,6 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
                                 'N/A'
                               )}
                             </td>
-                            {/* Ô chi tiết (icon con mắt) */}
                             <td className='px-4 py-2'>
                               <Link to={`/students/details/${student.id}`}>
                                 <div className='flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 hover:bg-muted'>
