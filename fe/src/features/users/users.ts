@@ -86,8 +86,8 @@ export async function getUserById(userId: string): Promise<User> {
     const response = await API_SERVICES.users.getOne(userId)
     const rawData = response.data
     const userDetails = rawData?.data
-    console.log('rawData', rawData)
-    console.log('rawUser', rawData.data)
+    // console.log('rawData', rawData)
+    // console.log('rawUser', rawData.data)
 
     if (!userDetails) {
       throw new Error('User not found')

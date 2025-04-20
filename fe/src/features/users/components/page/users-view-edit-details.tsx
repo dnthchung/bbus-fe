@@ -97,13 +97,14 @@ export default function UsersDetailsContent() {
       toast({
         title: 'Thành công',
         description: 'Thông tin tài khoản đã được cập nhật',
+        variant: 'success',
       })
     } catch (err) {
       console.error('Error updating user:', err)
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật thông tin tài khoản',
-        variant: 'destructive',
+        variant: 'deny',
       })
     }
   }
@@ -118,68 +119,23 @@ export default function UsersDetailsContent() {
     setAvatarPreviewUrl(previewUrl)
   }
 
-  //   const handleAvatarUpload = async () => {
-  //     if (!selectedAvatar || !id) return
-
-  //     try {
-  //       setUploadingAvatar(true)
-  //       const response = await API_SERVICES.users.update_avatar(id, selectedAvatar)
-  //       console.log('Avatar upload response:', response)
-  //       // Refresh user data to get updated avatar
-  //       const updatedUser = await getUserById(id)
-  //       setUser(updatedUser)
-  //       setEditedUser(updatedUser)
-
-  //       // Clear the preview and selected file
-  //       setSelectedAvatar(null)
-  //       if (avatarPreviewUrl) {
-  //         URL.revokeObjectURL(avatarPreviewUrl)
-  //         setAvatarPreviewUrl(null)
-  //       }
-
-  //       toast({
-  //         title: 'Thành công',
-  //         description: 'Ảnh đại diện đã được cập nhật',
-  //         variant: 'success',
-  //       })
-  //     } catch (err) {
-  //       console.error('Error uploading avatar:', err)
-  //       toast({
-  //         title: 'Lỗi',
-  //         description: 'Không thể cập nhật ảnh đại diện',
-  //         variant: 'deny',
-  //       })
-  //     } finally {
-  //       setUploadingAvatar(false)
-  //     }
-  //   }
-
   const handleAvatarUpload = async () => {
-    console.log('🚀 [Avatar Upload] Bắt đầu upload avatar', { id, file: selectedAvatar })
     if (!selectedAvatar || !id) {
-      console.error('❌ [Avatar Upload] Thiếu file hoặc id:', { selectedAvatar, id })
+      toast({
+        title: 'Lỗi',
+        description: '❌ [Avatar Upload] Thiếu file hoặc id:' + JSON.stringify({ selectedAvatar, id }),
+        variant: 'deny',
+      })
       return
     }
 
     try {
       setUploadingAvatar(true)
-      // Kiểm tra lại dữ liệu trước khi gửi
-      console.log(
-        '📤 [Avatar Upload] Chuẩn bị gửi request, FormData:',
-        (() => {
-          const fd = new FormData()
-          fd.append('avatar', selectedAvatar)
-          // Không thể log trực tiếp FormData, nên lấy tên & size của file
-          return { name: selectedAvatar.name, size: selectedAvatar.size }
-        })()
-      )
 
-      const response = await API_SERVICES.users.update_avatar(id, selectedAvatar)
-      console.log('✅ [Avatar Upload] API update_avatar response:', response)
+      await API_SERVICES.users.update_avatar(id, selectedAvatar)
 
       // Lấy lại thông tin user để cập nhật avatar mới
       const updatedUser = await getUserById(id)
-      console.log('🔄 [Avatar Upload] getUserById trả về:', updatedUser)
 
       setUser(updatedUser)
       setEditedUser(updatedUser)
@@ -194,17 +150,16 @@ export default function UsersDetailsContent() {
       toast({
         title: 'Thành công',
         description: 'Ảnh đại diện đã được cập nhật',
+        variant: 'success',
       })
     } catch (err) {
-      console.error('🔥 [Avatar Upload] Lỗi khi upload avatar:', err)
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật ảnh đại diện',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setUploadingAvatar(false)
-      console.log('🏁 [Avatar Upload] Kết thúc quá trình upload')
     }
   }
 
@@ -259,7 +214,7 @@ export default function UsersDetailsContent() {
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật trạng thái tài khoản',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setUpdatingStatus(false)
