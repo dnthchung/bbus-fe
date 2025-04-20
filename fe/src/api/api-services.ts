@@ -14,6 +14,9 @@ interface ApiServices {
     fetchUser: (userId: string) => Promise<any>
   }
   users: {
+    update: (user: any) => Promise<any>
+    update_avatar: (userId: string, avatarFile: File) => Promise<any>
+    update_status: (userId: string, status: string) => Promise<any>
     getAll: () => Promise<any>
     getOne: (userId: string) => Promise<any>
     list: () => Promise<any>
@@ -131,6 +134,23 @@ export const API_SERVICES: ApiServices = {
         },
       })
     },
+    update: (user: any) => apiClient.put(API_ENDPOINTS.USERS.UPDATE(), user),
+    update_avatar: (userId: string, avatarFile: File) => {
+      const formData = new FormData()
+      formData.append('id', userId)
+      formData.append('avatar', avatarFile)
+
+      return apiClient.patch(API_ENDPOINTS.USERS.UPDATE_AVATAR, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    },
+    update_status: (userId: string, status: string) =>
+      apiClient.patch(API_ENDPOINTS.USERS.UPDATE_STATUS, {
+        id: userId,
+        status: status,
+      }),
   },
   // -------------------------
   // 3) CHECKPOINTS

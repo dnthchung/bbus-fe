@@ -35,6 +35,7 @@
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { MixerHorizontalIcon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
+import { create } from 'domain'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 
@@ -48,6 +49,9 @@ const columnNameMap: Record<string, string> = {
   address: 'Địa chỉ',
   parentName: 'Tên phụ huynh',
   parentPhone: 'SĐT phụ huynh',
+  className: 'Lớp ',
+  createdAt: 'Ngày tạo',
+  updatedAt: 'Ngày cập nhật',
   // Add other column mappings as needed
 }
 

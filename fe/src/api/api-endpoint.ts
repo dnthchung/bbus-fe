@@ -14,6 +14,9 @@ export const API_ENDPOINTS = {
     DELETE_ONE: (userId: string) => `/user/del/${userId}`,
     GET_ENTITY_BY_USER_ID: (userId: string) => `/user/entity/${userId}`,
     IMPORT_USER: '/user/import',
+    UPDATE: () => '/user/upd',
+    UPDATE_AVATAR: '/user/upd-avatar',
+    UPDATE_STATUS: '/user/change-status',
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoint/list',

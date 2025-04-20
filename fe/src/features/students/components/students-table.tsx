@@ -33,9 +33,13 @@ export function StudentsTable({ columns, data }: DataTableProps) {
     columns,
     state: {
       sorting,
-      columnVisibility,
       rowSelection,
       columnFilters,
+      columnVisibility: {
+        // Ẩn cột createdAt mặc định
+        createdAt: false,
+        ...columnVisibility,
+      },
     },
     enableRowSelection: true, // Cho phép chọn dòng
     onRowSelectionChange: setRowSelection, // Cập nhật trạng thái khi chọn dòng

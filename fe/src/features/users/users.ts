@@ -29,7 +29,9 @@ export async function getAllUsers(): Promise<User[]> {
 
     // Parse & validate với Zod
     const parsedUsers = userListSchema.parse(rawUsers)
-    return parsedUsers
+    return parsedUsers.sort((a, b) => {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
   } catch (error) {
     console.error('Error getAllUsers in users.ts:', error)
     // Nếu lỗi, có thể return [] hoặc throw tùy bạn
@@ -47,9 +49,12 @@ export async function getAllUsersRoleParent(): Promise<User[]> {
     }
 
     // Parse & validate với Zod
+    const parsedUsers11 = userListSchema.parse(rawUsers)
     // Lọc danh sách user có role = "PARENT"
-    const parentUsers = rawUsers.filter((user: User) => user.role === 'PARENT')
-    return parentUsers
+    const parentUsers = parsedUsers11.filter((user: User) => user.role === 'PARENT')
+    return parentUsers.sort((a, b) => {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
   } catch (error) {
     console.error('Error getAllUsers in users.ts:', error)
     throw error
@@ -130,12 +135,15 @@ export async function getAllUsersExceptAdmins(): Promise<User[]> {
       return []
     }
 
+    const parsedUsers11 = userListSchema.parse(rawUsers)
+
     // Lọc danh sách user không có role là "SYSADMIN" hoặc "ADMIN"
-    const filteredUsers = rawUsers.filter((user: User) => user.role !== 'SYSADMIN' && user.role !== 'ADMIN')
+    const filteredUsers = parsedUsers11.filter((user: User) => user.role !== 'SYSADMIN' && user.role !== 'ADMIN')
 
     // Parse & validate với Zod
-    const parsedUsers = userListSchema.parse(filteredUsers)
-    return parsedUsers
+    return filteredUsers.sort((a, b) => {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
   } catch (error) {
     console.error('Error getAllUsersExceptAdmins in users.ts:', error)
     throw error
@@ -161,7 +169,10 @@ export async function getAllAdminUsers(): Promise<User[]> {
 
     // Parse & validate với Zod
     const parsedUsers = userListSchema.parse(adminUsers)
-    return parsedUsers
+
+    return parsedUsers.sort((a, b) => {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
   } catch (error) {
     console.error('Error getAllAdminUsers in users.ts:', error)
     throw error

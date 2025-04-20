@@ -55,7 +55,6 @@ export function DataTableStudentToolbar<TData>({ table }: DataTableStudentToolba
               options={[
                 { label: 'Nam', value: 'MALE' },
                 { label: 'Nữ', value: 'FEMALE' },
-                { label: 'Khác', value: 'OTHER' },
               ]}
             />
           )}

@@ -22,8 +22,9 @@ const parentSchema = z.object({
 // Định nghĩa schema cho học sinh
 export const studentSchema = z.object({
   id: z.string().uuid(),
-  rollNumber: z.string(),
+  rollNumber: z.string().optional(),
   name: z.string(),
+  className: z.string().optional(),
   avatar: z.string().optional(),
   dob: z.coerce.date(),
   address: z.string(),
@@ -35,6 +36,8 @@ export const studentSchema = z.object({
   // Làm cho các trường checkpoint optional vì có thể chưa có điểm đón
   checkpointName: z.string().optional(),
   checkpointDescription: z.string().optional(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 })
 
 // Schema cho form cập nhật học sinh - chỉ bao gồm các trường cần thiết
@@ -42,6 +45,7 @@ export const studentUpdateSchema = z.object({
   id: z.string().uuid(),
   rollNumber: z.string().optional(),
   name: z.string().trim().min(1, { message: 'Tên không được để trống' }).optional(),
+  className: z.string().trim().min(1, { message: 'Tên lớp không được để trống' }).optional(),
   avatar: z.string().optional(),
   dob: z.coerce.date().optional(),
   address: z.string().optional(),
