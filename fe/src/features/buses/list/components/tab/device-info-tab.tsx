@@ -46,7 +46,7 @@ export function DeviceInfoTab({ bus, onBusUpdate }: DeviceInfoTabProps) {
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật thông tin thiết bị',
-        variant: 'destructive',
+        variant: 'deny',
       })
     }
   }

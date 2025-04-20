@@ -248,8 +248,7 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
 
         {/* Student List Section */}
         <div className='w-full py-1 md:w-1/2'>
-          <div className='mb-4 flex flex-col items-center justify-center gap-2 sm:flex-row sm:justify-between'>
-            <h3 className='text-lg font-medium'>Danh sách học sinh đăng ký xe</h3>
+          <div className='mb-4 flex flex-col items-center justify-center gap-2 sm:flex-row sm:justify-around'>
             {/* Ô input để search */}
             <Input
               type='text'
@@ -261,6 +260,7 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
               }}
               className='h-8 w-full sm:w-1/2'
             />
+            <h3 className='text-lg font-medium'>Danh sách học sinh đăng ký xe</h3>
           </div>
 
           {loadingStudents ? (
