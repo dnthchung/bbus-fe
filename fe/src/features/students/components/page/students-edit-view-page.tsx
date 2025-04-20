@@ -121,10 +121,7 @@ export default function StudentsDetailsContent() {
               <BreadcrumbItem>
                 <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <span className='text-muted-foreground'>Học sinh</span>
-              </BreadcrumbItem>
+
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink href='/students'>Danh sách học sinh</BreadcrumbLink>

@@ -14,24 +14,37 @@ const EmptyValueBadge = ({ text }: { text: string }) => <Badge color='yellow'>{t
 
 export const columns: ColumnDef<Bus>[] = [
   // CỘT CHỌN DÒNG
+  // {
+  //   id: 'select',
+  //   header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
+  //   cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
+  //   enableSorting: false,
+  //   enableHiding: false,
+  //   meta: {
+  //     className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
+  //   },
+  // },
+
+  // --- Cột số thứ tự ---
   {
-    id: 'select',
-    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
-    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
+    id: 'index',
+    header: '#',
+    cell: ({ row }) => {
+      // Số thứ tự = index của row + 1
+      return <div className='text-center text-sm text-muted-foreground'>{row.index + 1}</div>
+    },
     enableSorting: false,
     enableHiding: false,
-    meta: {
-      className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
-    },
+    size: 40, // Đặt chiều rộng cột nhỏ hơn
   },
 
   // CÁC CỘT THÔNG TIN CHÍNH
-  // {
-  //   accessorKey: 'name',
-  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Tên xe buýt' />,
-  //   cell: ({ row }) => <LongText className='max-w-40'>{row.getValue('name')}</LongText>,
-  //   meta: { className: 'w-40' },
-  // },
+  {
+    accessorKey: 'name',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Tên xe buýt' />,
+    cell: ({ row }) => <LongText className='max-w-40'>{row.getValue('name')}</LongText>,
+    meta: { className: 'w-40' },
+  },
 
   {
     accessorKey: 'licensePlate',

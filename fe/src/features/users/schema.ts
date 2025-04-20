@@ -18,6 +18,8 @@ export const userSchema = z.object({
   address: z.string(),
   status: userStatusSchema,
   role: roleEnum, // Change from `roles` to `role`
+  updatedAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
 })
 
 export type User = z.infer<typeof userSchema>

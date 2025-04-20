@@ -2,6 +2,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import LongText from '@/components/common/long-text'
 import { Status } from '@/components/mine/status'
 import { AvatarThumbnail } from '@/features/users/components/avatar-thumbnail'
@@ -10,17 +11,39 @@ import { User } from '../schema'
 import { DataTableColumnHeader } from './table/data-table-column-header'
 import { DataTableRowActions } from './table/data-table-row-actions'
 
+// Hàm tiện ích format ngày dạng ISO -> DD/MM/YYYY
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr)
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+}
+
 export const columns: ColumnDef<User>[] = [
   // -- CỘT CHỌN ROW --
+  // {
+  //   id: 'select',
+  //   header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
+  //   meta: {
+  //     className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
+  //   },
+  //   cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
+  // --- Cột số thứ tự ---
   {
-    id: 'select',
-    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
-    meta: {
-      className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
+    id: 'index',
+    header: '#',
+    cell: ({ row }) => {
+      // Số thứ tự = index của row + 1
+      return <div className='text-center text-sm text-muted-foreground'>{row.index + 1}</div>
     },
-    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
     enableSorting: false,
     enableHiding: false,
+    size: 40, // Đặt chiều rộng cột nhỏ hơn
   },
   // -- CỘT HÌNH ẢNH --
   {
@@ -58,28 +81,6 @@ export const columns: ColumnDef<User>[] = [
     enableSorting: false,
   },
 
-  // -- CỘT TRẠNG THÁI TÀI KHOẢN --
-  {
-    accessorKey: 'status',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái tài khoản' />,
-    cell: ({ row }) => {
-      // Lấy status gốc, vd "ACTIVE"
-      const status = row.original.status
-      // Lấy nhãn tiếng Việt từ statusLabels
-      const statusLabel = statusLabels[status] || status // fallback
-      return (
-        <div className='flex space-x-2'>
-          <Status color={status === 'ACTIVE' ? 'green' : 'red'}>{statusLabel}</Status>
-        </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
-    enableHiding: false,
-    enableSorting: false,
-  },
-
   // -- CỘT VAI TRÒ --
   {
     id: 'role',
@@ -106,6 +107,58 @@ export const columns: ColumnDef<User>[] = [
       const rowValue = row.getValue(id) as string
       return filterValues.includes(rowValue)
     },
+  },
+  // --- Ngày cập nhật ---
+  {
+    accessorKey: 'updatedAt',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Ngày cập nhật' />,
+    cell: ({ row }) => {
+      const updatedAt = row.getValue('updatedAt') as string
+      if (!updatedAt) return <span>-</span>
+
+      // Xử lý đúng định dạng timestamp MongoDB
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className='cursor-default'>{formatDate(updatedAt)}</div>
+            </TooltipTrigger>
+            <TooltipContent className='text-xs'>
+              {new Date(updatedAt).toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    },
+    sortingFn: 'datetime',
+  },
+  // -- CỘT TRẠNG THÁI TÀI KHOẢN --
+  {
+    accessorKey: 'status',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái tài khoản' />,
+    cell: ({ row }) => {
+      // Lấy status gốc, vd "ACTIVE"
+      const status = row.original.status
+      // Lấy nhãn tiếng Việt từ statusLabels
+      const statusLabel = statusLabels[status] || status // fallback
+      return (
+        <div className='flex space-x-2'>
+          <Status color={status === 'ACTIVE' ? 'green' : 'red'}>{statusLabel}</Status>
+        </div>
+      )
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+    enableHiding: false,
+    enableSorting: false,
   },
   // -- CỘT HÀNH ĐỘNG (thường là menu ... ) --
   {
