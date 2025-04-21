@@ -6,10 +6,7 @@ import { toast } from '@/hooks/use-toast'
 
 type AllowedRoles = string[] | 'all'
 
-export function withRoleRoute<T extends object>(
-  Component: React.ComponentType<T>,
-  allowedRoles: AllowedRoles
-) {
+export function withRoleRoute<T extends object>(Component: React.ComponentType<T>, allowedRoles: AllowedRoles) {
   const WrappedComponent: React.FC<T> = (props: T) => {
     const { user, isLoading } = useAuthQuery()
     const navigate = useNavigate()
@@ -19,14 +16,14 @@ export function withRoleRoute<T extends object>(
       if (!isLoading && user) {
         // Check if user has required role
         const userRole = user.role || ''
-        const hasAccess =  allowedRoles === 'all' || (Array.isArray(allowedRoles) && allowedRoles.includes(userRole))
+        const hasAccess = allowedRoles === 'all' || (Array.isArray(allowedRoles) && allowedRoles.includes(userRole))
 
         if (!hasAccess) {
           // Redirect to forbidden page if user doesn't have required role
           toast({
-            title: 'Từ chối truy cập', 
+            title: 'Từ chối truy cập',
             description: 'Bạn không có quyền truy cập trang này.',
-            variant: 'deny' 
+            variant: 'deny',
           })
           navigate({ to: '/' })
         }
@@ -35,12 +32,12 @@ export function withRoleRoute<T extends object>(
 
     // Show loading while checking authentication
     if (isLoading) {
-      return <div>Loading...</div>
+      return <div>Loading...1</div>
     }
 
     // If user is not authenticated, the useAuthQuery hook will handle redirection
     if (!user) {
-      return <div>Loading...</div>
+      return <div>Loading...2</div>
     }
 
     // Render the component if user has access

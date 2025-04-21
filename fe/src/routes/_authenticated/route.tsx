@@ -8,6 +8,7 @@ import { useAuthQuery } from '@/hooks/use-auth'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import SkipToMain from '@/components/common/skip-to-main'
 import { AppSidebar } from '@/components/layout/app-sidebar'
+import { AdvancedBusLoader } from '@/components/mine/loader/advanced-bus-loader'
 
 function ProtectedRouteWithLayout() {
   const { user, isLoading } = useAuthQuery()
@@ -21,8 +22,14 @@ function ProtectedRouteWithLayout() {
   }, [isLoading, user, navigate])
 
   // Trong khi chờ xác thực hoặc đang chuyển hướng, hiển thị loading state
+  // if (isLoading || (!user && !isLoading)) {
+  //   return <div>Loading...</div>
+  // }
+
   if (isLoading || (!user && !isLoading)) {
-    return <div>Loading...</div>
+    return <AdvancedBusLoader size='full' animation='drive' variant='primary' text='Đang tải thông tin người dùng...' />
+  } else if (!user) {
+    return <div>Loading... 3</div>
   }
 
   // Lấy trạng thái mở sidebar từ cookie

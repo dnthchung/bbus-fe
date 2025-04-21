@@ -15,7 +15,7 @@ export function withGuestRoute<T extends object>(Component: React.ComponentType<
     }, [isLoading, user, navigate])
 
     if (isLoading || user) {
-      return <div>Loading...</div>
+      return <div>Loading... 123</div>
     }
 
     return <Component {...props} />
