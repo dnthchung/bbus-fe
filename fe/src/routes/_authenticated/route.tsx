@@ -27,7 +27,7 @@ function ProtectedRouteWithLayout() {
   // }
 
   if (isLoading || (!user && !isLoading)) {
-    return <AdvancedBusLoader size='full' animation='drive' variant='primary' text='Đang tải thông tin người dùng...' />
+    return <AdvancedBusLoader size='full' animation='drive' variant='secondary' text='Đang tải ...' />
   } else if (!user) {
     return <div>Loading... 3</div>
   }

@@ -5,6 +5,7 @@ import { AxiosError } from 'axios'
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { handleServerError } from '@/helpers/handle-server-error'
+import { GlobalLoadingProvider } from '@/context/global-loading-context'
 import { useAuthQuery } from '@/hooks/use-auth'
 import { toast } from '@/hooks/use-toast'
 import { FontProvider } from './context/font-context'
@@ -96,7 +97,9 @@ if (!rootElement.innerHTML) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
-            <RouterProvider router={router} />
+            <GlobalLoadingProvider>
+              <RouterProvider router={router} />
+            </GlobalLoadingProvider>
           </FontProvider>
         </ThemeProvider>
       </QueryClientProvider>
