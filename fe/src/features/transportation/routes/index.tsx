@@ -64,7 +64,7 @@ export default function TransportationRouteManagement() {
         toast({
           title: 'Error',
           description: 'Failed to load checkpoints data',
-          variant: 'destructive',
+          variant: 'deny',
         })
       } finally {
         setIsLoading(false)

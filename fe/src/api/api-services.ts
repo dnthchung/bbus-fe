@@ -32,6 +32,7 @@ interface ApiServices {
     get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => Promise<any>
     get_all_by_page_size: (page: number, size: number) => Promise<any>
     get_all_checkpoint_no_route: () => Promise<any>
+    update_status: (checkpointId: string, status: string) => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -166,12 +167,12 @@ export const API_SERVICES: ApiServices = {
       return apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.GET_ALL_BY_PAGE_SIZE}?page=${page}&size=${size}`)
     },
     get_all_checkpoint_no_route: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL_NO_ROUTE),
+    update_status: (checkpointId: string, status: string) => apiClient.patch(API_ENDPOINTS.CHECKPOINTS.UPDATE_STATUS, { id: checkpointId, status: status }),
   },
   //-------------------------
   // 4) STUDENTS
   //-------------------------
   students: {
-    //GET_HISTORY_BY_STUDENT_ID
     get_history_by_student_id: (studentId: string) => apiClient.get(`${API_ENDPOINTS.STUDENTS.GET_HISTORY_BY_STUDENT_ID}/${studentId}`),
     list: () => apiClient.get(API_ENDPOINTS.STUDENTS.LIST),
     addOne: (student: any) => apiClient.post(API_ENDPOINTS.STUDENTS.ADD_ONE, student),

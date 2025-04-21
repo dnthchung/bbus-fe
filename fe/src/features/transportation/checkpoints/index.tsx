@@ -11,37 +11,21 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { CheckpointsDialogs } from '@/features/transportation/checkpoints/components/checkpoints-dialogs'
+import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 import { CheckpointMap } from './components/checkpoint-map'
 import { CheckpointsPrimaryButtons } from './components/checkpoints-primary-buttons'
 import { CheckpointsTable } from './components/checkpoints-table'
 import CreateCheckpointPage from './components/page/create-checkpoint-page'
 import { columns } from './components/table/checkpoints-columns'
 import CheckpointsProvider from './context/checkpoints-context'
-import { getAllCheckpoints } from './data/checkpoints'
 import type { Checkpoint } from './data/schema'
 
 // Separate content component that uses the context
 function CheckpointsContent() {
-  const [checkpointList, setCheckpointList] = useState<Checkpoint[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint | null>(null)
   const [viewMode, setViewMode] = useState<'table' | 'map-table'>('table')
 
-  // Fetch checkpoints on mount
-  useEffect(() => {
-    async function fetchCheckpoints() {
-      try {
-        setLoading(true)
-        const parsedCheckpoints = await getAllCheckpoints()
-        setCheckpointList(parsedCheckpoints)
-      } catch (error) {
-        console.error('Error fetching checkpoints in index.tsx:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchCheckpoints()
-  }, [])
+  const { checkpoints: checkpointList, loading, refreshCheckpoints } = useCheckpoints()
 
   const handleCheckpointClick = (checkpoint: Checkpoint) => {
     setSelectedCheckpoint(checkpoint)

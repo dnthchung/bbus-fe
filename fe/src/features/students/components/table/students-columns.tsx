@@ -33,7 +33,7 @@ export const columns: ColumnDef<Student>[] = [
   // --- Cột số thứ tự ---
   {
     id: 'index',
-    header: '#',
+    header: () => <div className='text-center text-sm text-muted-foreground'>#</div>,
     cell: ({ row }) => {
       // Số thứ tự = index của row + 1
       return <div className='text-center text-sm text-muted-foreground'>{row.index + 1}</div>

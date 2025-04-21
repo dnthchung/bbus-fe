@@ -145,6 +145,7 @@ export async function getBusListByRouteId(routeId: string) {
 //result : [ { "id": "080e0ee6-a265-48c1-a8d5-f00cc28fbe47", "name": "test", "description": "test", "latitude": "20.09872", "longitude": "107.02182", "status": "ACTIVE" }, { "id": "9c7dc267-6dc8-49b5-9f4c-1ba317cc516d", "name": "Bến xe Giáp Bát", "description": "Trạm xe buýt ngay Bến xe Giáp Bát", "latitude": "20.995568", "longitude": "105.841293", "status": "ACTIVE" }, { "id": "346b48c3-912f-456f-b2e2-4469260962e6", "name": "Cầu Chương Dương", "description": "Trạm xe buýt ở đầu cầu Chương Dương", "latitude": "21.033028", "longitude": "105.863672", "status": "INACTIVE" }, { "id": "90cd0ab6-9bc0-42be-a996-6f47cfe2b04c", "name": "Hồ Hoàn Kiếm", "description": "Trạm xe buýt đối diện Hồ Hoàn Kiếm", "latitude": "21.028511", "longitude": "105.854203", "status": "ACTIVE" } ]
 export async function getListCheckpointByRouteId(routeId: string) {
   try {
+    console.log('routeId => ', routeId)
     const req = await API_SERVICES.route.get_list_checkpoint_by_route_id(routeId)
     // Handle different response structures
     const listCheckpoint = req.data?.data || req.data || []
