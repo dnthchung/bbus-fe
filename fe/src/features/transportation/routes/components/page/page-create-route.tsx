@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
-import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconSearch } from '@tabler/icons-react'
@@ -14,18 +13,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { Status } from '@/components/mine/status'
 import { createRoute } from '@/features/transportation/function'
 import { getListCheckpoint, getNumberOfStudentInEachCheckpoint, getAllCheckpointButNotInRoute } from './checkpoint-service'
@@ -43,20 +41,15 @@ interface Checkpoint {
 
 interface RouteFormValues {
   description: string
-  periodStart: string
-  periodEnd: string
 }
 
 const routeFormSchema = z.object({
-  description: z.string().min(3, 'Description must be at least 3 characters'),
-  periodStart: z.string().min(1, 'Start date is required'),
-  periodEnd: z.string().min(1, 'End date is required'),
+  description: z.string().min(3, 'Description must be at least 3 characters').max(3000, 'Description cannot exceed 3000 characters'),
 })
 
 export default function PageCreateRoute() {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
   const [selectedCheckpoints, setSelectedCheckpoints] = useState<Checkpoint[]>([])
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
@@ -65,8 +58,6 @@ export default function PageCreateRoute() {
     resolver: zodResolver(routeFormSchema),
     defaultValues: {
       description: '',
-      periodStart: format(new Date(), 'yyyy-MM-dd'),
-      periodEnd: format(new Date(new Date().setMonth(new Date().getMonth() + 9)), 'yyyy-MM-dd'),
     },
   })
 
@@ -74,10 +65,6 @@ export default function PageCreateRoute() {
     const loadCheckpoints = async () => {
       try {
         setLoading(true)
-        // const data = await getAllCheckpointButNotInRoute()
-        // const data = await getListCheckpoint()
-        // const data = (await getListCheckpoint()).filter((checkpoint) => checkpoint.status !== 'INACTIVE')
-
         const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
 
         const checkpointsWithStudentCount = await Promise.all(
@@ -90,6 +77,7 @@ export default function PageCreateRoute() {
             }
           })
         )
+
         setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
       } catch (error) {
         toast({
@@ -101,12 +89,15 @@ export default function PageCreateRoute() {
         setLoading(false)
       }
     }
+
     loadCheckpoints()
   }, [toast])
 
   const addCheckpoint = (checkpoint: Checkpoint) => {
     if (!selectedCheckpoints.some((cp) => cp.id === checkpoint.id)) {
       setSelectedCheckpoints((prev) => [...prev, checkpoint])
+      // Remove the added checkpoint from the available checkpoints list
+      setCheckpoints((prev) => prev.filter((cp) => cp.id !== checkpoint.id))
       setOpen(false)
     } else {
       toast({
@@ -118,7 +109,10 @@ export default function PageCreateRoute() {
   }
 
   const removeCheckpoint = (index: number) => {
+    const removedCheckpoint = selectedCheckpoints[index]
     setSelectedCheckpoints((prev) => prev.filter((_, i) => i !== index))
+    // Add the removed checkpoint back to the available checkpoints list
+    setCheckpoints((prev) => [...prev, removedCheckpoint].sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
   }
 
   const moveCheckpointUp = (index: number) => {
@@ -148,12 +142,11 @@ export default function PageCreateRoute() {
       })
       return
     }
+
     const path = selectedCheckpoints.map((cp) => cp.id).join(' ')
     const payload = {
       path,
       description: values.description,
-      periodStart: values.periodStart,
-      periodEnd: values.periodEnd,
     }
 
     try {
@@ -165,6 +158,36 @@ export default function PageCreateRoute() {
       })
       form.reset()
       setSelectedCheckpoints([])
+      // Reload checkpoints to get the updated list after creating the route
+      const loadCheckpoints = async () => {
+        try {
+          setLoading(true)
+          const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
+
+          const checkpointsWithStudentCount = await Promise.all(
+            data.map(async (checkpoint: Checkpoint) => {
+              try {
+                const studentCount = await getNumberOfStudentInEachCheckpoint(checkpoint.id)
+                return { ...checkpoint, studentCount }
+              } catch {
+                return { ...checkpoint, studentCount: 0 }
+              }
+            })
+          )
+
+          setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: 'Failed to refresh checkpoints. Please reload the page.',
+            variant: 'deny',
+          })
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      loadCheckpoints()
     } catch (error) {
       toast({
         title: 'Create Failed',
@@ -344,49 +367,19 @@ export default function PageCreateRoute() {
                     />
                   </div>
                   <Separator />
-                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                    <FormField
-                      control={form.control}
-                      name='description'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mô tả</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder='Nhập mô tả tuyến xe...' {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className='grid grid-cols-2 gap-4'>
-                      <FormField
-                        control={form.control}
-                        name='periodStart'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Ngày bắt đầu</FormLabel>
-                            <FormControl>
-                              <Input type='date' {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='periodEnd'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Ngày kết thúc</FormLabel>
-                            <FormControl>
-                              <Input type='date' {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name='description'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mô tả</FormLabel>
+                        <FormControl>
+                          <LimitedTextarea value={field.value} onChange={field.onChange} maxLength={3000} placeholder='Nhập mô tả tuyến xe...' />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <Button type='submit' className='w-full' disabled={selectedCheckpoints.length < 2}>
                     Tạo tuyến xe
                   </Button>

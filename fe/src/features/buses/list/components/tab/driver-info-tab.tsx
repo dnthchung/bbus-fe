@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/mine/badge'
-import { getAllDrivers, getAllAssistants } from '@/features/buses/buses'
+import { getAvailableAssistants, getAvailableDrivers } from '@/features/buses/buses'
 import type { Bus } from '@/features/buses/schema'
 
 interface DriverInfoTabProps {
@@ -39,11 +39,11 @@ export default function DriverInfoTab({ bus, onBusUpdate }: DriverInfoTabProps) 
       setLoadingAssistants(true)
 
       // Fetch drivers
-      const driversData = await getAllDrivers()
+      const driversData = await getAvailableDrivers()
       setDrivers(driversData)
 
       // Fetch assistants
-      const assistantsData = await getAllAssistants()
+      const assistantsData = await getAvailableAssistants()
       setAssistants(assistantsData)
     } catch (error) {
       console.error('Error fetching drivers and assistants:', error)
@@ -179,7 +179,7 @@ export default function DriverInfoTab({ bus, onBusUpdate }: DriverInfoTabProps) 
         >
           {/* Drivers Selection */}
           <div className='w-1/2'>
-            <div className='mb-2 flex items-center justify-between'>
+            <div className='mb-2 flex items-center justify-around'>
               <h4 className='font-medium'>Chọn tài xế</h4>
               <div className='relative w-64'>
                 <MagnifyingGlassIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
@@ -210,7 +210,7 @@ export default function DriverInfoTab({ bus, onBusUpdate }: DriverInfoTabProps) 
 
           {/* Assistants Selection */}
           <div className='w-1/2'>
-            <div className='mb-2 flex items-center justify-between'>
+            <div className='mb-2 flex items-center justify-around'>
               <h4 className='font-medium'>Chọn phụ xe</h4>
               <div className='relative w-64'>
                 <MagnifyingGlassIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />

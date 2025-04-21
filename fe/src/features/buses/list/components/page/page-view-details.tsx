@@ -33,6 +33,7 @@ export default function PageViewDetails() {
       try {
         setLoading(true)
         const busData = await getBusById(id ?? '')
+        //data result : {amountOfStudents : 14 assistantId : "83bcd928-ed7e-422f-a57c-49a52f34223b" assistantName : "assistant" assistantPhone : "0912345670" busStatus : "ACTIVE" cameraFacesluice : "1001001" driverId : "6946cf4c-9e26-4305-9541-3e7680b104f9" driverName : "teacher" driverPhone : "0912345674" espId : "001001" id : "84389627-6cd4-42bd-a5fd-049623e2c99e" licensePlate : "30A-921.12" name : "Bus 001" routeCode : "R002" routeId : "33597c4a-a9c5-44c9-a2d9-75eb0bbbcb72"}
         setBus(busData)
         setError(null)
       } catch (err) {
@@ -85,6 +86,17 @@ export default function PageViewDetails() {
 
   const handleStatusUpdate = async () => {
     if (!bus || !id) return
+
+    // Kiểm tra nếu đang active và có học sinh trên xe
+    if (bus.busStatus === 'ACTIVE' && bus.amountOfStudents > 0) {
+      toast({
+        title: 'Không thể vô hiệu hóa',
+        description: 'Không thể vô hiệu hóa xe buýt khi còn học sinh trên xe và xe đang trong tuyến đường hoạt động',
+        variant: 'deny',
+      })
+      return
+    }
+
     try {
       setUpdatingStatus(true)
       const newStatus = bus.busStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'

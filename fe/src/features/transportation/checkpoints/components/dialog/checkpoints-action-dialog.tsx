@@ -1,27 +1,14 @@
 'use client'
 
-import { z } from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useState, useEffect } from 'react'
+import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Checkpoint } from '../../data/schema'
-
-// Schema validation với Zod
-const formSchema = z.object({
-  name: z.string().min(1, { message: 'Tên điểm dừng là bắt buộc.' }),
-  description: z.string().min(1, { message: 'Mô tả điểm dừng là bắt buộc.' }),
-  latitude: z.string().regex(/^[-+]?[0-9]*\.?[0-9]+$/, { message: 'Vĩ độ không hợp lệ.' }),
-  longitude: z.string().regex(/^[-+]?[0-9]*\.?[0-9]+$/, { message: 'Kinh độ không hợp lệ.' }),
-  status: z.enum(['ACTIVE', 'INACTIVE'], { message: 'Trạng thái không hợp lệ.' }),
-  isEdit: z.boolean(),
-})
-
-type CheckpointForm = z.infer<typeof formSchema>
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Status } from '@/components/mine/status'
+import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
+import type { Checkpoint } from '@/features/transportation/checkpoints/data/schema'
 
 interface Props {
   currentRow?: Checkpoint
@@ -30,143 +17,116 @@ interface Props {
 }
 
 export function CheckpointsActionDialog({ currentRow, open, onOpenChange }: Props) {
-  const isEdit = !!currentRow
+  const [saving, setSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [checkpointDetails, setCheckpointDetails] = useState<Checkpoint | null>(null)
 
-  const form = useForm<CheckpointForm>({
-    resolver: zodResolver(formSchema),
-    defaultValues: isEdit
-      ? { ...currentRow, isEdit }
-      : {
-          name: '',
-          description: '',
-          latitude: '',
-          longitude: '',
-          status: 'ACTIVE',
-          isEdit,
-        },
-  })
+  const { refreshCheckpoints } = useCheckpoints()
 
-  const onSubmit = (values: CheckpointForm) => {
-    form.reset()
-    toast({
-      title: 'Dữ liệu bạn đã gửi:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      ),
-    })
-    onOpenChange(false)
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!currentRow) return setIsLoading(true)
+      try {
+        // Có thể gọi API chi tiết tại đây nếu cần
+        setCheckpointDetails(currentRow)
+      } catch (error) {
+        console.error('Error loading checkpoint:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchDetails()
+  }, [currentRow])
+
+  const toggleStatus = async () => {
+    if (!currentRow) return
+    const newStatus = currentRow.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+    setSaving(true)
+
+    try {
+      await API_SERVICES.checkpoints.update_status(currentRow.id, newStatus)
+      await refreshCheckpoints()
+      onOpenChange(false) // Đóng sau khi refresh xong
+
+      toast({
+        title: 'Đã cập nhật',
+        description: newStatus === 'ACTIVE' ? 'Điểm dừng đã được kích hoạt.' : 'Điểm dừng đã được dừng hoạt động.',
+        variant: 'success',
+      })
+    } catch {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật trạng thái.',
+        variant: 'deny',
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(state) => {
-        form.reset()
-        onOpenChange(state)
-      }}
-    >
-      <DialogContent className='sm:max-w-lg'>
-        <DialogHeader className='text-left'>
-          <DialogTitle>{isEdit ? 'Chỉnh sửa điểm dừng' : 'Thêm điểm dừng mới'}</DialogTitle>
-          <DialogDescription>
-            {isEdit ? 'Cập nhật thông tin điểm dừng xe buýt tại đây. ' : 'Tạo mới một điểm dừng xe buýt. '}
-            Nhấn "Lưu thay đổi" khi hoàn tất.
-          </DialogDescription>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
+        <DialogHeader>
+          <DialogTitle className='text-xl'>Chi tiết điểm dừng {checkpointDetails?.name || 'N/A'}</DialogTitle>
+          <DialogDescription>Xem chi tiết và cập nhật trạng thái hoạt động của điểm dừng.</DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className='-mr-4 h-[26.25rem] w-full py-1 pr-4'>
-          <Form {...form}>
-            <form id='checkpoint-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 p-0.5'>
-              {/* Tên điểm dừng */}
-              <FormField
-                control={form.control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Tên điểm dừng</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Ví dụ: Bến xe Mỹ Đình' className='col-span-4' autoComplete='off' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+        {isLoading ? (
+          <div className='space-y-4 py-4'>
+            <Skeleton className='h-6 w-3/4' />
+            <Skeleton className='h-6 w-2/3' />
+            <Skeleton className='h-6 w-1/2' />
+            <Skeleton className='h-6 w-1/2' />
+            <Skeleton className='h-6 w-1/4' />
+          </div>
+        ) : checkpointDetails ? (
+          <div className='space-y-6 py-4'>
+            <table className='w-full overflow-hidden rounded border border-gray-300 text-sm dark:border-gray-600'>
+              <tbody>
+                <InfoRow label='Tên điểm dừng' value={checkpointDetails.name || 'N/A'} />
+                <InfoRow label='Mô tả' value={checkpointDetails.description || 'N/A'} multiline />
+                <InfoRow label='Vĩ độ' value={checkpointDetails.latitude || 'N/A'} />
+                <InfoRow label='Kinh độ' value={checkpointDetails.longitude || 'N/A'} />
+                <InfoRow
+                  label='Trạng thái'
+                  value={
+                    <Status color={checkpointDetails.status === 'ACTIVE' ? 'green' : 'red'} className='inline-flex'>
+                      {checkpointDetails.status === 'ACTIVE' ? 'Đang hoạt động' : 'Không hoạt động'}
+                    </Status>
+                  }
+                />
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className='flex items-center justify-center p-8'>
+            <p className='text-sm text-muted-foreground'>Không có dữ liệu điểm dừng.</p>
+          </div>
+        )}
 
-              {/* Mô tả */}
-              <FormField
-                control={form.control}
-                name='description'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Mô tả</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Ví dụ: Điểm dừng gần cổng trường' className='col-span-4' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Vĩ độ (Latitude) */}
-              <FormField
-                control={form.control}
-                name='latitude'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Vĩ độ</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Ví dụ: 21.033781' className='col-span-4' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Kinh độ (Longitude) */}
-              <FormField
-                control={form.control}
-                name='longitude'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Kinh độ</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Ví dụ: 105.782362' className='col-span-4' {...field} />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-
-              {/* Trạng thái */}
-              <FormField
-                control={form.control}
-                name='status'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 text-right'>Trạng thái</FormLabel>
-                    <FormControl>
-                      <select {...field} className='col-span-4 rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500'>
-                        <option value='ACTIVE'>Đang hoạt động</option>
-                        <option value='INACTIVE'>Không hoạt động</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </ScrollArea>
-
-        {/* Nút lưu thay đổi */}
-        <DialogFooter>
-          <Button type='submit' form='checkpoint-form'>
-            Lưu thay đổi
+        <DialogFooter className='flex flex-row items-center justify-between gap-2'>
+          <Button type='button' variant='secondary' onClick={() => onOpenChange(false)}>
+            Đóng
           </Button>
+
+          {checkpointDetails && (
+            <Button type='button' variant={checkpointDetails.status === 'ACTIVE' ? 'destructive' : 'default'} disabled={saving} onClick={toggleStatus}>
+              {checkpointDetails.status === 'ACTIVE' ? 'Dừng hoạt động' : 'Kích hoạt'}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function InfoRow({ label, value, multiline = false }: { label: string; value: React.ReactNode; multiline?: boolean }) {
+  return (
+    <tr className='border-t border-gray-300 dark:border-gray-600'>
+      <td className='w-1/3 whitespace-nowrap bg-gray-100 p-2 align-top text-sm font-medium dark:bg-gray-800'>{label}:</td>
+      <td className={`p-2 text-sm ${multiline ? 'whitespace-pre-wrap break-words' : 'whitespace-nowrap'}`}>{value}</td>
+    </tr>
   )
 }

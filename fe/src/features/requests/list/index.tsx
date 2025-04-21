@@ -135,9 +135,9 @@ function RequestContent() {
             </TabsContent>
 
             <TabsContent value='pickup'>
-              <div className='mb-4 flex justify-end'>
+              {/* <div className='mb-4 flex justify-end'>
                 <Button onClick={handleAutoProcessAll}>Tự động xử lý tất cả đơn</Button>
-              </div>
+              </div> */}
               <RequestTable requests={pickupRequests} onViewRequest={handleViewRequest} />
             </TabsContent>
 

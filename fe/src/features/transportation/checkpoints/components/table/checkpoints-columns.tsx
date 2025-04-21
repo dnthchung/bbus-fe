@@ -17,15 +17,27 @@ const checkpointStatusColors: Record<CheckpointStatus, 'green' | 'red'> = {
 
 // ✅ Cột bảng Checkpoints
 export const columns: ColumnDef<Checkpoint>[] = [
+  // {
+  //   id: 'select',
+  //   header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
+  //   meta: {
+  //     className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
+  //   },
+  //   cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
+  // --- Cột số thứ tự ---
   {
-    id: 'select',
-    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
-    meta: {
-      className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
+    id: 'index',
+    header: () => <div className='text-center text-sm text-muted-foreground'>#</div>,
+    cell: ({ row }) => {
+      // Số thứ tự = index của row + 1
+      return <div className='text-center text-sm text-muted-foreground'>{row.index + 1}</div>
     },
-    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
     enableSorting: false,
     enableHiding: false,
+    size: 40, // Đặt chiều rộng cột nhỏ hơn
   },
   {
     accessorKey: 'name',

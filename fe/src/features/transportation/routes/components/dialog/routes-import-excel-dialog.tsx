@@ -8,7 +8,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
 // Định nghĩa các đuôi file được phép.
-const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm', 'csv', 'txt', 'tsv', 'xlsb', 'ods', 'xml', 'html', 'pdf', 'xla', 'xlam']
+const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx']
 
 // Tạo schema cho việc tải lên file.
 // Đầu tiên đảm bảo rằng chỉ có đúng một file được tải lên, sau đó chuyển đổi FileList thành đối tượng File,

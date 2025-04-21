@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
     COUNT_STUDENTS_OF_ONE_CHECKPOINT: '/checkpoint/count-students',
     GET_A_CHECKPOINT_BY_CHECKPOINT_ID: '/checkpoint',
     GET_ALL_BY_PAGE_SIZE: '/checkpoint/list',
+    UPDATE_STATUS: '/checkpoint/status',
   },
   STUDENTS: {
     LIST: '/student/list?size=10000',
@@ -60,9 +61,11 @@ export const API_ENDPOINTS = {
   },
   DRIVER: {
     GET_ALL: '/driver/list',
+    GET_ALL_AVAILABLE: '/driver/available',
   },
   ASSISTANT: {
     GET_ALL: '/assistant/list',
+    GET_ALL_AVAILABLE: '/assistant/available',
   },
   SCHEDULE: {
     GET_DATES_BY_MONTH: '/bus-schedule/dates',

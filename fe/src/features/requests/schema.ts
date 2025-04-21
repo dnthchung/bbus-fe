@@ -8,6 +8,7 @@ const requestSchema = z.object({
   studentId: z.string().uuid().nullable(),
   studentName: z.string().nullable(),
   sendByUserId: z.string().uuid(),
+  sendByName: z.string(),
   checkpointId: z.string().uuid(),
   checkpointName: z.string(),
   approvedByUserId: z.string().uuid(),
@@ -17,6 +18,8 @@ const requestSchema = z.object({
   reason: z.string(),
   reply: z.string(),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 })
 
 export type Request = z.infer<typeof requestSchema>

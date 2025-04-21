@@ -64,6 +64,26 @@ export async function getAllDrivers() {
   }
 }
 
+//get list driver available (not in bus )
+export async function getAvailableDrivers() {
+  try {
+    const response = await API_SERVICES.drivers.get_all_available()
+    const rawData = response.data
+    const rawDrivers = rawData?.data?.drivers || rawData?.data
+
+    if (!rawDrivers) {
+      console.log('No available drivers data found in response')
+      return []
+    }
+
+    console.log('Raw available drivers data:', rawDrivers)
+    return rawDrivers
+  } catch (error) {
+    console.error('Error getAvailableDrivers in buses.ts:', error)
+    throw error
+  }
+}
+
 //api get list assistant
 export async function getAllAssistants() {
   try {
@@ -80,6 +100,26 @@ export async function getAllAssistants() {
     return rawAssistants
   } catch (error) {
     console.error('Error getAllAssistants in buses.ts:', error)
+    throw error
+  }
+}
+
+//get list assistant available (not in bus )
+export async function getAvailableAssistants() {
+  try {
+    const response = await API_SERVICES.assistants.get_all_available()
+    const rawData = response.data
+    const rawAssistants = rawData?.data?.assistants || rawData?.data
+
+    if (!rawAssistants) {
+      console.log('No available assistants data found in response')
+      return []
+    }
+
+    console.log('Raw available assistants data:', rawAssistants)
+    return rawAssistants
+  } catch (error) {
+    console.error('Error getAvailableAssistants in buses.ts:', error)
     throw error
   }
 }

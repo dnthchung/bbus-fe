@@ -8,10 +8,10 @@ export async function getAllRequest() {
   try {
     const response = await API_SERVICES.requests.get_all_request()
     const requests = response.data.data.requests || response.data.requests
-    console.log('All requests:', requests)
+    // console.log('All requests:', requests)
     return requests
   } catch (error) {
-    console.error('Error fetching all requests:', error)
+    // console.error('Error fetching all requests:', error)
     toast({
       title: 'Error',
       description: 'Failed to fetch requests',
@@ -27,10 +27,10 @@ export async function getAllRequestType() {
   try {
     const response = await API_SERVICES.requests.get_all_request_type()
     const requestTypes = response.data.data.requestTypes || response.data.requestTypes
-    console.log('All request types:', requestTypes)
+    // console.log('All request types:', requestTypes)
     return requestTypes
   } catch (error) {
-    console.error('Error fetching request types:', error)
+    // console.error('Error fetching request types:', error)
     toast({
       title: 'Error',
       description: 'Failed to fetch request types',
@@ -47,10 +47,10 @@ export async function getRequestById(requestId: string) {
   try {
     const response = await API_SERVICES.requests.get_a_request_details_by_request_id(requestId)
     const requestDetails = response.data.data || response.data
-    console.log('Request details:', requestDetails)
+    // console.log('Request details:', requestDetails)
     return requestDetails
   } catch (error) {
-    console.error('Error fetching request details:', error)
+    // console.error('Error fetching request details:', error)
     toast({
       title: 'Error',
       description: 'Failed to fetch request details',
@@ -66,7 +66,7 @@ export async function getRequestById(requestId: string) {
 export async function processChangeCheckpoint(requestId: string) {
   try {
     const response = await API_SERVICES.requests.process_change_checkpoint(requestId)
-    console.log('Process change checkpoint response:', response.data)
+    // console.log('Process change checkpoint response:', response.data)
 
     toast({
       title: 'Success',
@@ -76,7 +76,7 @@ export async function processChangeCheckpoint(requestId: string) {
 
     return response.data
   } catch (error) {
-    console.error('Error processing checkpoint change:', error)
+    // console.error('Error processing checkpoint change:', error)
     toast({
       title: 'Error',
       description: 'Failed to process checkpoint change',
@@ -96,7 +96,7 @@ export async function replyRequest(requestId: string, reply: string, status: 'AP
     }
 
     const response = await API_SERVICES.requests.reply_request(requestData)
-    console.log('Reply request response:', response.data)
+    // console.log('Reply request response:', response.data)
 
     toast({
       title: 'Success',
@@ -106,7 +106,7 @@ export async function replyRequest(requestId: string, reply: string, status: 'AP
 
     return response.data
   } catch (error) {
-    console.error('Error replying to request:', error)
+    // console.error('Error replying to request:', error)
     toast({
       title: 'Error',
       description: 'Failed to reply to request',

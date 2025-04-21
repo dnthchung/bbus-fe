@@ -362,8 +362,8 @@ export default function UsersDetailsContent() {
               </div>
             </div>
             <div>
-              <h2 className='mb-4 text-xl font-semibold'>Ảnh đại diện</h2>
-              <div className='flex flex-col items-center rounded-md border p-6'>
+              <h2 className='my-6 text-xl font-semibold'>Ảnh đại diện</h2>
+              <div className='flex flex-col items-center rounded-md border p-5'>
                 <div className='group relative mb-4 flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-full border' onClick={triggerFileInput}>
                   {/* Avatar display with hover effect */}
                   {avatarPreviewUrl ? (

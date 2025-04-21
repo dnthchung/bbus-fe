@@ -9,7 +9,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
 // Định nghĩa các đuôi file được phép
-const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm', 'csv', 'txt', 'tsv', 'xlsb', 'ods', 'xml', 'html', 'pdf', 'xla', 'xlam']
+const allowedExtensions = ['xls', 'xlsx', 'xlsm']
 
 // Tạo schema cho việc tải lên file
 const fileSchema = z
@@ -68,7 +68,7 @@ export function CheckpointsImportDialog({ open, onOpenChange }: Props) {
         <DialogHeader className='text-left'>
           <DialogTitle>Nhập danh sách điểm dừng xe buýt</DialogTitle>
           <DialogDescription>
-            Tải lên một file chứa danh sách điểm dừng để nhập. Các định dạng file được hỗ trợ: <code>.xls, .xlsx, .xlsm, .xltx, .xltm, .csv, .txt, .tsv, .xlsb, .ods, .xml, .html, .pdf, .xla, .xlam</code>
+            Tải lên một file chứa danh sách điểm dừng để nhập. Các định dạng file được hỗ trợ: <code>.xls, .xlsx, .xlsm</code>
           </DialogDescription>
         </DialogHeader>
 
@@ -81,7 +81,7 @@ export function CheckpointsImportDialog({ open, onOpenChange }: Props) {
                 <FormItem>
                   <FormLabel>Tải lên File</FormLabel>
                   <FormControl>
-                    <input type='file' accept='.xls,.xlsx,.xlsm,.xltx,.xltm,.csv,.txt,.tsv,.xlsb,.ods,.xml,.html,.pdf,.xla,.xlam' onChange={(e) => field.onChange(e.target.files)} />
+                    <input type='file' accept='.xls,.xlsx,.xlsm' onChange={(e) => field.onChange(e.target.files)} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -2,10 +2,11 @@
 
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import { DialogDescription } from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Textarea } from '@/components/ui/textarea'
+import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { useRequests } from '../../context/requests-context'
 import { getRequestById } from '../../function'
 import { RequestStatusBadge } from './request-status-badge'
@@ -22,10 +23,14 @@ interface RequestDetailModalProps {
 
 export function RequestDetailModal({ request, requestType, onClose, onApprove, onReject, onMarkAsRead, onAutoProcess }: RequestDetailModalProps) {
   const { processing } = useRequests()
+
   const [response, setResponse] = useState('')
+  const maxResponseLength = 3000
+
   const [requestDetails, setRequestDetails] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  /* ---------------- fetch chi tiết ---------------- */
   useEffect(() => {
     const fetchRequestDetails = async () => {
       try {
@@ -41,13 +46,9 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     fetchRequestDetails()
   }, [request.requestId])
 
-  const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setResponse(e.target.value)
-  }
-
   const requestData = requestDetails || request
   const isPending = requestData.status === 'PENDING'
-  const isApproved = requestData.status === 'APPROVED'
+  const isApproved = requestData.status === 'APPROVED' // giữ lại nếu cần
 
   /* ----------------- Helpers ----------------- */
   const getRequestTypeLabel = () => {
@@ -57,7 +58,6 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     if (typeName.includes('báo cáo')) return 'report'
     return 'other'
   }
-
   const currentRequestType = requestType || getRequestTypeLabel()
   const isReport = currentRequestType === 'report'
   const isPickup = currentRequestType === 'pickup' || requestData.requestTypeName?.includes('đón/trả')
@@ -67,9 +67,17 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     const d = new Date(date)
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
   }
-
-  // Ngày gửi – ưu tiên createdAt, sau đó fromDate
   const getSubmissionDate = () => requestData.createdAt || requestData.createdDate || requestData.submissionDate || requestData.fromDate
+
+  /* -------- validate & gửi -------- */
+  const validateAndSubmit = (action: 'approve' | 'reject') => {
+    if (!response.trim()) return
+    if (action === 'approve') {
+      onApprove(requestData.requestId, response)
+    } else {
+      onReject(requestData.requestId, response)
+    }
+  }
 
   /* -------------- Loading skeleton -------------- */
   if (isLoading) {
@@ -96,6 +104,9 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
       <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle className='text-xl'>Chi tiết đơn</DialogTitle>
+          <DialogDescription className='flex justify-between text-sm text-muted-foreground'>
+            <span className='mb-2'>{requestData.requestTypeName}</span>
+          </DialogDescription>
         </DialogHeader>
 
         {/* ---------- Bảng thông tin ---------- */}
@@ -103,7 +114,6 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
           <table className='w-full overflow-hidden rounded border border-gray-300 text-sm dark:border-gray-600'>
             <tbody>
               <InfoRow label='Học sinh' value={requestData.studentName || `Người dùng: ${requestData.sendByUserId?.substring(0, 8)}...`} />
-              {/* ---- SỬA HÀNG NÀY ---- */}
               <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
               <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
 
@@ -123,13 +133,12 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
             </tbody>
           </table>
 
-          {/* Ô phản hồi (ẩn khi đã duyệt hoặc là đơn report) */}
-          {!isReport && (
-            <div className='mt-4'>
-              <div className='mb-1 font-medium'>Phản hồi:</div>
-              <Textarea placeholder='Nhập phản hồi...' value={response} onChange={handleResponseChange} className='min-h-[100px]' disabled={!isPending || processing} />
-            </div>
-          )}
+          {/* ----------- LimitedTextarea ----------- */}
+          <div className='my-6'>
+            <span className='text-sm font-medium text-muted-foreground'>Phản hồi</span>
+
+            {!isReport && isPending && <LimitedTextarea value={response} onChange={setResponse} maxLength={maxResponseLength} placeholder='Nhập phản hồi...' disabled={!isPending || processing} />}
+          </div>
         </div>
 
         {/* ---------- Action buttons ---------- */}
@@ -149,10 +158,10 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
             </>
           ) : isPending ? (
             <>
-              <Button variant='destructive' onClick={() => onReject(requestData.requestId, response)} disabled={processing}>
+              <Button variant='destructive' onClick={() => validateAndSubmit('reject')} disabled={processing || response.trim() === ''}>
                 {processing ? 'Đang xử lý...' : 'Từ chối'}
               </Button>
-              <Button onClick={() => onApprove(requestData.requestId, response)} disabled={processing}>
+              <Button onClick={() => validateAndSubmit('approve')} disabled={processing || response.trim() === ''}>
                 {processing ? 'Đang xử lý...' : 'Phê duyệt'}
               </Button>
             </>
