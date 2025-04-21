@@ -6,7 +6,7 @@ import { DialogDescription } from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Textarea } from '@/components/ui/textarea'
+import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { useRequests } from '../../context/requests-context'
 import { getRequestById } from '../../function'
 import { RequestStatusBadge } from './request-status-badge'
@@ -23,12 +23,14 @@ interface RequestDetailModalProps {
 
 export function RequestDetailModal({ request, requestType, onClose, onApprove, onReject, onMarkAsRead, onAutoProcess }: RequestDetailModalProps) {
   const { processing } = useRequests()
+
   const [response, setResponse] = useState('')
-  const [isResponseError, setIsResponseError] = useState(false)
   const maxResponseLength = 3000
+
   const [requestDetails, setRequestDetails] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  /* ---------------- fetch chi tiết ---------------- */
   useEffect(() => {
     const fetchRequestDetails = async () => {
       try {
@@ -41,35 +43,12 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
         setIsLoading(false)
       }
     }
-
     fetchRequestDetails()
   }, [request.requestId])
 
-  const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    if (value.length <= maxResponseLength) {
-      setResponse(value)
-    }
-    setIsResponseError(value.trim() === '')
-  }
-
-  // Kiểm tra hợp lệ trước khi gửi
-  const validateAndSubmit = (action: 'approve' | 'reject') => {
-    if (!response.trim()) {
-      setIsResponseError(true)
-      return
-    }
-
-    if (action === 'approve') {
-      onApprove(requestData.requestId, response)
-    } else {
-      onReject(requestData.requestId, response)
-    }
-  }
-
   const requestData = requestDetails || request
   const isPending = requestData.status === 'PENDING'
-  const isApproved = requestData.status === 'APPROVED'
+  const isApproved = requestData.status === 'APPROVED' // giữ lại nếu cần
 
   /* ----------------- Helpers ----------------- */
   const getRequestTypeLabel = () => {
@@ -79,7 +58,6 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     if (typeName.includes('báo cáo')) return 'report'
     return 'other'
   }
-
   const currentRequestType = requestType || getRequestTypeLabel()
   const isReport = currentRequestType === 'report'
   const isPickup = currentRequestType === 'pickup' || requestData.requestTypeName?.includes('đón/trả')
@@ -89,9 +67,17 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     const d = new Date(date)
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
   }
-
-  // Ngày gửi – ưu tiên createdAt, sau đó fromDate
   const getSubmissionDate = () => requestData.createdAt || requestData.createdDate || requestData.submissionDate || requestData.fromDate
+
+  /* -------- validate & gửi -------- */
+  const validateAndSubmit = (action: 'approve' | 'reject') => {
+    if (!response.trim()) return
+    if (action === 'approve') {
+      onApprove(requestData.requestId, response)
+    } else {
+      onReject(requestData.requestId, response)
+    }
+  }
 
   /* -------------- Loading skeleton -------------- */
   if (isLoading) {
@@ -130,32 +116,29 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
               <InfoRow label='Học sinh' value={requestData.studentName || `Người dùng: ${requestData.sendByUserId?.substring(0, 8)}...`} />
               <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
               <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
+
               {isPickup && requestData.checkpointName && <InfoRow label='Điểm đón/trả mới' value={requestData.checkpointName} />}
+
               {currentRequestType === 'leave' && requestData.fromDate && requestData.toDate && (
                 <>
                   <InfoRow label='Từ ngày' value={formatDate(requestData.fromDate)} />
                   <InfoRow label='Đến ngày' value={formatDate(requestData.toDate)} />
                 </>
               )}
+
               <InfoRow label='Nội dung' value={requestData.reason} multiline />
               <InfoRow label='Trạng thái' value={<RequestStatusBadge status={requestData.status} />} />
+
               {requestData.reply && <InfoRow label='Phản hồi' value={requestData.reply} multiline />}
             </tbody>
           </table>
 
-          {/* Ô phản hồi (ẩn khi đã duyệt hoặc là đơn report) */}
-          {!isReport && isPending && (
-            <div className='mt-4'>
-              <div className='mb-1 flex justify-between'>
-                <span className='font-medium'>Phản hồi:</span>
-                <span className={`text-xs ${response.length > maxResponseLength * 0.9 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                  {response.length}/{maxResponseLength}
-                </span>
-              </div>
-              <Textarea placeholder='Nhập phản hồi...' value={response} onChange={handleResponseChange} className={`min-h-[100px] ${isResponseError ? 'border-red-500 focus-visible:ring-red-500' : ''}`} disabled={!isPending || processing} />
-              {isResponseError && <p className='mt-1 text-xs text-red-500'>Vui lòng nhập phản hồi trước khi phê duyệt hoặc từ chối</p>}
-            </div>
-          )}
+          {/* ----------- LimitedTextarea ----------- */}
+          <div className='my-6'>
+            <span className='text-sm font-medium text-muted-foreground'>Phản hồi</span>
+
+            {!isReport && isPending && <LimitedTextarea value={response} onChange={setResponse} maxLength={maxResponseLength} placeholder='Nhập phản hồi...' disabled={!isPending || processing} />}
+          </div>
         </div>
 
         {/* ---------- Action buttons ---------- */}
