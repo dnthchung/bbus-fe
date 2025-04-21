@@ -29,9 +29,9 @@ export default function UsersDetailsContent() {
   const [editedUser, setEditedUser] = useState<any | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,16 +72,62 @@ export default function UsersDetailsContent() {
     if (isEditing) {
       // Cancel editing
       setEditedUser(user)
+      setValidationErrors({})
     }
     setIsEditing(!isEditing)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+
+    // Update the edited user
     setEditedUser((prev: any) => ({
       ...prev,
       [name]: value,
     }))
+
+    // Clear validation error for this field if it exists
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }))
+    }
+  }
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+
+    // Trim spaces at the beginning and end
+    const trimmedValue = value.trim()
+
+    // Update with trimmed value
+    setEditedUser((prev: any) => ({
+      ...prev,
+      [name]: trimmedValue,
+    }))
+
+    // Validate required fields
+    if (name === 'name' && !trimmedValue) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        name: 'Họ và tên không được để trống',
+      }))
+    }
+
+    if (name === 'phone' && !trimmedValue) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        phone: 'Số điện thoại không được để trống',
+      }))
+    }
+
+    if (name === 'email' && !trimmedValue) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        email: 'Email không được để trống',
+      }))
+    }
   }
 
   const handleGenderChange = (value: string) => {
@@ -91,23 +137,46 @@ export default function UsersDetailsContent() {
     }))
   }
 
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {}
+
+    // Required fields validation
+    if (!editedUser.name?.trim()) {
+      errors.name = 'Họ và tên không được để trống'
+    }
+
+    if (!editedUser.phone?.trim()) {
+      errors.phone = 'Số điện thoại không được để trống'
+    }
+
+    if (!editedUser.email?.trim()) {
+      errors.email = 'Email không được để trống'
+    }
+
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleSaveChanges = async () => {
     try {
-      // Validate phone
-      if (!editedUser.phone) {
+      // Validate form before submitting
+      if (!validateForm()) {
         toast({
           title: 'Lỗi',
-          description: 'Số điện thoại không được để trống',
+          description: 'Vui lòng kiểm tra lại thông tin',
           variant: 'deny',
         })
         return
       }
 
-      // Prepare data for update, ensuring phone is never null
+      // Prepare data for update, ensuring fields are trimmed
       const userDataToUpdate = {
         ...user,
         ...editedUser,
-        phone: editedUser.phone || '', // Ensure phone is never null
+        name: editedUser.name?.trim() || '',
+        phone: editedUser.phone?.trim() || '',
+        email: editedUser.email?.trim() || '',
+        address: editedUser.address?.trim() || '',
         id: id,
       }
 
@@ -118,7 +187,6 @@ export default function UsersDetailsContent() {
       delete userDataToUpdate.updated_at
 
       console.log('Data to be sent:', userDataToUpdate)
-
       const response = await API_SERVICES.users.update(userDataToUpdate)
 
       // Check if response has data property and use it, otherwise use the edited user data
@@ -127,8 +195,9 @@ export default function UsersDetailsContent() {
       // Important: Update both state variables with the complete user data
       setUser({ ...user, ...updatedUserData })
       setEditedUser({ ...user, ...updatedUserData })
-
       setIsEditing(false)
+      setValidationErrors({})
+
       toast({
         title: 'Thành công',
         description: 'Thông tin tài khoản đã được cập nhật',
@@ -154,6 +223,7 @@ export default function UsersDetailsContent() {
       })
     }
   }
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -176,12 +246,10 @@ export default function UsersDetailsContent() {
 
     try {
       setUploadingAvatar(true)
-
       await API_SERVICES.users.update_avatar(id, selectedAvatar)
 
       // Lấy lại thông tin user để cập nhật avatar mới
       const updatedUser = await getUserById(id)
-
       setUser(updatedUser)
       setEditedUser(updatedUser)
 
@@ -303,6 +371,7 @@ export default function UsersDetailsContent() {
             Quay lại danh sách
           </Button>
         </div>
+
         {loading ? (
           <div className='flex h-64 items-center justify-center'>
             <p>Đang tải thông tin...</p>
@@ -341,7 +410,16 @@ export default function UsersDetailsContent() {
                   <tbody>
                     <tr className='border-b'>
                       <td className='w-1/3 bg-muted/50 px-4 py-3 font-medium'>Họ và tên</td>
-                      <td className='px-4 py-3'>{isEditing ? <Input name='name' value={editedUser.name || ''} onChange={handleInputChange} className='max-w-md' /> : user.name || 'Chưa cập nhật'}</td>
+                      <td className='px-4 py-3'>
+                        {isEditing ? (
+                          <div>
+                            <Input name='name' value={editedUser.name || ''} onChange={handleInputChange} onBlur={handleInputBlur} className={`max-w-md ${validationErrors.name ? 'border-destructive' : ''}`} />
+                            {validationErrors.name && <p className='mt-1 text-sm text-destructive'>{validationErrors.name}</p>}
+                          </div>
+                        ) : (
+                          user.name || 'Chưa cập nhật'
+                        )}
+                      </td>
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Ngày sinh</td>
@@ -349,7 +427,7 @@ export default function UsersDetailsContent() {
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</td>
-                      <td className='px-4 py-3'>{isEditing ? <Input name='address' value={editedUser.address || ''} onChange={handleInputChange} className='max-w-md' /> : user.address || 'Chưa cập nhật'}</td>
+                      <td className='px-4 py-3'>{isEditing ? <Input name='address' value={editedUser.address || ''} onChange={handleInputChange} onBlur={handleInputBlur} className='max-w-md' /> : user.address || 'Chưa cập nhật'}</td>
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Giới tính</td>
@@ -376,11 +454,29 @@ export default function UsersDetailsContent() {
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Email</td>
-                      <td className='px-4 py-3'>{isEditing ? <Input name='email' type='email' value={editedUser.email || ''} onChange={handleInputChange} className='max-w-md' /> : user.email || 'Chưa cập nhật'}</td>
+                      <td className='px-4 py-3'>
+                        {isEditing ? (
+                          <div>
+                            <Input name='email' type='email' value={editedUser.email || ''} onChange={handleInputChange} onBlur={handleInputBlur} className={`max-w-md ${validationErrors.email ? 'border-destructive' : ''}`} />
+                            {validationErrors.email && <p className='mt-1 text-sm text-destructive'>{validationErrors.email}</p>}
+                          </div>
+                        ) : (
+                          user.email || 'Chưa cập nhật'
+                        )}
+                      </td>
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Số điện thoại</td>
-                      <td className='px-4 py-3'>{isEditing ? <Input name='phone' value={editedUser.phone || ''} onChange={handleInputChange} className='max-w-md' /> : user.phone || 'Chưa cập nhật'}</td>
+                      <td className='px-4 py-3'>
+                        {isEditing ? (
+                          <div>
+                            <Input name='phone' value={editedUser.phone || ''} onChange={handleInputChange} onBlur={handleInputBlur} className={`max-w-md ${validationErrors.phone ? 'border-destructive' : ''}`} />
+                            {validationErrors.phone && <p className='mt-1 text-sm text-destructive'>{validationErrors.phone}</p>}
+                          </div>
+                        ) : (
+                          user.phone || 'Chưa cập nhật'
+                        )}
+                      </td>
                     </tr>
                     <tr>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Trạng thái</td>
@@ -427,24 +523,20 @@ export default function UsersDetailsContent() {
                     // Show placeholder
                     <div className='text-muted-foreground'>Avatar</div>
                   )}
-
                   {/* Overlay on hover */}
                   <div className='absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
                     <Upload className='h-6 w-6 text-white' />
                   </div>
                 </div>
-
                 <div className='w-full'>
                   {/* Hidden file input */}
                   <input ref={fileInputRef} type='file' id='avatar-upload' accept='image/*' className='hidden' onChange={handleAvatarChange} disabled={uploadingAvatar} />
-
                   {/* Visible button to trigger file selection */}
                   <div className='flex justify-center gap-2'>
                     <Button variant='outline' onClick={triggerFileInput} className='w-1/2' disabled={uploadingAvatar}>
                       Chọn ảnh
                     </Button>
                   </div>
-
                   {selectedAvatar && (
                     <div className='mt-4 flex justify-center gap-2'>
                       <Button size='sm' variant='outline' onClick={handleCancelAvatarUpload} disabled={uploadingAvatar}>
