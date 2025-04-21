@@ -1,5 +1,5 @@
 // fe/src/api/api-services.ts
-import { LoginCredentials } from '@/types'
+import type { LoginCredentials } from '@/types'
 import apiClient from '@/api/api-client'
 import { API_ENDPOINTS } from './api-endpoint'
 
@@ -120,6 +120,7 @@ export const API_SERVICES: ApiServices = {
   // 2) USERS
   // -------------------------
   users: {
+    update: (user: any) => apiClient.put(API_ENDPOINTS.USERS.UPDATE(), user),
     getAll: () => apiClient.get(API_ENDPOINTS.USERS.GET_ALL),
     getOne: (userId: string) => apiClient.get(API_ENDPOINTS.USERS.GET_ONE(userId)),
     list: () => apiClient.get(API_ENDPOINTS.USERS.LIST),
@@ -137,7 +138,6 @@ export const API_SERVICES: ApiServices = {
         },
       })
     },
-    update: (user: any) => apiClient.put(API_ENDPOINTS.USERS.UPDATE(), user),
     update_avatar: (userId: string, avatarFile: File) => {
       const formData = new FormData()
       formData.append('id', userId)

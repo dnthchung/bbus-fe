@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
+import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { Status } from '@/components/mine/status'
 import { getUserById } from '@/features/users/users'
 
 export default function UsersDetailsContent() {
@@ -91,14 +93,58 @@ export default function UsersDetailsContent() {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await API_SERVICES.users.update(editedUser)
-      setUser(response.data || editedUser)
+      // Validate phone
+      if (!editedUser.phone) {
+        toast({
+          title: 'Lỗi',
+          description: 'Số điện thoại không được để trống',
+          variant: 'deny',
+        })
+        return
+      }
+
+      // Prepare data for update, ensuring phone is never null
+      const userDataToUpdate = {
+        ...user,
+        ...editedUser,
+        phone: editedUser.phone || '', // Ensure phone is never null
+        id: id,
+      }
+
+      // Remove fields that should be handled by backend
+      delete userDataToUpdate.createdAt
+      delete userDataToUpdate.updatedAt
+      delete userDataToUpdate.created_at
+      delete userDataToUpdate.updated_at
+
+      console.log('Data to be sent:', userDataToUpdate)
+
+      const response = await API_SERVICES.users.update(userDataToUpdate)
+
+      // Check if response has data property and use it, otherwise use the edited user data
+      const updatedUserData = response?.data || editedUser
+
+      // Important: Update both state variables with the complete user data
+      setUser({ ...user, ...updatedUserData })
+      setEditedUser({ ...user, ...updatedUserData })
+
       setIsEditing(false)
       toast({
         title: 'Thành công',
         description: 'Thông tin tài khoản đã được cập nhật',
         variant: 'success',
       })
+
+      // Fetch fresh data from the server to ensure we have the latest
+      try {
+        const freshUserData = await getUserById(id)
+        if (freshUserData) {
+          setUser(freshUserData)
+          setEditedUser(freshUserData)
+        }
+      } catch (fetchErr) {
+        console.error('Error fetching updated user data:', fetchErr)
+      }
     } catch (err) {
       console.error('Error updating user:', err)
       toast({
@@ -108,7 +154,6 @@ export default function UsersDetailsContent() {
       })
     }
   }
-
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -245,6 +290,7 @@ export default function UsersDetailsContent() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className='flex items-center space-x-4'>
+            <Search />
             <ThemeSwitch />
             <ProfileDropdown />
           </div>
@@ -316,7 +362,7 @@ export default function UsersDetailsContent() {
                             <SelectContent>
                               <SelectItem value='MALE'>Nam</SelectItem>
                               <SelectItem value='FEMALE'>Nữ</SelectItem>
-                              <SelectItem value='OTHER'>Khác</SelectItem>
+                              {/* <SelectItem value='OTHER'>Khác</SelectItem> */}
                             </SelectContent>
                           </Select>
                         ) : user.gender === 'MALE' ? (
@@ -341,13 +387,15 @@ export default function UsersDetailsContent() {
                       <td className='px-4 py-3'>
                         {user.status === 'ACTIVE' ? (
                           <div className='flex items-center'>
-                            <div className='mr-2 h-2 w-2 rounded-full bg-green-500'></div>
-                            <span>Đang sử dụng</span>
+                            <Status color='green' showDot={true}>
+                              Đang hoạt động
+                            </Status>
                           </div>
                         ) : (
                           <div className='flex items-center'>
-                            <div className='mr-2 h-2 w-2 rounded-full bg-red-500'></div>
-                            <span>Không hoạt động</span>
+                            <Status color='red' showDot={true}>
+                              Đã vô hiệu hóa
+                            </Status>
                           </div>
                         )}
                       </td>
@@ -391,9 +439,11 @@ export default function UsersDetailsContent() {
                   <input ref={fileInputRef} type='file' id='avatar-upload' accept='image/*' className='hidden' onChange={handleAvatarChange} disabled={uploadingAvatar} />
 
                   {/* Visible button to trigger file selection */}
-                  <Button variant='outline' onClick={triggerFileInput} className='w-full' disabled={uploadingAvatar}>
-                    Chọn ảnh
-                  </Button>
+                  <div className='flex justify-center gap-2'>
+                    <Button variant='outline' onClick={triggerFileInput} className='w-1/2' disabled={uploadingAvatar}>
+                      Chọn ảnh
+                    </Button>
+                  </div>
 
                   {selectedAvatar && (
                     <div className='mt-4 flex justify-center gap-2'>
