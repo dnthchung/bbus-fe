@@ -2,6 +2,7 @@
 
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import { DialogDescription } from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -23,6 +24,8 @@ interface RequestDetailModalProps {
 export function RequestDetailModal({ request, requestType, onClose, onApprove, onReject, onMarkAsRead, onAutoProcess }: RequestDetailModalProps) {
   const { processing } = useRequests()
   const [response, setResponse] = useState('')
+  const [isResponseError, setIsResponseError] = useState(false)
+  const maxResponseLength = 3000
   const [requestDetails, setRequestDetails] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -38,11 +41,30 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
         setIsLoading(false)
       }
     }
+
     fetchRequestDetails()
   }, [request.requestId])
 
   const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setResponse(e.target.value)
+    const value = e.target.value
+    if (value.length <= maxResponseLength) {
+      setResponse(value)
+    }
+    setIsResponseError(value.trim() === '')
+  }
+
+  // Kiểm tra hợp lệ trước khi gửi
+  const validateAndSubmit = (action: 'approve' | 'reject') => {
+    if (!response.trim()) {
+      setIsResponseError(true)
+      return
+    }
+
+    if (action === 'approve') {
+      onApprove(requestData.requestId, response)
+    } else {
+      onReject(requestData.requestId, response)
+    }
   }
 
   const requestData = requestDetails || request
@@ -96,6 +118,9 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
       <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle className='text-xl'>Chi tiết đơn</DialogTitle>
+          <DialogDescription className='flex justify-between text-sm text-muted-foreground'>
+            <span className='mb-2'>{requestData.requestTypeName}</span>
+          </DialogDescription>
         </DialogHeader>
 
         {/* ---------- Bảng thông tin ---------- */}
@@ -103,31 +128,32 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
           <table className='w-full overflow-hidden rounded border border-gray-300 text-sm dark:border-gray-600'>
             <tbody>
               <InfoRow label='Học sinh' value={requestData.studentName || `Người dùng: ${requestData.sendByUserId?.substring(0, 8)}...`} />
-              {/* ---- SỬA HÀNG NÀY ---- */}
               <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
               <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
-
               {isPickup && requestData.checkpointName && <InfoRow label='Điểm đón/trả mới' value={requestData.checkpointName} />}
-
               {currentRequestType === 'leave' && requestData.fromDate && requestData.toDate && (
                 <>
                   <InfoRow label='Từ ngày' value={formatDate(requestData.fromDate)} />
                   <InfoRow label='Đến ngày' value={formatDate(requestData.toDate)} />
                 </>
               )}
-
               <InfoRow label='Nội dung' value={requestData.reason} multiline />
               <InfoRow label='Trạng thái' value={<RequestStatusBadge status={requestData.status} />} />
-
               {requestData.reply && <InfoRow label='Phản hồi' value={requestData.reply} multiline />}
             </tbody>
           </table>
 
           {/* Ô phản hồi (ẩn khi đã duyệt hoặc là đơn report) */}
-          {!isReport && (
+          {!isReport && isPending && (
             <div className='mt-4'>
-              <div className='mb-1 font-medium'>Phản hồi:</div>
-              <Textarea placeholder='Nhập phản hồi...' value={response} onChange={handleResponseChange} className='min-h-[100px]' disabled={!isPending || processing} />
+              <div className='mb-1 flex justify-between'>
+                <span className='font-medium'>Phản hồi:</span>
+                <span className={`text-xs ${response.length > maxResponseLength * 0.9 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                  {response.length}/{maxResponseLength}
+                </span>
+              </div>
+              <Textarea placeholder='Nhập phản hồi...' value={response} onChange={handleResponseChange} className={`min-h-[100px] ${isResponseError ? 'border-red-500 focus-visible:ring-red-500' : ''}`} disabled={!isPending || processing} />
+              {isResponseError && <p className='mt-1 text-xs text-red-500'>Vui lòng nhập phản hồi trước khi phê duyệt hoặc từ chối</p>}
             </div>
           )}
         </div>
@@ -149,10 +175,10 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
             </>
           ) : isPending ? (
             <>
-              <Button variant='destructive' onClick={() => onReject(requestData.requestId, response)} disabled={processing}>
+              <Button variant='destructive' onClick={() => validateAndSubmit('reject')} disabled={processing || response.trim() === ''}>
                 {processing ? 'Đang xử lý...' : 'Từ chối'}
               </Button>
-              <Button onClick={() => onApprove(requestData.requestId, response)} disabled={processing}>
+              <Button onClick={() => validateAndSubmit('approve')} disabled={processing || response.trim() === ''}>
                 {processing ? 'Đang xử lý...' : 'Phê duyệt'}
               </Button>
             </>

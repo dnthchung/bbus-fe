@@ -15,7 +15,7 @@ interface RequestTableProps {
 export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
   /* ---------------- State ---------------- */
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10) // mặc định 10 hàng
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   /* -------------- Pagination -------------- */
   const totalPages = Math.ceil(requests.length / itemsPerPage)
@@ -59,8 +59,16 @@ export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
             paginatedRequests.map((request, index) => (
               <TableRow key={request.requestId}>
                 <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                <TableCell>{request.sendByUserName || `Người dùng: ${request.sendByUserId.substring(0, 8)}...`}</TableCell>
-                <TableCell className='font-medium'>{request.studentName || ` HS của người dùng: ${request.sendByUserId.substring(0, 8)}...`}</TableCell>
+                <TableCell>{request.sendByName || `Người dùng: ${request.sendByUserId.substring(0, 8)}...`}</TableCell>
+                <TableCell className='font-medium'>
+                  {request.studentName || (
+                    <div className='flex items-center gap-2'>
+                      <Badge variant='soft' color='yellow'>
+                        Trống
+                      </Badge>
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell>{new Date(getSubmissionDate(request)).toLocaleDateString('vi-VN')}</TableCell>
                 <TableCell className='max-w-[300px] truncate'>{getSummary(request)}</TableCell>
                 <TableCell>
