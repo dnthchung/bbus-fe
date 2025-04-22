@@ -40,6 +40,9 @@ const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Họ và tên không được để trống' })
+    .regex(/^[\p{L} ]+$/u, {
+      message: 'Họ và tên chỉ được gồm chữ cái và khoảng trắng, không chứa ký tự đặc biệt',
+    })
     .refine((v) => !v.startsWith(' '), {
       message: 'Họ và tên không được bắt đầu bằng khoảng trắng',
     }),

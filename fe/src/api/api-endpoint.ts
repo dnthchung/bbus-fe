@@ -5,6 +5,10 @@ export const API_ENDPOINTS = {
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
     USER: (userId: string) => `/user/${userId}`,
+    SEND_OTP_TO_MAIL: '/auth/forgot-password/request',
+    VERIFY_OTP: '/auth/forgot-password/verify',
+    RESET_PASSWORD: '/auth/forgot-password/reset',
+    CHANGE_PASSWORD: '/auth/change-password',
   },
   USERS: {
     GET_ALL: '/user?size=10000',

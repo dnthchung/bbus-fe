@@ -3,11 +3,14 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
+import { API_SERVICES } from '@/api/api-services'
 import { cn } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
+//file url : fe/src/app/forgot-password/forgot-password-form.tsx
 type ForgotFormProps = HTMLAttributes<HTMLDivElement>
 
 // ✅ Dùng lại schema email
@@ -26,13 +29,26 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    console.log(data)
-    setTimeout(() => {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    try {
+      setIsLoading(true)
+      console.log(data)
+      const res = await API_SERVICES.auth.send_otp_to_mail(data.email)
+
+      setTimeout(() => {
+        setIsLoading(false)
+        navigate({ to: '/otp' })
+      }, 3000)
+    } catch (error) {
+      // setErrorMessage(err.response?.data?.message || 'Có lỗi xảy ra')
+      toast({
+        title: 'Có lỗi xảy ra',
+        description: 'Vui lòng thử lại sau',
+        variant: 'deny',
+      })
+    } finally {
       setIsLoading(false)
-      navigate({ to: '/otp' })
-    }, 3000)
+    }
   }
 
   return (
