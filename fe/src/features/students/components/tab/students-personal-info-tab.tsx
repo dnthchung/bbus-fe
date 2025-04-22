@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/mine/badge'
+import { AdvancedBusLoader } from '@/components/mine/loader/advanced-bus-loader'
 import { Status } from '@/components/mine/status'
-import { genderLabels, statusLabels } from '../../data/data'
-import type { Student } from '../../data/schema'
+import { genderLabels, statusLabels } from '@/features/students/data/data'
+import type { Student } from '@/features/students/data/schema'
 
 interface StudentsPersonalInfoTabProps {
   student: Student
@@ -31,6 +32,7 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
   const [avatarPreview, setAvatarPreview] = useState<string | null>(student.avatar || null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const gradeOptions = ['1', '2', '3', '4', '5']
   const classLetterOptions = ['A', 'B', 'C', 'D']
@@ -73,7 +75,10 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
 
   const handleSave = async () => {
     try {
+      setIsLoading(true)
       const updatedStudent = { ...student, ...formData }
+      // console.log('updatedStudent', updatedStudent)
+      // await API_SERVICES.students.update(updatedStudent)
       onStudentUpdate(updatedStudent)
       toast({
         title: 'Thành công',
@@ -85,8 +90,10 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật thông tin cá nhân',
-        variant: 'destructive',
+        variant: 'deny',
       })
+    } finally {
+      setIsLoading(false) // End loading regardless of success or failure
     }
   }
 
@@ -145,156 +152,160 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
   }
 
   return (
-    <div className='mt-5 grid grid-cols-1 gap-6 md:grid-cols-3'>
-      {/* LEFT: Thông tin cá nhân */}
-      <div className='space-y-1 md:col-span-2'>
-        <div className='mb-4 flex items-center justify-between'>
-          <h3 className='text-lg font-medium'>Thông tin cá nhân</h3>
-          {editing ? (
-            <div className='space-x-2'>
-              <Button variant='outline' size='sm' onClick={handleCancel}>
-                Hủy
+    <>
+      {isLoading && <AdvancedBusLoader size='full' variant='primary' animation='drive' text='Đang cập nhật thông tin...' />}
+      <div className='mt-5 grid grid-cols-1 gap-6 md:grid-cols-3'>
+        {/* LEFT: Thông tin cá nhân */}
+        <div className='space-y-1 md:col-span-2'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h3 className='text-lg font-medium'>Thông tin cá nhân</h3>
+            {editing ? (
+              <div className='space-x-2'>
+                <Button variant='outline' size='sm' onClick={handleCancel}>
+                  Hủy
+                </Button>
+                <Button size='sm' onClick={handleSave}>
+                  Lưu
+                </Button>
+              </div>
+            ) : (
+              <Button variant='outline' size='sm' onClick={() => setEditing(true)}>
+                Chỉnh sửa
               </Button>
-              <Button size='sm' onClick={handleSave}>
-                Lưu
-              </Button>
+            )}
+          </div>
+
+          <div className='overflow-hidden rounded-md border text-sm'>
+            {/* Họ và tên */}
+            <div className='flex border-b'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Họ và tên</div>
+              <div className='flex-1 px-4 py-3'>{editing ? <Input name='name' value={formData.name} onChange={handleChange} className='h-8' /> : student.name || <Badge color='yellow'>Trống</Badge>}</div>
             </div>
-          ) : (
-            <Button variant='outline' size='sm' onClick={() => setEditing(true)}>
-              Chỉnh sửa
-            </Button>
-          )}
-        </div>
 
-        <div className='overflow-hidden rounded-md border text-sm'>
-          {/* Họ và tên */}
-          <div className='flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Họ và tên</div>
-            <div className='flex-1 px-4 py-3'>{editing ? <Input name='name' value={formData.name} onChange={handleChange} className='h-8' /> : student.name || <Badge color='yellow'>Trống</Badge>}</div>
-          </div>
+            {/* Ngày sinh */}
+            <div className='flex border-b'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Ngày sinh</div>
+              <div className='flex-1 px-4 py-3'>{editing ? <Input type='date' name='dob' value={typeof formData.dob === 'string' ? formData.dob : formatDate(formData.dob)} onChange={handleChange} className='h-8' /> : formatDate(student.dob)}</div>
+            </div>
 
-          {/* Ngày sinh */}
-          <div className='flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Ngày sinh</div>
-            <div className='flex-1 px-4 py-3'>{editing ? <Input type='date' name='dob' value={typeof formData.dob === 'string' ? formData.dob : formatDate(formData.dob)} onChange={handleChange} className='h-8' /> : formatDate(student.dob)}</div>
-          </div>
+            {/* Lớp */}
+            <div className='student-row student-class flex border-b'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Lớp</div>
+              <div className='flex-1 px-4 py-3'>
+                {editing ? (
+                  <div className='flex gap-2'>
+                    <Select value={currentGrade} onValueChange={handleGradeChange}>
+                      <SelectTrigger className='h-8 w-20'>
+                        <SelectValue placeholder='Khối' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gradeOptions.map((grade) => (
+                          <SelectItem key={grade} value={grade}>
+                            {grade}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-          {/* Lớp */}
-          <div className='student-row student-class flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Lớp</div>
-            <div className='flex-1 px-4 py-3'>
-              {editing ? (
-                <div className='flex gap-2'>
-                  <Select value={currentGrade} onValueChange={handleGradeChange}>
-                    <SelectTrigger className='h-8 w-20'>
-                      <SelectValue placeholder='Khối' />
+                    <Select value={currentClassLetter} onValueChange={handleClassLetterChange}>
+                      <SelectTrigger className='h-8 w-20'>
+                        <SelectValue placeholder='Lớp' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classLetterOptions.map((letter) => (
+                          <SelectItem key={letter} value={letter}>
+                            {letter}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  student.className || <Badge color='yellow'>Trống</Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Mã học sinh */}
+            <div className='flex border-b'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Mã HS</div>
+              <div className='flex-1 px-4 py-3'>{editing ? <Input name='rollNumber' value={formData.rollNumber} onChange={handleChange} className='h-8' /> : student.rollNumber || <Badge color='yellow'>Trống</Badge>}</div>
+            </div>
+
+            {/* Địa chỉ */}
+            <div className='flex border-b'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</div>
+              <div className='flex-1 px-4 py-3'>{editing ? <Input name='address' value={formData.address} onChange={handleChange} className='h-8' /> : student.address || <Badge color='yellow'>Trống</Badge>}</div>
+            </div>
+
+            {/* Giới tính */}
+            <div className='flex border-b'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Giới tính</div>
+              <div className='flex-1 px-4 py-3'>
+                {editing ? (
+                  <Select value={formData.gender} onValueChange={handleGenderChange}>
+                    <SelectTrigger className='h-8 w-full'>
+                      <SelectValue placeholder='Chọn giới tính' />
                     </SelectTrigger>
                     <SelectContent>
-                      {gradeOptions.map((grade) => (
-                        <SelectItem key={grade} value={grade}>
-                          {grade}
+                      {Object.entries(genderLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                ) : (
+                  genderLabels[student.gender] || <Badge color='yellow'>Không rõ</Badge>
+                )}
+              </div>
+            </div>
 
-                  <Select value={currentClassLetter} onValueChange={handleClassLetterChange}>
-                    <SelectTrigger className='h-8 w-20'>
-                      <SelectValue placeholder='Lớp' />
+            {/* Trạng thái */}
+            <div className='flex'>
+              <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Trạng thái</div>
+              <div className='flex-1 px-4 py-3'>
+                {editing ? (
+                  <Select value={formData.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger className='h-8 w-full'>
+                      <SelectValue placeholder='Chọn trạng thái' />
                     </SelectTrigger>
                     <SelectContent>
-                      {classLetterOptions.map((letter) => (
-                        <SelectItem key={letter} value={letter}>
-                          {letter}
+                      {Object.entries(statusLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              ) : (
-                student.className || <Badge color='yellow'>Trống</Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Mã học sinh */}
-          <div className='flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Mã HS</div>
-            <div className='flex-1 px-4 py-3'>{editing ? <Input name='rollNumber' value={formData.rollNumber} onChange={handleChange} className='h-8' /> : student.rollNumber || <Badge color='yellow'>Trống</Badge>}</div>
-          </div>
-
-          {/* Địa chỉ */}
-          <div className='flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</div>
-            <div className='flex-1 px-4 py-3'>{editing ? <Input name='address' value={formData.address} onChange={handleChange} className='h-8' /> : student.address || <Badge color='yellow'>Trống</Badge>}</div>
-          </div>
-
-          {/* Giới tính */}
-          <div className='flex border-b'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Giới tính</div>
-            <div className='flex-1 px-4 py-3'>
-              {editing ? (
-                <Select value={formData.gender} onValueChange={handleGenderChange}>
-                  <SelectTrigger className='h-8 w-full'>
-                    <SelectValue placeholder='Chọn giới tính' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(genderLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                genderLabels[student.gender] || <Badge color='yellow'>Không rõ</Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Trạng thái */}
-          <div className='flex'>
-            <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Trạng thái</div>
-            <div className='flex-1 px-4 py-3'>
-              {editing ? (
-                <Select value={formData.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className='h-8 w-full'>
-                    <SelectValue placeholder='Chọn trạng thái' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(statusLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Status color={student.status === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[student.status]}</Status>
-              )}
+                ) : (
+                  <Status color={student.status === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[student.status]}</Status>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* RIGHT: Avatar upload */}
-      <div className='space-y-4'>
-        <h3 className='p-1 text-center text-base font-medium'>Ảnh đại diện</h3>
-        <div className='rounded-md border p-3 text-center'>
-          <img src={avatarPreview || '/placeholder-avatar.png'} alt='Avatar' className='mx-auto mb-3 h-28 w-28 rounded-full border object-cover' />
-          <Input type='file' accept='image/*' onChange={handleAvatarChange} />
-          {avatarFile && (
-            <div className='mt-3 flex justify-center gap-2'>
-              <Button size='sm' onClick={handleAvatarUpload} disabled={uploadingAvatar}>
-                {uploadingAvatar ? 'Đang tải...' : 'Xác nhận'}
-              </Button>
-              <Button size='sm' variant='outline' onClick={handleAvatarCancel}>
-                Hủy
-              </Button>
-            </div>
-          )}
+        {/* RIGHT: Avatar upload */}
+        <div className='space-y-4'>
+          <h3 className='p-1 text-center text-base font-medium'>Ảnh đại diện</h3>
+          <div className='rounded-md border p-3 text-center'>
+            <img src={avatarPreview || '/placeholder-avatar.png'} alt='Avatar' className='mx-auto mb-3 h-28 w-28 rounded-full border object-cover' />
+            <Input type='file' accept='image/*' onChange={handleAvatarChange} />
+            {avatarFile && (
+              <div className='mt-3 flex justify-center gap-2'>
+                <Button size='sm' onClick={handleAvatarUpload} disabled={uploadingAvatar}>
+                  {uploadingAvatar ? 'Đang tải...' : 'Xác nhận'}
+                </Button>
+                <Button size='sm' variant='outline' onClick={handleAvatarCancel}>
+                  Hủy
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
+export default StudentsPersonalInfoTab

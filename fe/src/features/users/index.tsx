@@ -1,6 +1,7 @@
 // fe/src/features/users/index.tsx
 import { useEffect, useState } from 'react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
@@ -72,9 +73,47 @@ function UsersContent() {
           <UsersPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-          {loading ? (
+          {/* {loading ? (
             <div className='flex h-64 items-center justify-center'>
               <p>Đang tải dữ liệu...</p>
+            </div>
+          ) : (
+            <UsersTable data={users} columns={columns} />
+          )} */}
+          {loading ? (
+            <div className='w-full'>
+              <div className='space-y-4'>
+                {/* Skeleton header */}
+                <div className='flex items-center justify-between'>
+                  <div className='h-8 w-48 animate-pulse rounded-md bg-muted'></div>
+                  <div className='h-8 w-32 animate-pulse rounded-md bg-muted'></div>
+                </div>
+
+                {/* Skeleton table */}
+                <div className='rounded-md border'>
+                  {/* Skeleton header row */}
+                  <div className='flex border-b bg-muted/50 px-4 py-3'>
+                    {Array(5)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div key={i} className='mx-2 h-4 flex-1 animate-pulse rounded-md bg-muted'></div>
+                      ))}
+                  </div>
+
+                  {/* Skeleton data rows */}
+                  {Array(5)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div key={i} className='flex items-center border-b px-4 py-4'>
+                        {Array(5)
+                          .fill(0)
+                          .map((_, j) => (
+                            <div key={j} className='mx-2 h-4 flex-1 animate-pulse rounded-md bg-muted'></div>
+                          ))}
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
           ) : (
             <UsersTable data={users} columns={columns} />

@@ -1,4 +1,3 @@
-
 # Hướng dẫn sử dụng thành phần Loader
 
 Tài liệu này hướng dẫn cách sử dụng hai thành phần `BusLoader` và `AdvancedBusLoader` trong dự án React.
@@ -31,8 +30,8 @@ yarn add lucide-react
 Import các component loader vào file của bạn:
 
 ```tsx
-import { BusLoader } from '@/components/mine/loader/bus-loader'
-import { AdvancedBusLoader } from '@/components/mine/loader/advanced-bus-loader'
+import { BusLoader } from "@/components/mine/loader/bus-loader";
+import { AdvancedBusLoader } from "@/components/mine/loader/advanced-bus-loader";
 ```
 
 ---
@@ -43,13 +42,13 @@ Một loader đơn giản với icon xe buýt nhảy lên và xuống, kèm tùy
 
 ### Props
 
-| Tên        | Kiểu                                                                                       | Mặc định     | Mô tả                                                  |
-| ---------- | ------------------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------ |
-| `size`     | `'sm'` \| `'md'` \| `'lg'` \| `'xl'` \| `'2xl'` \| `'full'`                              | `'md'`       | Kích thước tổng thể của loader.                        |
-| `variant`  | `'primary'` \| `'secondary'` \| `'default'`                                               | `'default'`  | Chủ đề màu sắc cho icon và văn bản.                    |
-| `showText` | `boolean`                                                                                  | `true`       | Hiển thị văn bản bên dưới icon hay không.               |
-| `text`     | `string`                                                                                   | `'Loading…'` | Văn bản tùy chỉnh khi `showText` là `true`.            |
-| `className`| `string`                                                                                   | —            | Các lớp CSS Tailwind bổ sung cho phần wrapper `<div>`. |
+| Tên         | Kiểu                                                        | Mặc định     | Mô tả                                                  |
+| ----------- | ----------------------------------------------------------- | ------------ | ------------------------------------------------------ |
+| `size`      | `'sm'` \| `'md'` \| `'lg'` \| `'xl'` \| `'2xl'` \| `'full'` | `'md'`       | Kích thước tổng thể của loader.                        |
+| `variant`   | `'primary'` \| `'secondary'` \| `'default'`                 | `'default'`  | Chủ đề màu sắc cho icon và văn bản.                    |
+| `showText`  | `boolean`                                                   | `true`       | Hiển thị văn bản bên dưới icon hay không.              |
+| `text`      | `string`                                                    | `'Loading…'` | Văn bản tùy chỉnh khi `showText` là `true`.            |
+| `className` | `string`                                                    | —            | Các lớp CSS Tailwind bổ sung cho phần wrapper `<div>`. |
 
 ### Ví dụ
 
@@ -57,35 +56,27 @@ Một loader đơn giản với icon xe buýt nhảy lên và xuống, kèm tùy
 <summary>Loader nhỏ dùng inline</summary>
 
 ```tsx
-<BusLoader
-  size="sm"
-  text="Đang tải dữ liệu..."
-/>
+<BusLoader size="sm" text="Đang tải dữ liệu..." />
 ```
+
 </details>
 
 <details>
 <summary>Loader trung bình cho bảng</summary>
 
 ```tsx
-<BusLoader
-  size="md"
-  variant="primary"
-  text="Đang tải bảng..."
-/>
+<BusLoader size="md" variant="primary" text="Đang tải bảng..." />
 ```
+
 </details>
 
 <details>
 <summary>Loader toàn màn hình</summary>
 
 ```tsx
-<BusLoader
-  size="full"
-  variant="secondary"
-  text="Vui lòng chờ…"
-/>
+<BusLoader size="full" variant="secondary" text="Vui lòng chờ…" />
 ```
+
 </details>
 
 ---
@@ -96,14 +87,14 @@ Phiên bản nâng cao với nhiều kiểu hoạt ảnh khác nhau và thêm �
 
 ### Props
 
-| Tên         | Kiểu                                                                                                  | Mặc định      | Mô tả                                                               |
-| ----------- | ----------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------- |
-| `size`      | `'sm'` \| `'md'` \| `'lg'` \| `'xl'` \| `'2xl'` \| `'full'`                                          | `'md'`        | Kích thước thành phần (icon, đường, và văn bản).                  |
-| `variant`   | `'primary'` \| `'secondary'` \| `'default'`                                                           | `'default'`   | Chủ đề màu cho icon, đường và văn bản.                             |
-| `animation` | `'bounce'` \| `'pulse'` \| `'spin'` \| `'drive'`                                                      | `'drive'`     | Kiểu hoạt ảnh cho icon (và đường khi `drive`).                     |
-| `showText`  | `boolean`                                                                                             | `true`        | Hiển thị văn bản bên dưới loader hay không.                         |
-| `text`      | `string`                                                                                              | `'Loading…'`  | Văn bản tùy chỉnh khi `showText` là `true`.                        |
-| `className` | `string`                                                                                              | —             | Các lớp CSS Tailwind bổ sung cho phần wrapper `<div>`.             |
+| Tên         | Kiểu                                                        | Mặc định     | Mô tả                                                  |
+| ----------- | ----------------------------------------------------------- | ------------ | ------------------------------------------------------ |
+| `size`      | `'sm'` \| `'md'` \| `'lg'` \| `'xl'` \| `'2xl'` \| `'full'` | `'md'`       | Kích thước thành phần (icon, đường, và văn bản).       |
+| `variant`   | `'primary'` \| `'secondary'` \| `'default'`                 | `'default'`  | Chủ đề màu cho icon, đường và văn bản.                 |
+| `animation` | `'bounce'` \| `'pulse'` \| `'spin'` \| `'drive'`            | `'drive'`    | Kiểu hoạt ảnh cho icon (và đường khi `drive`).         |
+| `showText`  | `boolean`                                                   | `true`       | Hiển thị văn bản bên dưới loader hay không.            |
+| `text`      | `string`                                                    | `'Loading…'` | Văn bản tùy chỉnh khi `showText` là `true`.            |
+| `className` | `string`                                                    | —            | Các lớp CSS Tailwind bổ sung cho phần wrapper `<div>`. |
 
 ### Kiểu hoạt ảnh
 
@@ -127,6 +118,7 @@ Phiên bản nâng cao với nhiều kiểu hoạt ảnh khác nhau và thêm �
   text="Đang lấy dữ liệu…"
 />
 ```
+
 </details>
 
 <details>
@@ -140,6 +132,7 @@ Phiên bản nâng cao với nhiều kiểu hoạt ảnh khác nhau và thêm �
   showText={false}
 />
 ```
+
 </details>
 
 ---
@@ -150,5 +143,6 @@ Phiên bản nâng cao với nhiều kiểu hoạt ảnh khác nhau và thêm �
 - Dùng `className` để điều chỉnh margin, vị trí hoặc z-index nếu cần.
 - Cả hai loader đều sử dụng icon từ [Lucide‑React](https://github.com/lucide-icons/lucide).
 
+```
 
 ```

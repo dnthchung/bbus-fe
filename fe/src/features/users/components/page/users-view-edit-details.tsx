@@ -373,8 +373,44 @@ export default function UsersDetailsContent() {
         </div>
 
         {loading ? (
-          <div className='flex h-64 items-center justify-center'>
-            <p>Đang tải thông tin...</p>
+          <div className='w-full'>
+            <div className='space-y-6'>
+              {/* Skeleton header */}
+              <div>
+                <div className='mb-2 h-8 w-3/4 animate-pulse rounded-md bg-muted'></div>
+                <div className='h-4 w-1/2 animate-pulse rounded-md bg-muted'></div>
+              </div>
+
+              {/* Skeleton user info card */}
+              <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
+                <div className='md:col-span-2'>
+                  <div className='overflow-hidden rounded-md border'>
+                    {/* Skeleton table rows */}
+                    {Array(7)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div key={i} className='flex border-b'>
+                          <div className='w-1/3 bg-muted/50 px-4 py-3'>
+                            <div className='h-5 w-24 animate-pulse rounded-md bg-muted'></div>
+                          </div>
+                          <div className='flex-1 px-4 py-3'>
+                            <div className='h-5 w-3/4 animate-pulse rounded-md bg-muted'></div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Skeleton avatar section */}
+                <div>
+                  <div className='my-6 h-6 w-32 animate-pulse rounded-md bg-muted'></div>
+                  <div className='flex flex-col items-center rounded-md border p-5'>
+                    <div className='mb-4 h-32 w-32 animate-pulse rounded-full bg-muted'></div>
+                    <div className='h-9 w-2/3 animate-pulse rounded-md bg-muted'></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : error ? (
           <div className='rounded-lg bg-destructive/10 p-4'>

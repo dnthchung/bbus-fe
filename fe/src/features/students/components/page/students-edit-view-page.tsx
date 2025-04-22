@@ -8,15 +8,16 @@ import { toast } from '@/hooks/use-toast'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import type { Student } from '../../data/schema'
-import { StudentsParentInfoTab } from '../tab/students-parent-info-tab'
-import { StudentsPersonalInfoTab } from '../tab/students-personal-info-tab'
-import { StudentsPickupInfoTab } from '../tab/students-pickup-info-tab'
+import { StudentsParentInfoTab } from '@/features/students/components/tab/students-parent-info-tab'
+import { StudentsPersonalInfoTab } from '@/features/students/components/tab/students-personal-info-tab'
+import { StudentsPickupInfoTab } from '@/features/students/components/tab/students-pickup-info-tab'
+import type { Student } from '@/features/students/data/schema'
 
 export default function StudentsDetailsContent() {
   const { id } = Route.useParams()
@@ -112,6 +113,62 @@ export default function StudentsDetailsContent() {
     return new Date(date).toLocaleDateString('vi-VN')
   }
 
+  const handlePersonalInfoUpdate = async (updatedStudent: Student) => {
+    try {
+      setLoading(true)
+
+      // Gọi API cập nhật thông tin cá nhân
+      await API_SERVICES.students.update(updatedStudent)
+
+      // Refetch lại thông tin học sinh (giống như cách xử lý trong handleStudentUpdate)
+      const response = await API_SERVICES.students.getOne(updatedStudent.id)
+      setStudent(response.data.data)
+
+      toast({
+        title: 'Cập nhật thành công',
+        description: 'Thông tin cá nhân đã được cập nhật.',
+        variant: 'success',
+      })
+    } catch (error) {
+      console.error('Error updating student:', error)
+      toast({
+        title: 'Cập nhật thất bại',
+        description: 'Đã xảy ra lỗi khi cập nhật thông tin cá nhân: ' + error,
+        variant: 'deny',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePickupInfoUpdate = async (updatedStudent: Student) => {
+    try {
+      setLoading(true)
+
+      // Gọi API cập nhật thông tin đưa đón
+      await API_SERVICES.students.update(updatedStudent)
+
+      // Refetch lại thông tin học sinh
+      const response = await API_SERVICES.students.getOne(updatedStudent.id)
+      setStudent(response.data.data)
+
+      toast({
+        title: 'Cập nhật thành công',
+        description: 'Thông tin đưa đón đã được cập nhật.',
+        variant: 'success',
+      })
+    } catch (error) {
+      console.error('Error updating student:', error)
+      toast({
+        title: 'Cập nhật thất bại',
+        description: 'Đã xảy ra lỗi khi cập nhật thông tin đưa đón: ' + error,
+        variant: 'deny',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <>
       <Header fixed>
@@ -152,8 +209,43 @@ export default function StudentsDetailsContent() {
         </div>
 
         {loading ? (
-          <div className='flex items-center justify-center py-10'>
-            <div className='h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+          <div className='space-y-6'>
+            {/* Skeleton for tabs */}
+            <div className='w-1/2'>
+              <Skeleton className='h-10 w-full rounded-md' />
+            </div>
+
+            {/* Skeleton for content */}
+            <Card>
+              <CardContent className='p-6'>
+                <div className='space-y-4'>
+                  <Skeleton className='h-8 w-1/3' />
+                  <div className='grid grid-cols-2 gap-6'>
+                    <div className='space-y-2'>
+                      <Skeleton className='h-5 w-1/3' />
+                      <Skeleton className='h-10 w-full' />
+                    </div>
+                    <div className='space-y-2'>
+                      <Skeleton className='h-5 w-1/3' />
+                      <Skeleton className='h-10 w-full' />
+                    </div>
+                    <div className='space-y-2'>
+                      <Skeleton className='h-5 w-1/3' />
+                      <Skeleton className='h-10 w-full' />
+                    </div>
+                    <div className='space-y-2'>
+                      <Skeleton className='h-5 w-1/3' />
+                      <Skeleton className='h-10 w-full' />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Skeleton for action button */}
+            <div className='border-t pt-4'>
+              <Skeleton className='h-10 w-32' />
+            </div>
           </div>
         ) : error ? (
           <Card>
@@ -183,7 +275,7 @@ export default function StudentsDetailsContent() {
               </TabsList>
 
               <TabsContent className='w-full' value='personal'>
-                <StudentsPersonalInfoTab student={student} onStudentUpdate={() => {}} formatDate={formatDate} />
+                <StudentsPersonalInfoTab student={student} onStudentUpdate={handlePersonalInfoUpdate} formatDate={formatDate} />
               </TabsContent>
 
               <TabsContent value='parent'>
@@ -191,7 +283,7 @@ export default function StudentsDetailsContent() {
               </TabsContent>
 
               <TabsContent className='w-1/2' value='pickup'>
-                <StudentsPickupInfoTab student={student} onStudentUpdate={() => {}} />
+                <StudentsPickupInfoTab student={student} onStudentUpdate={handlePickupInfoUpdate} />
               </TabsContent>
             </Tabs>
 

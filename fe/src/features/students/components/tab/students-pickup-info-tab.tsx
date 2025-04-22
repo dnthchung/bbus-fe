@@ -67,7 +67,7 @@ export function StudentsPickupInfoTab({ student, onStudentUpdate }: StudentsPick
             </Button>
           </div>
         ) : (
-          <Button variant='outline' size='sm' onClick={() => setEditing(true)}>
+          <Button variant='outline' size='sm' onClick={() => setEditing(true)} disabled>
             Chỉnh sửa
           </Button>
         )}
