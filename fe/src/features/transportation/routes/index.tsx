@@ -188,9 +188,9 @@ export default function TransportationRouteManagement() {
     } catch (error) {
       console.error('Error generating route:', error)
       toast({
-        title: 'Route Generation Failed',
-        description: 'Could not generate the route. Please try again.',
-        variant: 'destructive',
+        title: 'Lỗi ',
+        description: 'Không thể tạo tuyến đường. Vui lòng thử lại sau.',
+        variant: 'deny',
       })
     }
   }
@@ -382,7 +382,7 @@ export default function TransportationRouteManagement() {
         <div className='ml-auto flex items-center gap-4'>
           <Button onClick={saveChanges} disabled={isSaving} className='gap-2'>
             {isSaving ? <Loader2 className='h-4 w-4 animate-spin' /> : <Save className='h-4 w-4' />}
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
           </Button>
           <ThemeSwitch />
           <ProfileDropdown />

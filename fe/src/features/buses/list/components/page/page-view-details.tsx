@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
@@ -171,8 +172,46 @@ export default function PageViewDetails() {
         </div>
 
         {loading ? (
-          <div className='flex items-center justify-center py-10'>
-            <div className='h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
+          <div className='w-full'>
+            <div className='space-y-6'>
+              {/* Back button skeleton */}
+              <div className='mb-6'>
+                <Skeleton className='h-9 w-36' />
+              </div>
+
+              {/* Title skeleton */}
+              <div className='mb-6'>
+                <Skeleton className='mb-2 h-8 w-64' />
+                <Skeleton className='h-5 w-96' />
+              </div>
+
+              {/* Tabs skeleton */}
+              <div className='mb-6'>
+                <Skeleton className='mb-4 h-10 w-1/2' />
+
+                {/* Tab content skeleton */}
+                <Card>
+                  <CardContent className='p-6'>
+                    <div className='space-y-4'>
+                      {/* Form fields skeleton */}
+                      {Array(6)
+                        .fill(0)
+                        .map((_, i) => (
+                          <div key={i} className='grid grid-cols-2 gap-4'>
+                            <Skeleton className='h-5 w-32' />
+                            <Skeleton className='h-10 w-full' />
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Action button skeleton */}
+              <div className='border-t pt-4'>
+                <Skeleton className='h-10 w-32' />
+              </div>
+            </div>
           </div>
         ) : error ? (
           <Card>

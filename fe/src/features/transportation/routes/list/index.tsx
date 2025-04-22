@@ -9,17 +9,19 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { Status } from '@/components/mine/status'
 import { getListCheckpointByRouteId, getNumberOfStudentInEachCheckpoint } from '@/features/transportation/function'
+import RoutesProvider, { useRoutes } from '@/features/transportation/routes/context/routes-context'
 import RouteMap from '../components/map/route-map'
 import { RoutesPrimaryButtons } from '../components/routes-primary-buttons'
 import { columns } from '../components/table/routes-columns'
 import { RoutesTable } from '../components/table/routes-table'
-import RoutesProvider, { useRoutes } from '../context/routes-context'
 
 interface Checkpoint {
   id: string
@@ -216,17 +218,46 @@ function RoutesContent() {
                             <TableHead>Tên điểm dừng</TableHead>
                             <TableHead>Mô tả</TableHead>
                             <TableHead>Trạng thái</TableHead>
-                            <TableHead className='text-right'>Số học sinh</TableHead>
+                            <TableHead className='text-right'>Số HS</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {checkpoints.map((checkpoint, index) => (
                             <TableRow key={checkpoint.id}>
                               <TableCell>{index + 1}</TableCell>
-                              <TableCell className='font-medium'>{checkpoint.name}</TableCell>
-                              <TableCell>{checkpoint.description}</TableCell>
+                              <TableCell className='max-w-[160px] align-top'>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className='cursor-default whitespace-normal break-words'>{checkpoint.name || '—'}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{checkpoint.name}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+
                               <TableCell>
-                                <Badge variant={checkpoint.status === 'ACTIVE' ? 'default' : 'secondary'}>{checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}</Badge>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className='max-w-[150px] cursor-default truncate'>{checkpoint.description || '—'}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{checkpoint.description}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+
+                              <TableCell>
+                                {/* <Badge variant={checkpoint.status === 'ACTIVE' ? 'default' : 'secondary'}>{checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}</Badge> */}
+                                <TableCell>
+                                  <Status color={checkpoint.status === 'ACTIVE' ? 'green' : 'red'} showDot={true}>
+                                    {checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                                  </Status>
+                                </TableCell>
                               </TableCell>
                               <TableCell className='text-right'>
                                 <Badge variant='outline'>{checkpoint.studentCount || 0}</Badge>

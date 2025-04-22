@@ -1,24 +1,25 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { MapPin } from 'lucide-react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
 import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { CheckpointMap } from '@/features/transportation/checkpoints/components/checkpoint-map'
 import { CheckpointsDialogs } from '@/features/transportation/checkpoints/components/checkpoints-dialogs'
+import { CheckpointsPrimaryButtons } from '@/features/transportation/checkpoints/components/checkpoints-primary-buttons'
+import { CheckpointsTable } from '@/features/transportation/checkpoints/components/checkpoints-table'
+import CreateCheckpointPage from '@/features/transportation/checkpoints/components/page/create-checkpoint-page'
+import { columns } from '@/features/transportation/checkpoints/components/table/checkpoints-columns'
 import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
-import { CheckpointMap } from './components/checkpoint-map'
-import { CheckpointsPrimaryButtons } from './components/checkpoints-primary-buttons'
-import { CheckpointsTable } from './components/checkpoints-table'
-import CreateCheckpointPage from './components/page/create-checkpoint-page'
-import { columns } from './components/table/checkpoints-columns'
-import CheckpointsProvider from './context/checkpoints-context'
-import type { Checkpoint } from './data/schema'
+import CheckpointsProvider from '@/features/transportation/checkpoints/context/checkpoints-context'
+import type { Checkpoint } from '@/features/transportation/checkpoints/data/schema'
 
 // Separate content component that uses the context
 function CheckpointsContent() {
@@ -95,7 +96,40 @@ function CheckpointsContent() {
             </div>
 
             {loading ? (
-              <div className='flex justify-center p-8'>Đang tải...</div>
+              <div className='w-full'>
+                <div className='space-y-4'>
+                  {/* Skeleton header */}
+                  <div className='flex items-center justify-between'>
+                    <div className='h-8 w-48 animate-pulse rounded-md bg-muted'></div>
+                    <div className='h-8 w-32 animate-pulse rounded-md bg-muted'></div>
+                  </div>
+
+                  {/* Skeleton table */}
+                  <div className='rounded-md border'>
+                    {/* Skeleton header row */}
+                    <div className='flex border-b bg-muted/50 px-4 py-3'>
+                      {Array(5)
+                        .fill(0)
+                        .map((_, i) => (
+                          <div key={i} className='mx-2 h-4 flex-1 animate-pulse rounded-md bg-muted'></div>
+                        ))}
+                    </div>
+
+                    {/* Skeleton data rows */}
+                    {Array(5)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div key={i} className='flex items-center border-b px-4 py-4'>
+                          {Array(5)
+                            .fill(0)
+                            .map((_, j) => (
+                              <div key={j} className='mx-2 h-4 flex-1 animate-pulse rounded-md bg-muted'></div>
+                            ))}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
             ) : viewMode === 'table' ? (
               <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
                 <CheckpointsTable data={checkpointList} columns={columns} />

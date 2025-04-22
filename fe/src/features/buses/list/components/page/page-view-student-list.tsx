@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { ThemeSwitch } from '@/components/common/theme-switch'
@@ -105,9 +106,54 @@ export default function PageViewStudentListDetails() {
         </div>
 
         {loading ? (
-          <div className='flex items-center justify-center py-10'>
-            <Loader2 className='h-10 w-10 animate-spin text-primary' />
-          </div>
+          <Card>
+            <CardContent className='p-0'>
+              <div className='overflow-x-auto'>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Mã số</TableHead>
+                      <TableHead>Tên</TableHead>
+                      <TableHead>Giới tính</TableHead>
+                      <TableHead>Địa chỉ</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead>Tên phụ huynh</TableHead>
+                      <TableHead>Điểm đón</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array(5)
+                      .fill(0)
+                      .map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell>
+                            <Skeleton className='h-4 w-16' />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className='h-4 w-32' />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className='h-4 w-16' />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className='h-4 w-40' />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className='h-4 w-20' />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className='h-4 w-32' />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className='h-4 w-24' />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         ) : error ? (
           <Card>
             <CardContent className='py-10 text-center'>

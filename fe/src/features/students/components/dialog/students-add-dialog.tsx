@@ -7,7 +7,7 @@ import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addressSimple, type Province, type District, type Ward } from '@/helpers/addressSimple'
-import { CalendarIcon, Search, UserPlus, Check, Upload, X } from 'lucide-react'
+import { Search, UserPlus, Check, Upload, X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { API_SERVICES } from '@/api/api-services'
 import { cn } from '@/lib/utils'
@@ -15,11 +15,9 @@ import { toast } from '@/hooks/use-toast'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -126,7 +124,6 @@ interface Props {
 
 export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const [parentUsers, setParentUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState<'form' | 'parents'>('form')
@@ -500,17 +497,7 @@ function StudentFormFields({ control, formState, selectedParent, onSelectParentC
             <FormItem>
               <FormLabel>Ngày sinh</FormLabel>
               <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant='outline' className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                      {field.value ? format(field.value, 'dd/MM/yyyy') : 'Chọn ngày'}
-                      <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0' align='start'>
-                    <Calendar mode='single' selected={field.value} onSelect={field.onChange} disabled={(d: Date) => d > new Date() || d < new Date('1900-01-01')} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <Input type='date' max={new Date().toISOString().split('T')[0]} {...field} value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => field.onChange(new Date(e.target.value))} />
               </FormControl>
               <FormMessage />
             </FormItem>
