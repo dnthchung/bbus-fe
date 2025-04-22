@@ -38,6 +38,7 @@ export function StudentsTable({ columns, data }: DataTableProps) {
       columnVisibility: {
         // Ẩn cột createdAt mặc định
         createdAt: false,
+        updatedAt: false,
         ...columnVisibility,
       },
     },
