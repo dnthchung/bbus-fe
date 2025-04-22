@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addressSimple, type Province, type District, type Ward } from '@/helpers/addressSimple'
+import { address, type Province, type District, type Ward } from '@/helpers/address'
 import { Search, UserPlus, Check, Upload, X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { API_SERVICES } from '@/api/api-services'
@@ -46,9 +46,28 @@ const formSchema = z.object({
     .refine((v) => !v.startsWith(' '), {
       message: 'Họ và tên không được bắt đầu bằng khoảng trắng',
     }),
-  dob: z.coerce.date({
-    required_error: 'Vui lòng chọn ngày sinh hợp lệ',
-  }),
+  dob: z.preprocess(
+    (val) => {
+      if (!val || val === '') return undefined
+      if (val instanceof Date) return val
+      const date = new Date(val as string)
+      return isNaN(date.getTime()) ? undefined : date
+    },
+    z
+      .date({
+        required_error: 'Ngày sinh không được để trống',
+        invalid_type_error: 'Ngày sinh không hợp lệ',
+      })
+      .min(new Date(2000, 0, 1), {
+        message: 'Ngày sinh phải từ 01/01/2000 trở đi',
+      })
+      .max(new Date(2024, 11, 31), {
+        message: 'Ngày sinh phải trước 01/01/2025',
+      })
+      .refine((val) => val !== undefined, {
+        message: 'Ngày sinh không được để trống',
+      })
+  ),
   province: z.string().min(1, { message: 'Vui lòng chọn tỉnh/thành phố' }),
   district: z.string().min(1, { message: 'Vui lòng chọn quận/huyện' }),
   ward: z.string().min(1, { message: 'Vui lòng chọn phường/xã' }),
@@ -204,7 +223,7 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
   /* ----- address effects ----- */
   useEffect(() => {
     if (!provinceValue) return
-    const province = addressSimple.find((p) => p.Id === provinceValue)
+    const province = address.find((p) => p.Id === provinceValue)
     setSelectedProvince(province ?? null)
     setDistricts(province?.Districts ?? [])
     setValue('district', '')
@@ -222,7 +241,7 @@ export function StudentsAddDialog({ open, onOpenChange, onSuccess }: Props) {
 
   useEffect(() => {
     if (provinceValue && districtValue && wardValue && specificAddressValue) {
-      const provinceName = addressSimple.find((p) => p.Id === provinceValue)?.Name || ''
+      const provinceName = address.find((p) => p.Id === provinceValue)?.Name || ''
       const districtName = districts.find((d) => d.Id === districtValue)?.Name || ''
       const wardName = wards.find((w) => w.Id === wardValue)?.Name || ''
       const full = `${specificAddressValue}, ${wardName}, ${districtName}, ${provinceName}`
@@ -500,7 +519,21 @@ function StudentFormFields({ control, formState, selectedParent, onSelectParentC
             <FormItem>
               <FormLabel>Ngày sinh</FormLabel>
               <FormControl>
-                <Input type='date' max={new Date().toISOString().split('T')[0]} {...field} value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => field.onChange(new Date(e.target.value))} />
+                <Input
+                  type='date'
+                  max={new Date().toISOString().split('T')[0]}
+                  {...field}
+                  value={field.value && !isNaN(new Date(field.value).getTime()) ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const date = new Date(e.target.value)
+                      field.onChange(date)
+                    } else {
+                      field.onChange(undefined) // Set to undefined for proper Zod validation
+                    }
+                  }}
+                  onBlur={field.onBlur}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -573,7 +606,7 @@ function StudentFormFields({ control, formState, selectedParent, onSelectParentC
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {addressSimple.map((p) => (
+                  {address.map((p) => (
                     <SelectItem key={p.Id} value={p.Id || ''}>
                       {p.Name}
                     </SelectItem>
