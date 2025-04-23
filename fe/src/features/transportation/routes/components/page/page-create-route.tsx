@@ -212,7 +212,7 @@ export default function PageCreateRoute() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href='/transportation/routes'>Danh sách tuyến đường</BreadcrumbLink>
+                <BreadcrumbLink href='/transportation/routes/list'>Danh sách tuyến đường</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
