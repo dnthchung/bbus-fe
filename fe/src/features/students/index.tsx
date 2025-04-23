@@ -25,7 +25,7 @@ function StudentsContent() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <span className='text-muted-foreground'>Học sinh</span>
+                <span className='text-muted-foreground'>Quản lý học sinh</span>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
