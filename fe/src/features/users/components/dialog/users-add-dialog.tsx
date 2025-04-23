@@ -554,7 +554,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                           {currentUserRole === 'ADMIN' && (
                             <>
                               <SelectItem value='PARENT'>Phụ huynh</SelectItem>
-                              <SelectItem value='TEACHER'>Giáo viên</SelectItem>
                               <SelectItem value='DRIVER'>Tài xế xe buýt</SelectItem>
                               <SelectItem value='ASSISTANT'>Phụ tá tài xế</SelectItem>
                             </>

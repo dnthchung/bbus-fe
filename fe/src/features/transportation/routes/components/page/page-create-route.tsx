@@ -152,8 +152,8 @@ export default function PageCreateRoute() {
     try {
       await createRoute(payload)
       toast({
-        title: 'Route Created',
-        description: 'The bus route has been created successfully',
+        title: 'Thành công ',
+        description: 'Tạo tuyến đường thành công',
         variant: 'success',
       })
       form.reset()
@@ -178,8 +178,8 @@ export default function PageCreateRoute() {
           setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
         } catch (error) {
           toast({
-            title: 'Error',
-            description: 'Failed to refresh checkpoints. Please reload the page.',
+            title: 'Thất bại',
+            description: 'Xảy ra lỗi khi tải lại danh sách điểm dừng',
             variant: 'deny',
           })
         } finally {
@@ -190,8 +190,8 @@ export default function PageCreateRoute() {
       loadCheckpoints()
     } catch (error) {
       toast({
-        title: 'Create Failed',
-        description: 'Something went wrong while creating the route',
+        title: 'Thât bại',
+        description: 'Tạo tuyến đường thất bại',
         variant: 'destructive',
       })
     }

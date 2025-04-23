@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { PinInput, PinInputField } from '@/components/common/pin-input'
 
+//ủl file : fe/src/app/forgot-password/otp-form.tsx
 type OtpFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z.object({

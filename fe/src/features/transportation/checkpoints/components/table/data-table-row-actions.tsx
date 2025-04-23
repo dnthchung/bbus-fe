@@ -38,10 +38,10 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             </DropdownMenuShortcut>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+          {/* <DropdownMenuSeparator /> */}
 
           {/* Xóa */}
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onClick={() => {
               setCurrentRow(row.original)
               setOpen('delete')
@@ -52,7 +52,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             <DropdownMenuShortcut>
               <IconTrash size={16} />
             </DropdownMenuShortcut>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
