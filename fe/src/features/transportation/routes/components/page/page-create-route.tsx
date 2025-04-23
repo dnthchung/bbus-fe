@@ -44,7 +44,7 @@ interface RouteFormValues {
 }
 
 const routeFormSchema = z.object({
-  description: z.string().min(3, 'Description must be at least 3 characters').max(3000, 'Description cannot exceed 3000 characters'),
+  description: z.string().min(3, 'Mô tả phải có ít nhất 3 ký tự.').max(3000, 'Mô tả không được vượt quá 3000 ký tự'),
 })
 
 export default function PageCreateRoute() {
@@ -81,8 +81,8 @@ export default function PageCreateRoute() {
         setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
       } catch (error) {
         toast({
-          title: 'Error',
-          description: 'Failed to load checkpoints. Please try again.',
+          title: 'Thất bại',
+          description: 'Không thể tải danh sách điểm dừng. Vui lòng thử lại.',
           variant: 'deny',
         })
       } finally {
@@ -136,8 +136,8 @@ export default function PageCreateRoute() {
   const onSubmit = async (values: RouteFormValues) => {
     if (selectedCheckpoints.length < 2) {
       toast({
-        title: 'Validation Error',
-        description: 'Please select at least 2 checkpoints for the route',
+        title: 'Lỗi xác thực',
+        description: 'Vui lòng chọn ít nhất 2 điểm dừng cho tuyến đường',
         variant: 'deny',
       })
       return
