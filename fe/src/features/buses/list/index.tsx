@@ -49,7 +49,7 @@ export default function BusList() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Danh sách</BreadcrumbPage>
+                <BreadcrumbPage>Danh sách xe bus</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

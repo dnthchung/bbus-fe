@@ -138,7 +138,7 @@ export default function PageViewDetails() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href='/buses/list'>Danh sách</BreadcrumbLink>
+                <BreadcrumbLink href='/buses/list'>Danh sách xe bus</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
