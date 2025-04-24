@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/transportation/routes/list/index.tsx:
 import { useState } from 'react'
 import { Loader2, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -186,7 +187,7 @@ function RoutesContent() {
                     <span>Đang tải...</span>
                   </div>
                 ) : (
-                  <RoutesTable data={routes} columns={columns} onRowClick={handleRouteSelect} />
+                  <RoutesTable data={routes} columns={columns as any} onRowClick={handleRouteSelect} />
                 )}
               </TabsContent>
 

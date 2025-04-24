@@ -34,6 +34,11 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
       setIsLoading(true)
       console.log(data)
       const res = await API_SERVICES.auth.send_otp_to_mail(data.email)
+      toast({
+        title: 'Gửi thành công',
+        description: 'Vui lòng kiểm tra email của bạn',
+        variant: 'success',
+      })
 
       setTimeout(() => {
         setIsLoading(false)
@@ -42,8 +47,8 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
     } catch (error) {
       // setErrorMessage(err.response?.data?.message || 'Có lỗi xảy ra')
       toast({
-        title: 'Có lỗi xảy ra',
-        description: 'Vui lòng thử lại sau',
+        title: 'Có lỗi xảy ra : ' + error,
+        description: 'Vui lòng thử lại.',
         variant: 'deny',
       })
     } finally {

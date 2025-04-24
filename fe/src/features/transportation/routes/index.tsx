@@ -358,7 +358,7 @@ export default function TransportationRouteManagement() {
       toast({
         title: 'Save Failed',
         description: 'Could not save changes. Please try again.',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setIsSaving(false)

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { type ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { type ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
+// Sửa lại định nghĩa kiểu dữ liệu cho component
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -13,12 +14,18 @@ interface DataTableProps<TData, TValue> {
 
 export function RoutesTable<TData, TValue>({ columns, data, onRowClick }: DataTableProps<TData, TValue>) {
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
+  const [sorting, setSorting] = useState<SortingState>([])
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
   })
 
   const handleRowClick = (row: any) => {
@@ -36,7 +43,15 @@ export function RoutesTable<TData, TValue>({ columns, data, onRowClick }: DataTa
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <div className={header.column.getCanSort() ? 'cursor-pointer select-none' : ''} onClick={header.column.getToggleSortingHandler()}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </div>
+                      )}
+                    </TableHead>
+                  )
                 })}
               </TableRow>
             ))}
