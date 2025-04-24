@@ -1,10 +1,10 @@
 /**
  * Utility functions for form validation
  */
-//path : fe/src/features/students/data/validations.ts
+//path : fe/src/helpers/validations.ts
 // Trims spaces from the beginning and end of a string
-export const trimValue = (value: string): string => {
-  return value.trim()
+export function trimValue(value: string): string {
+  return value.trim() // Chỉ xóa khoảng trắng đầu cuối
 }
 
 // Validates a phone number (must be 10 digits and start with 0)

@@ -1,16 +1,20 @@
-//path :fe/src/features/auth/change-password/components/change-password-form.tsx
+'use client'
+
 import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { API_SERVICES } from '@/api/api-services'
 import { cn } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { PasswordInput } from '@/components/common/password-input'
 
-// Validation schema for the change password form
+type ChangePasswordFormProps = HTMLAttributes<HTMLDivElement>
+
+// ✅ Schema kiểm tra mật khẩu
 const passwordSchema = z
   .object({
     password: z.string().min(8, { message: 'Mật khẩu phải có ít nhất 8 ký tự' }).regex(/[A-Z]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa' }).regex(/[a-z]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ thường' }).regex(/[0-9]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ số' }),
@@ -21,10 +25,10 @@ const passwordSchema = z
     path: ['confirmPassword'],
   })
 
-type ChangePasswordFormProps = HTMLAttributes<HTMLDivElement>
-
 function ChangePasswordForm({ className, ...props }: ChangePasswordFormProps) {
   const navigate = useNavigate()
+  const { sessionId } = useSearch({ from: '/(auth)/otp' }) as { sessionId: string }
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
@@ -36,16 +40,37 @@ function ChangePasswordForm({ className, ...props }: ChangePasswordFormProps) {
     },
   })
 
-  function onSubmit(data: z.infer<typeof passwordSchema>) {
-    setIsLoading(true)
-    console.log(data)
+  async function onSubmit(data: z.infer<typeof passwordSchema>) {
+    try {
+      setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+      const res = await API_SERVICES.auth.reset_password({
+        sessionId,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      })
+
+      toast({
+        title: 'Thành công',
+        description: res?.data?.message || 'Đổi mật khẩu thành công',
+        variant: 'success',
+      })
+      navigate({
+        to: '/sign-in',
+      })
+
       setIsSuccess(true)
-      navigate({ to: '/sign-in' })
-    }, 2000)
+    } catch (error: any) {
+      const message = error?.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
+
+      toast({
+        title: 'Thất bại',
+        description: message,
+        variant: 'deny',
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isSuccess) {
@@ -72,7 +97,7 @@ function ChangePasswordForm({ className, ...props }: ChangePasswordFormProps) {
                 <FormItem className='space-y-1'>
                   <FormLabel>Mật khẩu mới</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder='Nhập mật khẩu mới' {...field} aria-label='password' autoComplete='current-password' />
+                    <PasswordInput placeholder='Nhập mật khẩu mới' {...field} autoComplete='new-password' aria-label='password' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,8 +110,7 @@ function ChangePasswordForm({ className, ...props }: ChangePasswordFormProps) {
                 <FormItem className='space-y-1'>
                   <FormLabel>Xác nhận mật khẩu</FormLabel>
                   <FormControl>
-                    {/* <Input  {...field} /> */}
-                    <PasswordInput placeholder='Nhập lại mật khẩu mới' {...field} aria-label='re-password' autoComplete='current-password' />
+                    <PasswordInput placeholder='Nhập lại mật khẩu mới' {...field} autoComplete='new-password' aria-label='confirm-password' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,9 +1,10 @@
+'use client'
+
 import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from '@tanstack/react-router'
-import { useSearch } from '@tanstack/react-router'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { API_SERVICES } from '@/api/api-services'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
@@ -13,7 +14,6 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { PinInput, PinInputField } from '@/components/common/pin-input'
 
-//ủl file : fe/src/app/forgot-password/otp-form.tsx
 type OtpFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z.object({
@@ -23,37 +23,47 @@ const formSchema = z.object({
 export function OtpForm({ className, ...props }: OtpFormProps) {
   const navigate = useNavigate()
   const { email } = useSearch({ from: '/(auth)/otp' }) as { email: string }
+
   const [isLoading, setIsLoading] = useState(false)
   const [disabledBtn, setDisabledBtn] = useState(true)
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      otp: '',
-    },
+    defaultValues: { otp: '' },
   })
-  //check otp , nhập otp và gửi để verify otp
-  //input : otp string + email string
-  //ủl : /auth/forgot-password/verify?email=tuanvmhe173334@fpt.edu.vn&otp=573595
-  // false : { "timestamp": "2025-04-22T15:11:03.557+00:00", "status": 409, "path": "/auth/forgot-password/verify", "error": "Conflict", "message": "Mã OTP không đúng", "details": {} }
-  //true : { "status": 200, "sessionId": "404ddaae-647c-4f11-acfd-6c837dee5b10", "message": "Xác thực OTP thành công" }
-  // verify_otp: (otp: string, email: string)
+
+  const handleComplete = () => {
+    if (disabledBtn) setDisabledBtn(false)
+  }
+
+  const handleIncomplete = () => {
+    if (!disabledBtn) setDisabledBtn(true)
+  }
+
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+    try {
+      setIsLoading(true)
+      const res = await API_SERVICES.auth.verify_otp(data.otp, email)
 
-    //TODO: Gửi otp đến mail
+      toast({
+        title: 'Thành công',
+        description: res.data.message || 'Xác thực OTP thành công',
+        variant: 'success',
+      })
 
-    toast({
-      title: 'Bạn đã gửi các giá trị sau:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
-    setTimeout(() => {
+      setTimeout(() => {
+        navigate({ to: '/change-password', search: { sessionId: res.data.sessionId } })
+      }, 1000)
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
+      toast({
+        title: 'Thất bại',
+        description: errorMessage,
+        variant: 'deny',
+      })
+    } finally {
       setIsLoading(false)
-      navigate({ to: '/change-password' })
-    }, 1000)
+    }
   }
 
   return (
@@ -67,7 +77,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
               render={({ field }) => (
                 <FormItem className='space-y-1'>
                   <FormControl>
-                    <PinInput {...field} className='flex h-10 justify-between' onComplete={() => setDisabledBtn(false)} onIncomplete={() => setDisabledBtn(true)}>
+                    <PinInput {...field} className='flex h-10 justify-between' onComplete={handleComplete} onIncomplete={handleIncomplete}>
                       {Array.from({ length: 7 }, (_, i) => {
                         if (i === 3) return <Separator key={i} orientation='vertical' />
                         return <PinInputField key={i} component={Input} className={`${form.getFieldState('otp').invalid ? 'border-red-500' : ''}`} />
@@ -79,7 +89,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
               )}
             />
             <Button className='mt-2' disabled={disabledBtn || isLoading}>
-              Xác thực
+              {isLoading ? 'Đang xử lý...' : 'Xác thực'}
             </Button>
           </div>
         </form>

@@ -14,7 +14,7 @@ interface ApiServices {
     fetchUser: (userId: string) => Promise<any>
     send_otp_to_mail: (email: string) => Promise<any>
     verify_otp: (otp: string, email: string) => Promise<any>
-    reset_password: (sessionId: string, password: string, confirmPassword: string) => Promise<any>
+    reset_password: (data: { sessionId: string; password: string; confirmPassword: string }) => Promise<any>
   }
   users: {
     update: (user: any) => Promise<any>
@@ -119,7 +119,12 @@ export const API_SERVICES: ApiServices = {
     fetchUser: (userId: string) => apiClient.get(API_ENDPOINTS.AUTH.USER(userId)),
     send_otp_to_mail: (email: string) => apiClient.post(`${API_ENDPOINTS.AUTH.SEND_OTP_TO_MAIL}?email=${email}`),
     verify_otp: (otp: string, email: string) => apiClient.post(`${API_ENDPOINTS.AUTH.VERIFY_OTP}?email=${email}&otp=${otp}`),
-    reset_password: (sessionId: string, password: string, confirmPassword: string) => apiClient.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { sessionId, password, confirmPassword }),
+    reset_password: ({ sessionId, password, confirmPassword }) =>
+      apiClient.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+        sessionId,
+        password,
+        confirmPassword,
+      }),
   },
 
   // -------------------------

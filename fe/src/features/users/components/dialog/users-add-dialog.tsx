@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { address, type Province, type District, type Ward } from '@/helpers/address'
+import { trimValue, isValidPhoneNumber, isValidEmail, isNotEmpty, validateInput } from '@/helpers/validations'
 import { Upload, X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { API_SERVICES } from '@/api/api-services'
@@ -22,68 +23,75 @@ import { useUsers } from '../../context/users-context'
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
-// Hàm tiện ích để trim khoảng trắng và kiểm tra chuỗi rỗng
-const trimAndValidateString = (value: string, errorMessage: string, pattern?: RegExp, patternErrorMessage?: string) => {
-  const trimmed = value.trim()
-  if (trimmed.length === 0) {
-    throw new Error(errorMessage)
-  }
-  if (pattern && !pattern.test(trimmed)) {
-    throw new Error(patternErrorMessage || errorMessage)
-  }
-  return trimmed
-}
-
-// Schema cho việc thêm mới người dùng - đã được chỉnh sửa để xử lý khoảng trắng
+// Schema cho việc thêm mới người dùng
 const formSchema = z.object({
   name: z
     .string()
     .min(1, 'Vui lòng nhập họ và tên')
     .transform((value, ctx) => {
-      try {
-        return trimAndValidateString(
-          value,
-          'Vui lòng nhập họ và tên',
-          /^[A-Za-zÀ-ỹ\s]+$/u, // regex hỗ trợ tiếng Việt & khoảng trắng
-          'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
-        )
-      } catch (error) {
+      const trimmed = trimValue(value)
+      if (!isNotEmpty(trimmed)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: (error as Error).message,
+          message: 'Vui lòng nhập họ và tên',
         })
         return value
       }
+      const nameError = validateInput(trimmed, [(val) => /^[A-Za-zÀ-ỹ\s]+$/u.test(val)], ['Họ và tên chỉ được chứa chữ cái và khoảng trắng'])
+      if (nameError) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: nameError,
+        })
+        return value
+      }
+      return trimmed
     }),
 
   email: z
     .string()
-    .email('Email không hợp lệ')
+    .min(1, 'Vui lòng nhập email')
     .transform((value, ctx) => {
-      try {
-        return trimAndValidateString(value, 'Vui lòng nhập email')
-      } catch (error) {
+      const trimmed = trimValue(value)
+      if (!isNotEmpty(trimmed)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: (error as Error).message,
+          message: 'Vui lòng nhập email',
         })
         return value
       }
+      if (!isValidEmail(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Email không hợp lệ',
+        })
+        return value
+      }
+      return trimmed
     }),
+
   phone: z
     .string()
     .min(1, 'Vui lòng nhập số điện thoại')
     .transform((value, ctx) => {
-      try {
-        return trimAndValidateString(value, 'Vui lòng nhập số điện thoại')
-      } catch (error) {
+      const trimmed = trimValue(value)
+      if (!isNotEmpty(trimmed)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: (error as Error).message,
+          message: 'Vui lòng nhập số điện thoại',
         })
         return value
       }
+      if (!isValidPhoneNumber(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0',
+        })
+        return value
+      }
+      return trimmed
     }),
+
   province: z.string().min(1, 'Vui lòng chọn tỉnh/thành phố'),
   district: z.string().min(1, 'Vui lòng chọn quận/huyện'),
   ward: z.string().min(1, 'Vui lòng chọn phường/xã'),
@@ -91,25 +99,28 @@ const formSchema = z.object({
     .string()
     .min(1, 'Vui lòng nhập địa chỉ cụ thể')
     .transform((value, ctx) => {
-      try {
-        return trimAndValidateString(value, 'Vui lòng nhập địa chỉ cụ thể')
-      } catch (error) {
+      const trimmed = trimValue(value)
+      if (!isNotEmpty(trimmed)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: (error as Error).message,
+          message: 'Vui lòng nhập địa chỉ cụ thể',
         })
         return value
       }
+      return trimmed
     }),
   address: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER'], {
     errorMap: () => ({ message: 'Giới tính không hợp lệ' }),
   }),
-  dob: z.coerce.date({
-    required_error: 'Vui lòng chọn ngày sinh',
-    invalid_type_error: 'Ngày sinh không hợp lệ',
-  }),
-
+  dob: z.preprocess(
+    // nếu input là chuỗi rỗng hoặc undefined, giữ nguyên để cho schema bên trong bắt lỗi
+    (val) => (val === '' || val == null ? undefined : val),
+    z.date({
+      required_error: 'Ngày sinh không được để trống',
+      invalid_type_error: 'Ngày sinh không hợp lệ',
+    })
+  ),
   role: z.string().min(1, 'Vui lòng chọn vai trò'),
   avatar: z
     .any()
@@ -138,7 +149,6 @@ const generatePassword = (): string => {
   const allChars = uppercase + lowercase + digits
   let password = ''
 
-  // Bắt buộc có 1 chữ hoa, 1 chữ thường, 1 số
   password += uppercase[Math.floor(Math.random() * uppercase.length)]
   password += lowercase[Math.floor(Math.random() * lowercase.length)]
   password += digits[Math.floor(Math.random() * digits.length)]
@@ -147,7 +157,6 @@ const generatePassword = (): string => {
     password += allChars[Math.floor(Math.random() * allChars.length)]
   }
 
-  // Trộn các ký tự để tránh mẫu cố định
   password = password
     .split('')
     .sort(() => 0.5 - Math.random())
@@ -162,10 +171,7 @@ const DEFAULT_AVATAR_PATH = '/images/defaultAvatar.png'
 // Hàm xử lý input để ngăn khoảng trắng đầu dòng
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (...event: any[]) => void) => {
   const value = e.target.value
-  if (value.startsWith(' ')) {
-    // Nếu giá trị bắt đầu bằng khoảng trắng, loại bỏ nó
-    e.target.value = value.trimStart()
-  }
+  e.target.value = trimValue(value) // Trim ngay khi nhập
   onChange(e)
 }
 
@@ -179,7 +185,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
   const { refreshUsers } = useUsers()
 
-  // Check current user role from localStorage when component mounts
   useEffect(() => {
     try {
       const role = localStorage.getItem('role')
@@ -189,7 +194,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
     }
   }, [])
 
-  // Khởi tạo React Hook Form với schema
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -205,7 +209,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
       dob: undefined,
       role: '',
     },
-    mode: 'onBlur', // Validate on blur để kiểm tra sớm lỗi input
+    mode: 'onBlur',
   })
 
   const { control, handleSubmit, reset, watch, setValue, formState, trigger } = form
@@ -215,7 +219,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   const wardValue = watch('ward')
   const specificAddressValue = watch('specificAddress')
 
-  // Cập nhật danh sách quận/huyện khi chọn tỉnh/thành phố
   useEffect(() => {
     if (provinceValue) {
       const province = address.find((p) => p.Id === provinceValue)
@@ -227,7 +230,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
     }
   }, [provinceValue, setValue])
 
-  // Cập nhật danh sách phường/xã khi chọn quận/huyện
   useEffect(() => {
     if (districtValue && selectedProvince) {
       const district = selectedProvince.Districts?.find((d) => d.Id === districtValue)
@@ -237,22 +239,19 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
     }
   }, [districtValue, selectedProvince, setValue])
 
-  // Cập nhật địa chỉ đầy đủ khi các thành phần địa chỉ thay đổi
   useEffect(() => {
     if (provinceValue && districtValue && wardValue && specificAddressValue) {
       const provinceName = address.find((p) => p.Id === provinceValue)?.Name || ''
       const districtName = districts.find((d) => d.Id === districtValue)?.Name || ''
       const wardName = wards.find((w) => w.Id === wardValue)?.Name || ''
-      const fullAddress = `${specificAddressValue.trim()}, ${wardName}, ${districtName}, ${provinceName}`
+      const fullAddress = `${trimValue(specificAddressValue)}, ${wardName}, ${districtName}, ${provinceName}`
       setValue('address', fullAddress)
     }
   }, [provinceValue, districtValue, wardValue, specificAddressValue, districts, wards, setValue])
 
-  // Xử lý khi chọn file ảnh
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Kiểm tra định dạng file
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
         toast({
           title: 'Định dạng file không hợp lệ',
@@ -262,12 +261,11 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
         return
       }
 
-      // Kiểm tra kích thước file
       if (file.size > MAX_FILE_SIZE) {
         toast({
           title: 'Kích thước file quá lớn',
           description: 'Kích thước file không được vượt quá 5MB',
-          variant: 'destructive',
+          variant: 'deny',
         })
         return
       }
@@ -281,7 +279,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
     }
   }
 
-  // Xử lý xóa ảnh đã chọn
   const handleRemoveAvatar = () => {
     setValue('avatar', undefined)
     setAvatarPreview(null)
@@ -289,48 +286,41 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
     if (fileInput) fileInput.value = ''
   }
 
-  // Hàm kiểm tra tất cả các trường bắt buộc trước khi submit
   const validateAllFields = async () => {
     const isValid = await trigger()
     if (!isValid) {
       toast({
         title: 'Thông tin không hợp lệ',
         description: 'Vui lòng kiểm tra lại thông tin nhập vào',
-        variant: 'destructive',
+        variant: 'deny',
       })
       return false
     }
     return true
   }
 
-  // Xử lý submit: tạo các trường tự động và gọi API thêm người dùng mới
   const onSubmit = async (values: UserForm) => {
     try {
-      // Kiểm tra lại tất cả các trường
       const isValid = await validateAllFields()
       if (!isValid) return
 
       setIsSubmitting(true)
 
-      // Tạo FormData để gửi dữ liệu dạng multipart/form-data
       const formData = new FormData()
 
-      // Thêm các trường thông tin cơ bản
       formData.append('username', generateUsername())
       formData.append('password', generatePassword())
-      formData.append('email', values.email.trim())
-      formData.append('phone', values.phone.trim())
-      formData.append('name', values.name.trim())
+      formData.append('email', trimValue(values.email))
+      formData.append('phone', trimValue(values.phone))
+      formData.append('name', trimValue(values.name))
       formData.append('address', values.address || '')
       formData.append('gender', values.gender)
       formData.append('dob', values.dob.toISOString())
       formData.append('role', values.role)
 
-      // Thêm file avatar nếu có, nếu không thì sử dụng avatar mặc định
       if (values.avatar instanceof File) {
         formData.append('avatar', values.avatar)
       } else {
-        // Tạo một file từ avatar mặc định
         try {
           const response = await fetch(DEFAULT_AVATAR_PATH)
           const blob = await response.blob()
@@ -338,15 +328,12 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
           formData.append('avatar', defaultAvatarFile)
         } catch (error) {
           console.error('Lỗi khi tải avatar mặc định:', error)
-          // Fallback: gửi đường dẫn nếu không thể tạo file
           formData.append('avatarPath', DEFAULT_AVATAR_PATH)
         }
       }
 
-      // Gọi API thêm người dùng mới với FormData
       await API_SERVICES.users.addOne(formData)
 
-      // Đảm bảo gọi xong refreshUsers trước khi onSuccess
       await refreshUsers()
 
       toast({
@@ -397,7 +384,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
         <Form {...form}>
           <form id='user-form' onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
             <div className='grid grid-cols-12 gap-4'>
-              {/* Avatar upload */}
               <div className='col-span-3 flex flex-col items-center space-y-2'>
                 <div className='relative'>
                   <Avatar className='h-32 w-32'>
@@ -422,9 +408,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                 {formState.errors.avatar && <p className='text-sm text-destructive'>{formState.errors.avatar.message as string}</p>}
               </div>
 
-              {/* Thông tin cá nhân */}
               <div className='col-span-9 grid grid-cols-3 gap-4'>
-                {/* Hàng 1: Họ tên + Email */}
                 <FormField
                   control={control}
                   name='name'
@@ -439,8 +423,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                           onChange={(e) => handleInputChange(e, field.onChange)}
                           onBlur={() => {
                             field.onBlur()
-                            // Tự động trim khi người dùng rời khỏi trường
-                            setValue('name', field.value.trim())
+                            setValue('name', trimValue(field.value))
                           }}
                         />
                       </FormControl>
@@ -462,7 +445,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                           onChange={(e) => handleInputChange(e, field.onChange)}
                           onBlur={() => {
                             field.onBlur()
-                            setValue('email', field.value.trim())
+                            setValue('email', trimValue(field.value))
                           }}
                         />
                       </FormControl>
@@ -484,7 +467,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                           onChange={(e) => handleInputChange(e, field.onChange)}
                           onBlur={() => {
                             field.onBlur()
-                            setValue('phone', field.value.trim())
+                            setValue('phone', trimValue(field.value))
                           }}
                         />
                       </FormControl>
@@ -493,7 +476,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                   )}
                 />
 
-                {/* Hàng 2: Ngày sinh + Giới tính + Vai trò */}
                 <FormField
                   control={control}
                   name='dob'
@@ -561,7 +543,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                           {currentUserRole === 'SYSADMIN' && (
                             <>
                               <SelectItem value='ADMIN'>Quản lý</SelectItem>
-                              {/* <SelectItem value="SYSADMIN">Quản trị hệ thống</SelectItem> */}
                             </>
                           )}
                         </SelectContent>
@@ -573,7 +554,6 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
               </div>
             </div>
 
-            {/* Địa chỉ */}
             <div className='grid grid-cols-12 gap-4'>
               <div className='col-span-12'>
                 <h3 className='mb-2 font-medium'>Thông tin địa chỉ</h3>
@@ -664,7 +644,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         onChange={(e) => handleInputChange(e, field.onChange)}
                         onBlur={() => {
                           field.onBlur()
-                          setValue('specificAddress', field.value.trim())
+                          setValue('specificAddress', trimValue(field.value))
                         }}
                       />
                     </FormControl>

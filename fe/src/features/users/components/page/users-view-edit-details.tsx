@@ -1,8 +1,8 @@
 'use client'
 
-//file url :  fe/src/features/users/components/page/users-view-edit-details.tsx
 import type React from 'react'
 import { useEffect, useState, useRef } from 'react'
+import { trimValue, isValidPhoneNumber, isValidEmail, isNotEmpty, validateInput } from '@/helpers/validations'
 import { Route } from '@/routes/_authenticated/users/list/details/$id'
 import { ChevronLeft, Save, X, Upload } from 'lucide-react'
 import { API_SERVICES } from '@/api/api-services'
@@ -33,23 +33,25 @@ export default function UsersDetailsContent() {
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
+  const MIN_DOB = '1950-01-01'
+  const MAX_DOB = '2025-12-31'
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
         const response = await getUserById(id)
+        console.log('User data:', response)
         setUser(response)
         setEditedUser(response)
         setError(null)
       } catch (err) {
-        console.error('Error fetching student details:', err)
-        setError(err instanceof Error ? err : new Error('Không thể tải thông tin học sinh'))
+        console.error('Error fetching user details:', err)
+        setError(err instanceof Error ? err : new Error('Không thể tải thông tin người dùng'))
       } finally {
         setLoading(false)
       }
     }
-
     if (id) {
       fetchData()
     }
@@ -71,7 +73,6 @@ export default function UsersDetailsContent() {
 
   const handleEditToggle = () => {
     if (isEditing) {
-      // Cancel editing
       setEditedUser(user)
       setValidationErrors({})
     }
@@ -80,28 +81,22 @@ export default function UsersDetailsContent() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
-    // For phone field, only allow digits
-    if (name === 'phone' && value) {
-      const digitsOnly = value.replace(/\D/g, '')
-
-      // Update the edited user with digits only for phone
-      setEditedUser((prev: any) => ({
-        ...prev,
-        [name]: digitsOnly,
-      }))
-
-      // Optionally set the input value to digits only
-      e.target.value = digitsOnly
+    let updatedValue = value
+    if (name === 'phone') {
+      updatedValue = value.replace(/\D/g, '') // Chỉ cho phép số
+    } else if (name === 'dob') {
+      updatedValue = value // Giữ nguyên giá trị ngày
+    } else if (name === 'name') {
+      // Chỉ cho phép chữ cái, số và khoảng trắng
+      // updatedValue = value.replace(/[^a-zA-Z0-9\s]/g, '')
+      updatedValue = value.replace(/[^\p{L}0-9\s]/gu, '')
     } else {
-      // For other fields, update normally
-      setEditedUser((prev: any) => ({
-        ...prev,
-        [name]: value,
-      }))
+      updatedValue = value
     }
-
-    // Clear validation error for this field if it exists
+    setEditedUser((prev: any) => ({
+      ...prev,
+      [name]: updatedValue,
+    }))
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({
         ...prev,
@@ -112,60 +107,62 @@ export default function UsersDetailsContent() {
 
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
-    // Trim spaces at the beginning and end
-    const trimmedValue = value.trim()
-
-    // Update with trimmed value
+    const trimmedValue = trimValue(value)
     setEditedUser((prev: any) => ({
       ...prev,
       [name]: trimmedValue,
     }))
-
-    // Validate fields
     const errors: { [key: string]: string } = { ...validationErrors }
 
-    // Required fields validation
     if (name === 'name') {
-      if (!trimmedValue) {
-        errors.name = 'Họ và tên không được để trống'
-      } else if (trimmedValue.length < 2) {
-        errors.name = 'Họ và tên phải có ít nhất 2 ký tự'
+      const nameRegex = /^[\p{L}0-9\s]+$/u
+      const error = validateInput(trimmedValue, [isNotEmpty, (val) => val.length >= 2, (val) => nameRegex.test(val)], ['Họ và tên không được để trống', 'Họ và tên phải có ít nhất 2 ký tự', 'Họ và tên không được chứa ký tự đặc biệt'])
+      if (error) {
+        errors.name = error
       } else {
         delete errors.name
       }
     }
-
     if (name === 'phone') {
-      if (!trimmedValue) {
-        errors.phone = 'Số điện thoại không được để trống'
-      } else if (!/^0\d{9}$/.test(trimmedValue)) {
-        errors.phone = 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0'
+      const error = validateInput(trimmedValue, [isNotEmpty, isValidPhoneNumber], ['Số điện thoại không được để trống', 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0'])
+      if (error) {
+        errors.phone = error
       } else {
         delete errors.phone
       }
     }
-
     if (name === 'email') {
-      if (!trimmedValue) {
-        errors.email = 'Email không được để trống'
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedValue)) {
-        errors.email = 'Email không đúng định dạng'
+      const error = validateInput(trimmedValue, [isNotEmpty, isValidEmail], ['Email không được để trống', 'Email không đúng định dạng'])
+      if (error) {
+        errors.email = error
       } else {
         delete errors.email
       }
     }
-
     if (name === 'address') {
-      if (!trimmedValue) {
-        errors.address = 'Địa chỉ không được để trống'
-      } else if (trimmedValue.length < 5) {
-        errors.address = 'Địa chỉ phải có ít nhất 5 ký tự'
+      const error = validateInput(trimmedValue, [isNotEmpty, (val) => val.length >= 5], ['Địa chỉ không được để trống', 'Địa chỉ phải có ít nhất 5 ký tự'])
+      if (error) {
+        errors.address = error
       } else {
         delete errors.address
       }
     }
-
+    if (name === 'dob') {
+      if (!trimmedValue) {
+        errors.dob = 'Ngày sinh không được để trống'
+      } else {
+        const selectedDate = new Date(trimmedValue)
+        const minDate = new Date(MIN_DOB)
+        const maxDate = new Date(MAX_DOB)
+        if (isNaN(selectedDate.getTime())) {
+          errors.dob = 'Ngày sinh không hợp lệ'
+        } else if (selectedDate < minDate || selectedDate > maxDate) {
+          errors.dob = 'Ngày sinh phải từ 1950 đến 2025'
+        } else {
+          delete errors.dob
+        }
+      }
+    }
     setValidationErrors(errors)
   }
 
@@ -178,40 +175,33 @@ export default function UsersDetailsContent() {
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {}
-
-    // Required fields validation
-    if (!editedUser.name?.trim()) {
-      errors.name = 'Họ và tên không được để trống'
-    } else if (editedUser.name.trim().length < 2) {
-      errors.name = 'Họ và tên phải có ít nhất 2 ký tự'
+    const nameRegex = /^[\p{L}0-9\s]+$/u
+    const nameError = validateInput(trimValue(editedUser.name || ''), [isNotEmpty, (val) => val.length >= 2, (val) => nameRegex.test(val)], ['Họ và tên không được để trống', 'Họ và tên phải có ít nhất 2 ký tự', 'Họ và tên không được chứa ký tự đặc biệt'])
+    if (nameError) errors.name = nameError
+    const phoneError = validateInput(trimValue(editedUser.phone || ''), [isNotEmpty, isValidPhoneNumber], ['Số điện thoại không được để trống', 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0'])
+    if (phoneError) errors.phone = phoneError
+    const emailError = validateInput(trimValue(editedUser.email || ''), [isNotEmpty, isValidEmail], ['Email không được để trống', 'Email không đúng định dạng'])
+    if (emailError) errors.email = emailError
+    const addressError = validateInput(trimValue(editedUser.address || ''), [isNotEmpty, (val) => val.length >= 5], ['Địa chỉ không được để trống', 'Địa chỉ phải có ít nhất 5 ký tự'])
+    if (addressError) errors.address = addressError
+    if (!editedUser.dob) {
+      errors.dob = 'Ngày sinh không được để trống'
+    } else {
+      const selectedDate = new Date(editedUser.dob)
+      const minDate = new Date(MIN_DOB)
+      const maxDate = new Date(MAX_DOB)
+      if (isNaN(selectedDate.getTime())) {
+        errors.dob = 'Ngày sinh không hợp lệ'
+      } else if (selectedDate < minDate || selectedDate > maxDate) {
+        errors.dob = 'Ngày sinh phải từ 1950 đến 2025'
+      }
     }
-
-    if (!editedUser.phone?.trim()) {
-      errors.phone = 'Số điện thoại không được để trống'
-    } else if (!/^0\d{9}$/.test(editedUser.phone.trim())) {
-      errors.phone = 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0'
-    }
-
-    if (!editedUser.email?.trim()) {
-      errors.email = 'Email không được để trống'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editedUser.email.trim())) {
-      errors.email = 'Email không đúng định dạng'
-    }
-
-    // Address is required and must be at least 5 characters
-    if (!editedUser.address?.trim()) {
-      errors.address = 'Địa chỉ không được để trống'
-    } else if (editedUser.address.trim().length < 5) {
-      errors.address = 'Địa chỉ phải có ít nhất 5 ký tự'
-    }
-
     setValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
 
   const handleSaveChanges = async () => {
     try {
-      // Validate form before submitting
       if (!validateForm()) {
         toast({
           title: 'Lỗi',
@@ -220,43 +210,32 @@ export default function UsersDetailsContent() {
         })
         return
       }
-
-      // Prepare data for update, ensuring fields are trimmed
       const userDataToUpdate = {
         ...user,
         ...editedUser,
-        name: editedUser.name?.trim() || '',
-        phone: editedUser.phone?.trim() || '',
-        email: editedUser.email?.trim() || '',
-        address: editedUser.address?.trim() || '',
+        name: trimValue(editedUser.name || ''),
+        phone: trimValue(editedUser.phone || ''),
+        email: trimValue(editedUser.email || ''),
+        address: trimValue(editedUser.address || ''),
+        dob: editedUser.dob,
         id: id,
       }
-
-      // Remove fields that should be handled by backend
       delete userDataToUpdate.createdAt
       delete userDataToUpdate.updatedAt
       delete userDataToUpdate.created_at
       delete userDataToUpdate.updated_at
-
       console.log('Data to be sent:', userDataToUpdate)
       const response = await API_SERVICES.users.update(userDataToUpdate)
-
-      // Check if response has data property and use it, otherwise use the edited user data
       const updatedUserData = response?.data || editedUser
-
-      // Important: Update both state variables with the complete user data
       setUser({ ...user, ...updatedUserData })
       setEditedUser({ ...user, ...updatedUserData })
       setIsEditing(false)
       setValidationErrors({})
-
       toast({
         title: 'Thành công',
         description: 'Thông tin tài khoản đã được cập nhật',
         variant: 'success',
       })
-
-      // Fetch fresh data from the server to ensure we have the latest
       try {
         const freshUserData = await getUserById(id)
         if (freshUserData) {
@@ -279,8 +258,6 @@ export default function UsersDetailsContent() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
-    // Create a preview URL for the selected file
     const previewUrl = URL.createObjectURL(file)
     setSelectedAvatar(file)
     setAvatarPreviewUrl(previewUrl)
@@ -290,28 +267,22 @@ export default function UsersDetailsContent() {
     if (!selectedAvatar || !id) {
       toast({
         title: 'Lỗi',
-        description: '❌ [Avatar Upload] Thiếu file hoặc id:' + JSON.stringify({ selectedAvatar, id }),
+        description: 'Thiếu file hoặc id',
         variant: 'deny',
       })
       return
     }
-
     try {
       setUploadingAvatar(true)
       await API_SERVICES.users.update_avatar(id, selectedAvatar)
-
-      // Lấy lại thông tin user để cập nhật avatar mới
       const updatedUser = await getUserById(id)
       setUser(updatedUser)
       setEditedUser(updatedUser)
-
-      // Xoá preview cũ
       if (avatarPreviewUrl) {
         URL.revokeObjectURL(avatarPreviewUrl)
       }
       setSelectedAvatar(null)
       setAvatarPreviewUrl(null)
-
       toast({
         title: 'Thành công',
         description: 'Ảnh đại diện đã được cập nhật',
@@ -334,14 +305,11 @@ export default function UsersDetailsContent() {
     }
     setSelectedAvatar(null)
     setAvatarPreviewUrl(null)
-
-    // Reset the file input
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
 
-  // Trigger file input click
   const triggerFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click()
@@ -350,7 +318,6 @@ export default function UsersDetailsContent() {
 
   useEffect(() => {
     return () => {
-      // Clean up any object URLs to avoid memory leaks
       if (avatarPreviewUrl) {
         URL.revokeObjectURL(avatarPreviewUrl)
       }
@@ -359,17 +326,13 @@ export default function UsersDetailsContent() {
 
   const handleStatusChange = async () => {
     if (!id) return
-
     try {
       setUpdatingStatus(true)
       const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
       await API_SERVICES.users.update_status(id, newStatus)
-
-      // Refresh user data to get updated status
       const updatedUser = await getUserById(id)
       setUser(updatedUser)
       setEditedUser(updatedUser)
-
       toast({
         title: 'Thành công',
         description: `Tài khoản đã được ${newStatus === 'ACTIVE' ? 'kích hoạt' : 'vô hiệu hóa'}`,
@@ -401,7 +364,7 @@ export default function UsersDetailsContent() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href='/students'>Danh sách tài khoản</BreadcrumbLink>
+                <BreadcrumbLink href='/users'>Danh sách tài khoản</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -419,25 +382,19 @@ export default function UsersDetailsContent() {
       <Main>
         <div className='mb-6'>
           <Button variant='outline' size='sm' onClick={handleBack}>
-            <ChevronLeft className='mr-2 h-4 w-4' />
-            Quay lại danh sách
+            <ChevronLeft className='mr-2 h-4 w-4' /> Quay lại danh sách
           </Button>
         </div>
-
         {loading ? (
           <div className='w-full'>
             <div className='space-y-6'>
-              {/* Skeleton header */}
               <div>
                 <div className='mb-2 h-8 w-3/4 animate-pulse rounded-md bg-muted'></div>
                 <div className='h-4 w-1/2 animate-pulse rounded-md bg-muted'></div>
               </div>
-
-              {/* Skeleton user info card */}
               <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
                 <div className='md:col-span-2'>
                   <div className='overflow-hidden rounded-md border'>
-                    {/* Skeleton table rows */}
                     {Array(7)
                       .fill(0)
                       .map((_, i) => (
@@ -452,13 +409,11 @@ export default function UsersDetailsContent() {
                       ))}
                   </div>
                 </div>
-
-                {/* Skeleton avatar section */}
                 <div>
                   <div className='my-6 h-6 w-32 animate-pulse rounded-md bg-muted'></div>
                   <div className='flex flex-col items-center rounded-md border p-5'>
                     <div className='mb-4 h-32 w-32 animate-pulse rounded-full bg-muted'></div>
-                    <div className='h-9 w-2/3 animate-pulse rounded-md bg-muted'></div>
+                    <div className='h-ucial'>Avatar</div>
                   </div>
                 </div>
               </div>
@@ -479,12 +434,10 @@ export default function UsersDetailsContent() {
                 {isEditing ? (
                   <div className='flex gap-2'>
                     <Button variant='outline' size='sm' onClick={handleEditToggle}>
-                      <X className='mr-2 h-4 w-4' />
-                      Hủy
+                      <X className='mr-2 h-4 w-4' /> Hủy
                     </Button>
                     <Button size='sm' onClick={handleSaveChanges}>
-                      <Save className='mr-2 h-4 w-4' />
-                      Lưu
+                      <Save className='mr-2 h-4 w-4' /> Lưu
                     </Button>
                   </div>
                 ) : (
@@ -511,7 +464,16 @@ export default function UsersDetailsContent() {
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Ngày sinh</td>
-                      <td className='px-4 py-3'>{isEditing ? <Input name='dob' type='date' value={editedUser.dob ? new Date(editedUser.dob).toISOString().split('T')[0] : ''} onChange={handleInputChange} className='max-w-md' /> : formatDate(user.dob) || 'Chưa cập nhật'}</td>
+                      <td className='px-4 py-3'>
+                        {isEditing ? (
+                          <div>
+                            <Input name='dob' type='date' value={editedUser.dob ? new Date(editedUser.dob).toISOString().split('T')[0] : ''} onChange={handleInputChange} onBlur={handleInputBlur} min={MIN_DOB} max={MAX_DOB} required className={`max-w-md ${validationErrors.dob ? 'border-destructive' : ''}`} />
+                            {validationErrors.dob && <p className='mt-1 text-sm text-destructive'>{validationErrors.dob}</p>}
+                          </div>
+                        ) : (
+                          formatDate(user.dob) || 'Chưa cập nhật'
+                        )}
+                      </td>
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</td>
@@ -537,7 +499,7 @@ export default function UsersDetailsContent() {
                             <SelectContent>
                               <SelectItem value='MALE'>Nam</SelectItem>
                               <SelectItem value='FEMALE'>Nữ</SelectItem>
-                              {/* <SelectItem value='OTHER'>Khác</SelectItem> */}
+                              <SelectItem value='OTHER'>Khác</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : user.gender === 'MALE' ? (
@@ -581,13 +543,15 @@ export default function UsersDetailsContent() {
                         {user.status === 'ACTIVE' ? (
                           <div className='flex items-center'>
                             <Status color='green' showDot={true}>
-                              Đang hoạt động
+                              {' '}
+                              Đang hoạt động{' '}
                             </Status>
                           </div>
                         ) : (
                           <div className='flex items-center'>
                             <Status color='red' showDot={true}>
-                              Đã vô hiệu hóa
+                              {' '}
+                              Đã vô hiệu hóa{' '}
                             </Status>
                           </div>
                         )}
@@ -606,29 +570,22 @@ export default function UsersDetailsContent() {
               <h2 className='my-6 text-xl font-semibold'>Ảnh đại diện</h2>
               <div className='flex flex-col items-center rounded-md border p-5'>
                 <div className='group relative mb-4 flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-full border' onClick={triggerFileInput}>
-                  {/* Avatar display with hover effect */}
                   {avatarPreviewUrl ? (
-                    // Show preview of selected image
                     <img src={avatarPreviewUrl || '/placeholder.svg'} alt='Preview' className='h-full w-full object-cover' />
                   ) : user.avatar ? (
-                    // Show current avatar
                     <Avatar className='h-full w-full'>
                       <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
                       <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                     </Avatar>
                   ) : (
-                    // Show placeholder
                     <div className='text-muted-foreground'>Avatar</div>
                   )}
-                  {/* Overlay on hover */}
                   <div className='absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
                     <Upload className='h-6 w-6 text-white' />
                   </div>
                 </div>
                 <div className='w-full'>
-                  {/* Hidden file input */}
                   <input ref={fileInputRef} type='file' id='avatar-upload' accept='image/*' className='hidden' onChange={handleAvatarChange} disabled={uploadingAvatar} />
-                  {/* Visible button to trigger file selection */}
                   <div className='flex justify-center gap-2'>
                     <Button variant='outline' onClick={triggerFileInput} className='w-1/2' disabled={uploadingAvatar}>
                       Chọn ảnh
