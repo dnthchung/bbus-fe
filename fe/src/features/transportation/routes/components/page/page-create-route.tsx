@@ -26,7 +26,7 @@ import { Main } from '@/components/layout/main'
 import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { Status } from '@/components/mine/status'
 import { createRoute } from '@/features/transportation/function'
-import { getListCheckpoint, getNumberOfStudentInEachCheckpoint, getAllCheckpointButNotInRoute } from './checkpoint-service'
+import { getNumberOfStudentInEachCheckpoint, getAllCheckpointButNotInRoute } from './checkpoint-service'
 import LeafletMap from './leaflet-map'
 
 interface Checkpoint {
