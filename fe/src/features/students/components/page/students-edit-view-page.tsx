@@ -19,6 +19,33 @@ import { StudentsPersonalInfoTab } from '@/features/students/components/tab/stud
 import { StudentsPickupInfoTab } from '@/features/students/components/tab/students-pickup-info-tab'
 import type { Student } from '@/features/students/data/schema'
 
+/**
+ * Chuyển message backend (EN) sang tiếng Việt.
+ * Ví dụ:
+ *  - "User with this phone: 0949602355 already exists"
+ *  → "Số điện thoại 0949602355 đã tồn tại"
+ */
+function parseUserCreationError(message: string): string {
+  // backend có thể trả về nhiều lỗi nối bằng dấu phẩy
+  const parts = message.split(',').map((p) => p.trim())
+  const friendlyParts = parts.map((part) => {
+    let m
+    // check phone
+    m = part.match(/phone:\s*(\d+)/i)
+    if (m) {
+      return `Số điện thoại ${m[1]} đã tồn tại`
+    }
+    // check email
+    m = part.match(/email:\s*([^\s]+)/i)
+    if (m) {
+      return `Email ${m[1]} đã tồn tại`
+    }
+    // nếu còn trường khác, giữ nguyên (hoặc bạn có thể thêm case)
+    return part
+  })
+  return friendlyParts.join('. ')
+}
+
 export default function StudentsDetailsContent() {
   const { id } = Route.useParams()
   const [student, setStudent] = useState<Student | null>(null)

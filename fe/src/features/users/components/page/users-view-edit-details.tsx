@@ -20,6 +20,30 @@ import { Main } from '@/components/layout/main'
 import { Status } from '@/components/mine/status'
 import { getUserById } from '@/features/users/users'
 
+function parseUserCreationError(message: string): string {
+  const raw = message || ''
+  const lower = raw.toLowerCase()
+
+  // Nếu có "email"
+  if (lower.includes('email')) {
+    const m = raw.match(/email:\s*([^\s,]+)/i)
+    if (m) {
+      return `Email ${m[1]} đã tồn tại`
+    }
+  }
+
+  // Nếu có "phone"
+  if (lower.includes('phone')) {
+    const m = raw.match(/phone:\s*(\d+)/i)
+    if (m) {
+      return `Số điện thoại ${m[1]} đã tồn tại`
+    }
+  }
+
+  // fallback: giữ nguyên thông báo gốc hoặc đưa về 1 câu chung
+  return 'Đã xảy ra lỗi: ' + raw
+}
+
 export default function UsersDetailsContent() {
   const { id } = Route.useParams()
   const [user, setUser] = useState<any | null>(null)
@@ -245,11 +269,12 @@ export default function UsersDetailsContent() {
       } catch (fetchErr) {
         console.error('Error fetching updated user data:', fetchErr)
       }
-    } catch (err) {
-      console.error('Error updating user:', err)
+    } catch (error: any) {
+      console.error('Error updating user:', error)
+      const errorMessage = parseUserCreationError(error?.message || '')
       toast({
-        title: 'Lỗi',
-        description: 'Không thể cập nhật thông tin tài khoản',
+        title: 'Không thể cập nhật thông tin',
+        description: 'Đã xảy ra lỗi khi cập nhật thông tin. ' + errorMessage,
         variant: 'deny',
       })
     }

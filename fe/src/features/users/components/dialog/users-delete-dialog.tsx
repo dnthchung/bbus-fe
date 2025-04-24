@@ -41,11 +41,8 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
       // ✅ Gọi toast thông báo
       toast({
         title: 'Đã xóa người dùng thành công',
-        description: (
-          <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-            <code className='text-white'>{JSON.stringify(currentRow, null, 2)}</code>
-          </pre>
-        ),
+        description: `Người dùng ${currentRow.name} đã được xóa thành công.`,
+        variant: 'success',
       })
 
       // ✅ Refresh danh sách user sau khi xóa
@@ -58,7 +55,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: Props) {
       toast({
         title: 'Không thể xóa người dùng',
         description: 'Đã xảy ra lỗi khi xóa người dùng. Vui lòng thử lại.',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setIsDeleting(false)
