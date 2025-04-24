@@ -25,6 +25,7 @@ export default function StudentsDetailsContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [activeTab, setActiveTab] = useState('personal')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +35,12 @@ export default function StudentsDetailsContent() {
         setStudent(response.data.data)
         setError(null)
       } catch (err) {
-        console.error('Error fetching student details:', err)
+        // console.error('Error fetching student details:', err)
+        toast({
+          title: 'Lỗi',
+          description: 'Không thể tải thông tin học sinh',
+          variant: 'deny',
+        })
         setError(err instanceof Error ? err : new Error('Không thể tải thông tin học sinh'))
       } finally {
         setLoading(false)
@@ -272,7 +278,7 @@ export default function StudentsDetailsContent() {
           </Card>
         ) : (
           <>
-            <Tabs defaultValue='personal' className='mb-6'>
+            <Tabs defaultValue='personal' className='mb-6' value={activeTab} onValueChange={setActiveTab}>
               <TabsList className='grid w-1/2 grid-cols-3'>
                 <TabsTrigger value='personal'>Thông tin cá nhân</TabsTrigger>
                 <TabsTrigger value='parent'>Thông tin phụ huynh</TabsTrigger>

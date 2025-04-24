@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent } from 'react'
+import { useState, type ChangeEvent, useEffect } from 'react'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { AdvancedBusLoader } from '@/components/mine/loader/advanced-bus-loader'
 import { Status } from '@/components/mine/status'
 import { genderLabels, statusLabels } from '@/features/students/data/data'
 import type { Student } from '@/features/students/data/schema'
+import { studentUpdateSchema } from '@/features/students/data/schema'
 
 interface StudentsPersonalInfoTabProps {
   student: Student
@@ -25,14 +26,18 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
     dob: student.dob || '',
     address: student.address || '',
     gender: student.gender || 'MALE',
-    status: student.status || 'ACTIVE',
-    rollNumber: student.rollNumber || '',
     className: student.className || '',
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [avatarPreview, setAvatarPreview] = useState<string | null>(student.avatar || null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Update local state when student prop changes (e.g., after tab switch)
+  useEffect(() => {
+    setAvatarPreview(student.avatar || null)
+  }, [student.avatar])
 
   const gradeOptions = ['1', '2', '3', '4', '5']
   const classLetterOptions = ['A', 'B', 'C', 'D']
@@ -42,20 +47,20 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    // Remove leading and trailing spaces for text inputs
+    const trimmedValue = value.trim()
+    setFormData((prev) => ({ ...prev, [name]: trimmedValue }))
+
+    // Clear error for this field when user types
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }))
+    }
   }
 
   const handleGenderChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
       gender: value as Student['gender'],
-    }))
-  }
-
-  const handleStatusChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      status: value as Student['status'],
     }))
   }
 
@@ -73,7 +78,44 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
     }))
   }
 
+  const validateForm = () => {
+    try {
+      // Create a validation object with the current form data
+      const validationData = {
+        id: student.id,
+        ...formData,
+      }
+
+      // Use Zod schema to validate
+      studentUpdateSchema.parse(validationData)
+      setErrors({})
+      return true
+    } catch (error: any) {
+      // Handle Zod validation errors
+      if (error.errors) {
+        const newErrors: Record<string, string> = {}
+        error.errors.forEach((err: any) => {
+          if (err.path && err.path.length > 0) {
+            newErrors[err.path[0]] = err.message
+          }
+        })
+        setErrors(newErrors)
+      }
+      return false
+    }
+  }
+
   const handleSave = async () => {
+    // First validate the form
+    if (!validateForm()) {
+      toast({
+        title: 'Lỗi',
+        description: 'Vui lòng kiểm tra lại thông tin nhập vào',
+        variant: 'deny',
+      })
+      return
+    }
+
     try {
       setIsLoading(true)
       const updatedStudent = { ...student, ...formData }
@@ -103,8 +145,6 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
       dob: student.dob || '',
       address: student.address || '',
       gender: student.gender || 'MALE',
-      status: student.status || 'ACTIVE',
-      rollNumber: student.rollNumber || '',
       className: student.className || '',
     })
     setEditing(false)
@@ -133,7 +173,20 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
     if (!avatarFile) return
     try {
       setUploadingAvatar(true)
-      await API_SERVICES.students.updateAvatar(student.id, avatarFile)
+      const response = await API_SERVICES.students.updateAvatar(student.id, avatarFile)
+
+      // Get the updated avatar URL from the response
+      const updatedAvatarUrl = response?.data?.data?.avatar || student.avatar
+
+      // Update the student object with the new avatar URL
+      const updatedStudent = {
+        ...student,
+        avatar: updatedAvatarUrl,
+      }
+
+      // Call the parent's update function to refresh the student data
+      onStudentUpdate(updatedStudent)
+
       toast({
         title: 'Thành công',
         description: 'Ảnh đại diện đã được cập nhật',
@@ -179,7 +232,16 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
             {/* Họ và tên */}
             <div className='flex border-b'>
               <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Họ và tên</div>
-              <div className='flex-1 px-4 py-3'>{editing ? <Input name='name' value={formData.name} onChange={handleChange} className='h-8' /> : student.name || <Badge color='yellow'>Trống</Badge>}</div>
+              <div className='flex-1 px-4 py-3'>
+                {editing ? (
+                  <div>
+                    <Input name='name' value={formData.name} onChange={handleChange} className={`h-8 ${errors.name ? 'border-red-500' : ''}`} />
+                    {errors.name && <p className='mt-1 text-xs text-red-500'>{errors.name}</p>}
+                  </div>
+                ) : (
+                  student.name || <Badge color='yellow'>Trống</Badge>
+                )}
+              </div>
             </div>
 
             {/* Ngày sinh */}
@@ -229,13 +291,22 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
             {/* Mã học sinh */}
             <div className='flex border-b'>
               <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Mã HS</div>
-              <div className='flex-1 px-4 py-3'>{editing ? <Input name='rollNumber' value={formData.rollNumber} onChange={handleChange} className='h-8' /> : student.rollNumber || <Badge color='yellow'>Trống</Badge>}</div>
+              <div className='flex-1 px-4 py-3'>{student.rollNumber || <Badge color='yellow'>Trống</Badge>}</div>
             </div>
 
             {/* Địa chỉ */}
             <div className='flex border-b'>
               <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</div>
-              <div className='flex-1 px-4 py-3'>{editing ? <Input name='address' value={formData.address} onChange={handleChange} className='h-8' /> : student.address || <Badge color='yellow'>Trống</Badge>}</div>
+              <div className='flex-1 px-4 py-3'>
+                {editing ? (
+                  <div>
+                    <Input name='address' value={formData.address} onChange={handleChange} className={`h-8 ${errors.address ? 'border-red-500' : ''}`} />
+                    {errors.address && <p className='mt-1 text-xs text-red-500'>{errors.address}</p>}
+                  </div>
+                ) : (
+                  student.address || <Badge color='yellow'>Trống</Badge>
+                )}
+              </div>
             </div>
 
             {/* Giới tính */}
@@ -265,22 +336,7 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
             <div className='flex'>
               <div className='w-1/4 bg-muted/50 px-4 py-3 font-medium'>Trạng thái</div>
               <div className='flex-1 px-4 py-3'>
-                {editing ? (
-                  <Select value={formData.status} onValueChange={handleStatusChange}>
-                    <SelectTrigger className='h-8 w-full'>
-                      <SelectValue placeholder='Chọn trạng thái' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(statusLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Status color={student.status === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[student.status]}</Status>
-                )}
+                <Status color={student.status === 'ACTIVE' ? 'green' : 'red'}>{statusLabels[student.status]}</Status>
               </div>
             </div>
           </div>

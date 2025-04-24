@@ -1,5 +1,6 @@
 'use client'
 
+//file url :  fe/src/features/users/components/page/users-view-edit-details.tsx
 import type React from 'react'
 import { useEffect, useState, useRef } from 'react'
 import { Route } from '@/routes/_authenticated/users/list/details/$id'
@@ -80,11 +81,25 @@ export default function UsersDetailsContent() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
-    // Update the edited user
-    setEditedUser((prev: any) => ({
-      ...prev,
-      [name]: value,
-    }))
+    // For phone field, only allow digits
+    if (name === 'phone' && value) {
+      const digitsOnly = value.replace(/\D/g, '')
+
+      // Update the edited user with digits only for phone
+      setEditedUser((prev: any) => ({
+        ...prev,
+        [name]: digitsOnly,
+      }))
+
+      // Optionally set the input value to digits only
+      e.target.value = digitsOnly
+    } else {
+      // For other fields, update normally
+      setEditedUser((prev: any) => ({
+        ...prev,
+        [name]: value,
+      }))
+    }
 
     // Clear validation error for this field if it exists
     if (validationErrors[name]) {
@@ -107,27 +122,51 @@ export default function UsersDetailsContent() {
       [name]: trimmedValue,
     }))
 
-    // Validate required fields
-    if (name === 'name' && !trimmedValue) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        name: 'Họ và tên không được để trống',
-      }))
+    // Validate fields
+    const errors: { [key: string]: string } = { ...validationErrors }
+
+    // Required fields validation
+    if (name === 'name') {
+      if (!trimmedValue) {
+        errors.name = 'Họ và tên không được để trống'
+      } else if (trimmedValue.length < 2) {
+        errors.name = 'Họ và tên phải có ít nhất 2 ký tự'
+      } else {
+        delete errors.name
+      }
     }
 
-    if (name === 'phone' && !trimmedValue) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        phone: 'Số điện thoại không được để trống',
-      }))
+    if (name === 'phone') {
+      if (!trimmedValue) {
+        errors.phone = 'Số điện thoại không được để trống'
+      } else if (!/^0\d{9}$/.test(trimmedValue)) {
+        errors.phone = 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0'
+      } else {
+        delete errors.phone
+      }
     }
 
-    if (name === 'email' && !trimmedValue) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        email: 'Email không được để trống',
-      }))
+    if (name === 'email') {
+      if (!trimmedValue) {
+        errors.email = 'Email không được để trống'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedValue)) {
+        errors.email = 'Email không đúng định dạng'
+      } else {
+        delete errors.email
+      }
     }
+
+    if (name === 'address') {
+      if (!trimmedValue) {
+        errors.address = 'Địa chỉ không được để trống'
+      } else if (trimmedValue.length < 5) {
+        errors.address = 'Địa chỉ phải có ít nhất 5 ký tự'
+      } else {
+        delete errors.address
+      }
+    }
+
+    setValidationErrors(errors)
   }
 
   const handleGenderChange = (value: string) => {
@@ -143,14 +182,27 @@ export default function UsersDetailsContent() {
     // Required fields validation
     if (!editedUser.name?.trim()) {
       errors.name = 'Họ và tên không được để trống'
+    } else if (editedUser.name.trim().length < 2) {
+      errors.name = 'Họ và tên phải có ít nhất 2 ký tự'
     }
 
     if (!editedUser.phone?.trim()) {
       errors.phone = 'Số điện thoại không được để trống'
+    } else if (!/^0\d{9}$/.test(editedUser.phone.trim())) {
+      errors.phone = 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0'
     }
 
     if (!editedUser.email?.trim()) {
       errors.email = 'Email không được để trống'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editedUser.email.trim())) {
+      errors.email = 'Email không đúng định dạng'
+    }
+
+    // Address is required and must be at least 5 characters
+    if (!editedUser.address?.trim()) {
+      errors.address = 'Địa chỉ không được để trống'
+    } else if (editedUser.address.trim().length < 5) {
+      errors.address = 'Địa chỉ phải có ít nhất 5 ký tự'
     }
 
     setValidationErrors(errors)
@@ -463,7 +515,16 @@ export default function UsersDetailsContent() {
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Địa chỉ</td>
-                      <td className='px-4 py-3'>{isEditing ? <Input name='address' value={editedUser.address || ''} onChange={handleInputChange} onBlur={handleInputBlur} className='max-w-md' /> : user.address || 'Chưa cập nhật'}</td>
+                      <td className='px-4 py-3'>
+                        {isEditing ? (
+                          <div>
+                            <Input name='address' value={editedUser.address || ''} onChange={handleInputChange} onBlur={handleInputBlur} className={`max-w-md ${validationErrors.address ? 'border-destructive' : ''}`} />
+                            {validationErrors.address && <p className='mt-1 text-sm text-destructive'>{validationErrors.address}</p>}
+                          </div>
+                        ) : (
+                          user.address || 'Chưa cập nhật'
+                        )}
+                      </td>
                     </tr>
                     <tr className='border-b'>
                       <td className='bg-muted/50 px-4 py-3 font-medium'>Giới tính</td>

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addressSimple, type Province, type District, type Ward } from '@/helpers/addressSimple'
+import { address, type Province, type District, type Ward } from '@/helpers/address'
 import { Upload, X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { API_SERVICES } from '@/api/api-services'
@@ -218,7 +218,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   // Cập nhật danh sách quận/huyện khi chọn tỉnh/thành phố
   useEffect(() => {
     if (provinceValue) {
-      const province = addressSimple.find((p) => p.Id === provinceValue)
+      const province = address.find((p) => p.Id === provinceValue)
       setSelectedProvince(province || null)
       setDistricts(province?.Districts || [])
       setValue('district', '')
@@ -240,7 +240,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
   // Cập nhật địa chỉ đầy đủ khi các thành phần địa chỉ thay đổi
   useEffect(() => {
     if (provinceValue && districtValue && wardValue && specificAddressValue) {
-      const provinceName = addressSimple.find((p) => p.Id === provinceValue)?.Name || ''
+      const provinceName = address.find((p) => p.Id === provinceValue)?.Name || ''
       const districtName = districts.find((d) => d.Id === districtValue)?.Name || ''
       const wardName = wards.find((w) => w.Id === wardValue)?.Name || ''
       const fullAddress = `${specificAddressValue.trim()}, ${wardName}, ${districtName}, ${provinceName}`
@@ -591,7 +591,7 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {addressSimple.map((province) => (
+                        {address.map((province) => (
                           <SelectItem key={province.Id} value={province.Id || ''}>
                             {province.Name}
                           </SelectItem>
