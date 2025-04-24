@@ -6,6 +6,7 @@ import { DialogDescription } from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/mine/badge'
 import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { useRequests } from '../../context/requests-context'
 import { getRequestById } from '../../function'
@@ -23,10 +24,8 @@ interface RequestDetailModalProps {
 
 export function RequestDetailModal({ request, requestType, onClose, onApprove, onReject, onMarkAsRead, onAutoProcess }: RequestDetailModalProps) {
   const { processing } = useRequests()
-
   const [response, setResponse] = useState('')
   const maxResponseLength = 3000
-
   const [requestDetails, setRequestDetails] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -58,6 +57,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     if (typeName.includes('báo cáo')) return 'report'
     return 'other'
   }
+
   const currentRequestType = requestType || getRequestTypeLabel()
   const isReport = currentRequestType === 'report'
   const isPickup = currentRequestType === 'pickup' || requestData.requestTypeName?.includes('đón/trả')
@@ -67,6 +67,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
     const d = new Date(date)
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
   }
+
   const getSubmissionDate = () => requestData.createdAt || requestData.createdDate || requestData.submissionDate || requestData.fromDate
 
   /* -------- validate & gửi -------- */
@@ -101,7 +102,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
   /* ------------------ Render ------------------ */
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className='bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
+      <DialogContent className='max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0f172a] sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle className='text-xl'>Chi tiết đơn</DialogTitle>
           <DialogDescription className='flex justify-between text-sm text-muted-foreground'>
@@ -111,32 +112,52 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
 
         {/* ---------- Bảng thông tin ---------- */}
         <div className='py-4'>
-          <table className='w-full overflow-hidden rounded border border-gray-300 text-sm dark:border-gray-600'>
-            <tbody>
-              <InfoRow label='Học sinh' value={requestData.studentName || `Người dùng: ${requestData.sendByUserId?.substring(0, 8)}...`} />
-              <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
-              <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
+          <div className='w-full rounded border border-gray-100 dark:border-gray-600'>
+            <table className='w-full table-fixed text-sm'>
+              <tbody>
+                <InfoRow
+                  label='Học sinh'
+                  value={
+                    requestData.studentName || (
+                      <Badge variant='soft' color='yellow'>
+                        Trống
+                      </Badge>
+                    )
+                  }
+                />
+                <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
+                <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
 
-              {isPickup && requestData.checkpointName && <InfoRow label='Điểm đón/trả mới' value={requestData.checkpointName} />}
+                {isPickup && requestData.checkpointName && <InfoRow label='Điểm đón/trả mới' value={requestData.checkpointName} />}
 
-              {currentRequestType === 'leave' && requestData.fromDate && requestData.toDate && (
-                <>
-                  <InfoRow label='Từ ngày' value={formatDate(requestData.fromDate)} />
-                  <InfoRow label='Đến ngày' value={formatDate(requestData.toDate)} />
-                </>
-              )}
+                {currentRequestType === 'leave' && requestData.fromDate && requestData.toDate && (
+                  <>
+                    <InfoRow label='Từ ngày' value={formatDate(requestData.fromDate)} />
+                    <InfoRow label='Đến ngày' value={formatDate(requestData.toDate)} />
+                  </>
+                )}
 
-              <InfoRow label='Nội dung' value={requestData.reason} multiline />
-              <InfoRow label='Trạng thái' value={<RequestStatusBadge status={requestData.status} />} />
+                <InfoRow
+                  label='Nội dung'
+                  value={
+                    requestData.reason || (
+                      <Badge variant='soft' color='yellow'>
+                        Trống
+                      </Badge>
+                    )
+                  }
+                  multiline
+                />
+                <InfoRow label='Trạng thái' value={<RequestStatusBadge status={requestData.status} />} />
 
-              {requestData.reply && <InfoRow label='Phản hồi' value={requestData.reply} multiline />}
-            </tbody>
-          </table>
+                {requestData.reply && <InfoRow label='Phản hồi' value={requestData.reply} multiline />}
+              </tbody>
+            </table>
+          </div>
 
           {/* ----------- LimitedTextarea ----------- */}
           <div className='my-6'>
             <span className='text-sm font-medium text-muted-foreground'>Phản hồi</span>
-
             {!isReport && isPending && <LimitedTextarea value={response} onChange={setResponse} maxLength={maxResponseLength} placeholder='Nhập phản hồi...' disabled={!isPending || processing} />}
           </div>
         </div>
@@ -180,8 +201,8 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
 function InfoRow({ label, value, multiline = false }: { label: string; value: React.ReactNode; multiline?: boolean }) {
   return (
     <tr className='border-t border-gray-300 dark:border-gray-600'>
-      <td className='w-1/3 whitespace-nowrap bg-gray-100 p-2 align-top text-sm font-medium dark:bg-gray-800'>{label}:</td>
-      <td className={`p-2 text-sm ${multiline ? 'whitespace-pre-wrap break-words' : 'whitespace-nowrap'}`}>{value}</td>
+      <td className='w-1/3 bg-gray-100 p-2 align-top text-sm font-medium dark:bg-gray-800'>{label}:</td>
+      <td className={`p-2 text-sm ${multiline ? 'whitespace-pre-wrap break-words' : ''}`}>{value}</td>
     </tr>
   )
 }
