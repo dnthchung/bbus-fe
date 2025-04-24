@@ -25,6 +25,33 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const MIN_DOB = '1950-01-01'
 const MAX_DOB = new Date().toISOString().split('T')[0]
 
+/**
+ * Chuyển message backend (EN) sang tiếng Việt.
+ * Ví dụ:
+ *  - "User with this phone: 0949602355 already exists"
+ *  → "Số điện thoại 0949602355 đã tồn tại"
+ */
+function parseUserCreationError(message: string): string {
+  // backend có thể trả về nhiều lỗi nối bằng dấu phẩy
+  const parts = message.split(',').map((p) => p.trim())
+  const friendlyParts = parts.map((part) => {
+    let m
+    // check phone
+    m = part.match(/phone:\s*(\d+)/i)
+    if (m) {
+      return `Số điện thoại ${m[1]} đã tồn tại`
+    }
+    // check email
+    m = part.match(/email:\s*([^\s]+)/i)
+    if (m) {
+      return `Email ${m[1]} đã tồn tại`
+    }
+    // nếu còn trường khác, giữ nguyên (hoặc bạn có thể thêm case)
+    return part
+  })
+  return friendlyParts.join('. ')
+}
+
 // Schema cho việc thêm mới người dùng
 const formSchema = z.object({
   name: z
@@ -356,11 +383,12 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
       if (onSuccess) {
         onSuccess()
       }
-    } catch (error) {
-      console.error('Lỗi khi thêm người dùng:', error)
+    } catch (error: any) {
+      console.error('Lỗi khi thêm người dùng:', error?.message)
+      const errorMessage = parseUserCreationError(error?.message || '')
       toast({
         title: 'Không thể thêm người dùng',
-        description: 'Đã xảy ra lỗi khi thêm người dùng mới. Vui lòng thử lại sau.',
+        description: 'Đã xảy ra lỗi khi thêm người dùng mới. ' + errorMessage,
         variant: 'deny',
       })
     } finally {
