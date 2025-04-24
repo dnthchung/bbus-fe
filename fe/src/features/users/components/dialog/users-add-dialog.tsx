@@ -22,6 +22,8 @@ import { useUsers } from '../../context/users-context'
 // Định nghĩa các định dạng file ảnh được chấp nhận
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MIN_DOB = '1950-01-01'
+const MAX_DOB = new Date().toISOString().split('T')[0]
 
 // Schema cho việc thêm mới người dùng
 const formSchema = z.object({
@@ -114,12 +116,15 @@ const formSchema = z.object({
     errorMap: () => ({ message: 'Giới tính không hợp lệ' }),
   }),
   dob: z.preprocess(
-    // nếu input là chuỗi rỗng hoặc undefined, giữ nguyên để cho schema bên trong bắt lỗi
     (val) => (val === '' || val == null ? undefined : val),
-    z.date({
-      required_error: 'Ngày sinh không được để trống',
-      invalid_type_error: 'Ngày sinh không hợp lệ',
-    })
+    z.date({ required_error: 'Ngày sinh không được để trống', invalid_type_error: 'Ngày sinh không hợp lệ' }).refine(
+      (d) => {
+        const min = new Date(MIN_DOB)
+        const max = new Date(MAX_DOB)
+        return d >= min && d <= max
+      },
+      { message: `Ngày sinh phải từ ${MIN_DOB} đến ${MAX_DOB}` }
+    )
   ),
   role: z.string().min(1, 'Vui lòng chọn vai trò'),
   avatar: z
@@ -162,6 +167,8 @@ const generatePassword = (): string => {
     .sort(() => 0.5 - Math.random())
     .join('')
 
+  console.log('Generated password:', password) // Log password to console for debugging
+
   return password
 }
 
@@ -170,8 +177,8 @@ const DEFAULT_AVATAR_PATH = '/images/defaultAvatar.png'
 
 // Hàm xử lý input để ngăn khoảng trắng đầu dòng
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (...event: any[]) => void) => {
-  const value = e.target.value
-  e.target.value = trimValue(value) // Trim ngay khi nhập
+  const newValue = e.target.value.replace(/^\s+/, '')
+  e.target.value = newValue // Trim ngay khi nhập
   onChange(e)
 }
 
@@ -483,10 +490,20 @@ export function UsersAddDialog({ open, onOpenChange, onSuccess }: Props) {
                     <FormItem>
                       <FormLabel>Ngày sinh</FormLabel>
                       <FormControl>
-                        <Input
+                        {/* <Input
                           type='date'
                           min='1900-01-01'
                           max={new Date().toISOString().split('T')[0]}
+                          value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value) : undefined
+                            field.onChange(date)
+                          }}
+                        /> */}
+                        <Input
+                          type='date'
+                          min={MIN_DOB}
+                          max={MAX_DOB}
                           value={field.value ? field.value.toISOString().split('T')[0] : ''}
                           onChange={(e) => {
                             const date = e.target.value ? new Date(e.target.value) : undefined
