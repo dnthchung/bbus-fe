@@ -16,7 +16,7 @@ export async function sendOtpToMail(email: string) {
 //input : otp string + email string
 //ủl : /auth/forgot-password/verify?email=tuanvmhe173334@fpt.edu.vn&otp=573595
 // false : { "timestamp": "2025-04-22T15:11:03.557+00:00", "status": 409, "path": "/auth/forgot-password/verify", "error": "Conflict", "message": "Mã OTP không đúng", "details": {} }
-//true :
+//true : { "status": 200, "sessionId": "404ddaae-647c-4f11-acfd-6c837dee5b10", "message": "Xác thực OTP thành công" }
 export async function verifyOtp(otp: string, email: string) {}
 
 //reset password

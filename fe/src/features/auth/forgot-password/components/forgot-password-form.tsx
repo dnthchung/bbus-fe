@@ -32,8 +32,8 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true)
-      console.log(data)
-      const res = await API_SERVICES.auth.send_otp_to_mail(data.email)
+      await API_SERVICES.auth.send_otp_to_mail(data.email)
+
       toast({
         title: 'Gửi thành công',
         description: 'Vui lòng kiểm tra email của bạn',
@@ -42,13 +42,17 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
 
       setTimeout(() => {
         setIsLoading(false)
-        navigate({ to: '/otp' })
-      }, 3000)
-    } catch (error) {
-      // setErrorMessage(err.response?.data?.message || 'Có lỗi xảy ra')
+        navigate({
+          to: '/otp',
+          search: { email: data.email },
+        })
+      }, 2000)
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
+
       toast({
-        title: 'Có lỗi xảy ra : ' + error,
-        description: 'Vui lòng thử lại.',
+        title: 'Thất bại',
+        description: errorMessage,
         variant: 'deny',
       })
     } finally {
