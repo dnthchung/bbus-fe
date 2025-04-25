@@ -1,5 +1,6 @@
 'use client'
 
+// path url: /fe/src/features/auth/sign-in/index.tsx
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -11,8 +12,6 @@ import { toast } from '@/hooks/use-toast'
 import { AdvancedBusLoader } from '@/components/mine/loader/advanced-bus-loader'
 import { AUTH_MESSAGES } from '@/features/auth/sign-in/data.ts'
 import { UserAuthForm } from './components/user-auth-form'
-
-// 👈 import thêm
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -31,12 +30,12 @@ export default function SignIn() {
 
       const token = localStorage.getItem('accessToken')
       if (!token) throw new Error('Không tìm thấy token!')
+
       const userId = getUserIdFromToken(token)
       if (!userId) throw new Error('Không thể lấy userId từ token!')
 
       const response = await API_SERVICES.auth.fetchUser(userId)
       const user = response.data.data
-
       queryClient.setQueryData(['authUser'], user)
 
       toast({
@@ -44,18 +43,15 @@ export default function SignIn() {
         title: 'Đăng nhập thành công!!',
         description: `${getTimeGreeting()}, ${user.name}.`,
       })
-
       navigate({ to: '/' })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.'
       setError(errorMessage)
-
       toast({
         title: 'Đăng nhập thất bại',
         description: AUTH_MESSAGES.LOGIN_FAILED,
         variant: 'deny',
       })
-
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('isAuthenticated')
@@ -68,12 +64,8 @@ export default function SignIn() {
     <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
       {loading && <AdvancedBusLoader size='full' animation='drive' variant='default' text='Đang đăng nhập...' />}
 
-      <div className='relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex'>
-        <div className='absolute inset-0 bg-zinc-900' />
-        <div className='relative z-20 flex items-center text-lg font-medium'>{/* Logo hoặc tên app */}</div>
-        <div className='relative z-20 mt-auto'>
-          <blockquote className='space-y-2'>{/* Trích dẫn hoặc logo công ty */}</blockquote>
-        </div>
+      <div className='relative hidden h-full w-full flex-col items-center justify-center p-6 lg:flex'>
+        <div className='h-full w-full rounded-lg bg-contain bg-center bg-no-repeat' style={{ backgroundImage: `url('/images/banner4.jpg')` }}></div>
       </div>
 
       <div className='flex items-center justify-center lg:p-8'>
@@ -81,9 +73,7 @@ export default function SignIn() {
           <div className='flex flex-col space-y-2 text-left'>
             <h1 className='text-2xl font-semibold tracking-tight'>Đăng nhập</h1>
             <p className='text-sm text-muted-foreground'>
-              Nhập số điện thoại và mật khẩu dưới đây
-              <br />
-              để đăng nhập vào tài khoản của bạn
+              Nhập số điện thoại và mật khẩu dưới đây <br /> để đăng nhập vào tài khoản của bạn
             </p>
           </div>
           <UserAuthForm onSubmit={handleLogin} isLoading={loading} error={error} />
