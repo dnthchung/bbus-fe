@@ -20,6 +20,10 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 
 // path: fe/src/features/auth/otp/components/otp-form.tsx
 
+// path: fe/src/features/auth/otp/components/otp-form.tsx
+
+// path: fe/src/features/auth/otp/components/otp-form.tsx
+
 // Import the ArrowLeft icon
 
 // path: fe/src/features/auth/otp/components/otp-form.tsx
@@ -85,13 +89,6 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
   /* ------------------------------ UI ------------------------------ */
   return (
     <div className={cn('grid gap-6', className)} {...props}>
-      <div className='flex items-center'>
-        <Button variant='ghost' size='sm' onClick={handleBack} className='gap-1 text-muted-foreground hover:text-foreground' type='button'>
-          <ArrowLeft size={16} />
-          Quay lại
-        </Button>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
           <FormField
@@ -121,6 +118,13 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
           <Button type='submit' disabled={pinValue.length !== OTP_LENGTH || isLoading} className='w-full'>
             {isLoading ? 'Đang xử lý…' : 'Xác thực'}
           </Button>
+
+          <div className='flex items-center'>
+            <Button variant='ghost' size='sm' onClick={handleBack} className='gap-1 text-muted-foreground hover:text-foreground' type='button'>
+              <ArrowLeft size={16} />
+              Quay lại
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

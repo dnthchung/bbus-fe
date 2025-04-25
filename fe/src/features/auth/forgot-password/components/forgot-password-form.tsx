@@ -67,13 +67,6 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
-      <div className='flex items-center'>
-        <Button variant='ghost' size='sm' onClick={handleBackToLogin} className='gap-1 text-muted-foreground hover:text-foreground' type='button'>
-          <ArrowLeft size={16} />
-          Quay lại đăng nhập
-        </Button>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-2'>
@@ -90,9 +83,16 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
                 </FormItem>
               )}
             />
-            <Button className='mt-2' disabled={isLoading}>
+            <Button className='mt-2 w-full' disabled={isLoading}>
               {isLoading ? 'Đang xử lý...' : 'Tiếp tục'}
             </Button>
+
+            <div className='mt-2 flex justify-center'>
+              <Button variant='default' size='sm' onClick={handleBackToLogin} className='gap-1 text-muted-foreground hover:text-foreground' type='button'>
+                <ArrowLeft size={16} />
+                Quay lại đăng nhập
+              </Button>
+            </div>
           </div>
         </form>
       </Form>
