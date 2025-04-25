@@ -75,11 +75,11 @@ function ChangePasswordForm({ className, ...props }: ChangePasswordFormProps) {
 
   if (isSuccess) {
     return (
-      <div className='py-4 text-center'>
-        <h3 className='mb-2 text-lg font-medium text-green-600'>Đổi mật khẩu thành công!</h3>
-        <p className='mb-4 text-sm text-muted-foreground'>Mật khẩu của bạn đã được cập nhật.</p>
-        <Link to='/sign-in' className='text-primary hover:underline'>
-          <Button>Đăng nhập ngay</Button>
+      <div className='space-y-4 py-6 text-center'>
+        <h3 className='text-lg font-semibold text-green-600'>🎉 Đổi mật khẩu thành công!</h3>
+        <p className='text-sm text-muted-foreground'>Mật khẩu của bạn đã được cập nhật. Bạn có thể đăng nhập lại ngay bây giờ.</p>
+        <Link to='/sign-in'>
+          <Button className='w-full'>Đăng nhập ngay</Button>
         </Link>
       </div>
     )

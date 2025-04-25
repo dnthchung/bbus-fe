@@ -87,12 +87,10 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
               {isLoading ? 'Đang xử lý...' : 'Tiếp tục'}
             </Button>
 
-            <div className='mt-2 flex justify-center'>
-              <Button variant='default' size='sm' onClick={handleBackToLogin} className='gap-1 text-muted-foreground hover:text-foreground' type='button'>
-                <ArrowLeft size={16} />
-                Quay lại đăng nhập
-              </Button>
-            </div>
+            <Button variant='secondary' size='sm' onClick={handleBackToLogin} className='mt-2 w-full gap-1 text-muted-foreground hover:text-foreground' type='button'>
+              <ArrowLeft size={16} />
+              Quay lại đăng nhập
+            </Button>
           </div>
         </form>
       </Form>
