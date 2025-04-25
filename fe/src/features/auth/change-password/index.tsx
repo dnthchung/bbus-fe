@@ -1,3 +1,4 @@
+//file url :  fe/src/features/auth/change-password/index.tsx
 import { Link } from '@tanstack/react-router'
 import { Card } from '@/components/ui/card'
 import ChangePasswordForm from '@/features/auth/change-password/components/change-password-form'

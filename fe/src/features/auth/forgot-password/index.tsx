@@ -1,5 +1,4 @@
-// import { Link } from '@tanstack/react-router'
-import { Link } from '@tanstack/react-router'
+//url file : fe/src/features/auth/forgot-password/index.tsx
 import { Card } from '@/components/ui/card'
 import AuthLayout from '../auth-layout'
 import { ForgotForm } from './components/forgot-password-form'
@@ -13,16 +12,6 @@ export default function ForgotPassword() {
           <p className='text-sm text-muted-foreground'>Chúng tôi sẽ gửi mã xác minh đến email của bạn để hỗ trợ quá trình đặt lại mật khẩu. Vui lòng nhập email bên dưới.</p>
         </div>
         <ForgotForm />
-        {/* <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
-          Bạn không có tài khoản?{' '}
-          <Link
-            to='/sign-up'
-            className='underline underline-offset-4 hover:text-primary'
-          >
-            Đăng ký
-          </Link>
-          .
-        </p> */}
       </Card>
     </AuthLayout>
   )

@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
+import { ArrowLeft } from 'lucide-react'
+// Import the ArrowLeft icon
 import { API_SERVICES } from '@/api/api-services'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
@@ -28,6 +30,9 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
       email: '',
     },
   })
+  const handleBackToLogin = () => {
+    navigate({ to: '/sign-in' })
+  }
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
@@ -62,6 +67,13 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
+      <div className='flex items-center'>
+        <Button variant='ghost' size='sm' onClick={handleBackToLogin} className='gap-1 text-muted-foreground hover:text-foreground' type='button'>
+          <ArrowLeft size={16} />
+          Quay lại đăng nhập
+        </Button>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-2'>

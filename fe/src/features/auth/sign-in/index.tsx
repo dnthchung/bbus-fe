@@ -1,6 +1,5 @@
 'use client'
 
-// path url: /fe/src/features/auth/sign-in/index.tsx
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -30,7 +29,6 @@ export default function SignIn() {
 
       const token = localStorage.getItem('accessToken')
       if (!token) throw new Error('Không tìm thấy token!')
-
       const userId = getUserIdFromToken(token)
       if (!userId) throw new Error('Không thể lấy userId từ token!')
 
@@ -43,15 +41,18 @@ export default function SignIn() {
         title: 'Đăng nhập thành công!!',
         description: `${getTimeGreeting()}, ${user.name}.`,
       })
+
       navigate({ to: '/' })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.'
       setError(errorMessage)
+
       toast({
         title: 'Đăng nhập thất bại',
         description: AUTH_MESSAGES.LOGIN_FAILED,
         variant: 'deny',
       })
+
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('isAuthenticated')
@@ -61,34 +62,32 @@ export default function SignIn() {
   }
 
   return (
-    <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
+    <div className='relative flex h-svh w-full items-center justify-center bg-cover bg-center' style={{ backgroundImage: `url('/images/9.jpg')` }}>
       {loading && <AdvancedBusLoader size='full' animation='drive' variant='default' text='Đang đăng nhập...' />}
 
-      <div className='relative hidden h-full w-full flex-col items-center justify-center p-6 lg:flex'>
-        <div className='h-full w-full rounded-lg bg-contain bg-center bg-no-repeat' style={{ backgroundImage: `url('/images/banner4.jpg')` }}></div>
-      </div>
-
-      <div className='flex items-center justify-center lg:p-8'>
-        <div className='mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[350px]'>
-          <div className='flex flex-col space-y-2 text-left'>
-            <h1 className='text-2xl font-semibold tracking-tight'>Đăng nhập</h1>
-            <p className='text-sm text-muted-foreground'>
-              Nhập số điện thoại và mật khẩu dưới đây <br /> để đăng nhập vào tài khoản của bạn
-            </p>
-          </div>
-          <UserAuthForm onSubmit={handleLogin} isLoading={loading} error={error} />
-          <p className='px-8 text-center text-sm text-muted-foreground'>
-            Bằng cách nhấn vào đăng nhập, bạn đồng ý với{' '}
-            <a href='/terms' className='underline underline-offset-4 hover:text-primary'>
-              Điều khoản dịch vụ
-            </a>{' '}
-            và{' '}
-            <a href='/privacy' className='underline underline-offset-4 hover:text-primary'>
-              Chính sách bảo mật
-            </a>
-            .
+      <div className='mx-auto w-full max-w-md space-y-6 rounded-lg bg-white/80 p-8 shadow-lg backdrop-blur-md'>
+        <div className='flex flex-col items-center space-y-2 text-center'>
+          <span className='text-4xl'>👋</span>
+          <h1 className='text-2xl font-semibold tracking-tight'>Bbus - Đăng nhập</h1>
+          <p className='text-sm text-muted-foreground'>
+            Nhập số điện thoại và mật khẩu dưới đây <br />
+            để đăng nhập vào tài khoản của bạn
           </p>
         </div>
+
+        <UserAuthForm onSubmit={handleLogin} isLoading={loading} error={error} />
+
+        <p className='px-4 text-center text-sm text-muted-foreground'>
+          Bằng cách nhấn vào đăng nhập, bạn đồng ý với{' '}
+          <a href='/terms' className='underline underline-offset-4 hover:text-primary'>
+            Điều khoản dịch vụ
+          </a>{' '}
+          và{' '}
+          <a href='/privacy' className='underline underline-offset-4 hover:text-primary'>
+            Chính sách bảo mật
+          </a>
+          .
+        </p>
       </div>
     </div>
   )

@@ -11,7 +11,7 @@ export default function Otp() {
         <div className='mb-2 flex flex-col space-y-2 text-left'>
           <h1 className='text-md font-semibold tracking-tight'>Xác thực hai yếu tố</h1>
           <p className='text-sm text-muted-foreground'>
-            Vui lòng nhập mã xác thực. <br /> Chúng tôi đã gửi mã xác thực đến số điện thoại của bạn.
+            Vui lòng nhập mã xác thực. <br /> Chúng tôi đã gửi mã xác thực đến email
           </p>
         </div>
         <OtpForm />

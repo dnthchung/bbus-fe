@@ -27,7 +27,7 @@ const passwordSchema = z
 
 function ChangePasswordForm({ className, ...props }: ChangePasswordFormProps) {
   const navigate = useNavigate()
-  const { sessionId } = useSearch({ from: '/(auth)/otp' }) as { sessionId: string }
+  const { sessionId } = useSearch({ from: '/(auth)/change-password' }) as { sessionId: string }
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
