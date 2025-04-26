@@ -14,11 +14,17 @@ import { PasswordInput } from '@/components/common/password-input'
 
 type ChangePasswordFormProps = HTMLAttributes<HTMLDivElement>
 
-// ✅ Schema kiểm tra mật khẩu
 const passwordSchema = z
   .object({
-    password: z.string().min(8, { message: 'Mật khẩu phải có ít nhất 8 ký tự' }).regex(/[A-Z]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa' }).regex(/[a-z]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ thường' }).regex(/[0-9]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ số' }),
-    confirmPassword: z.string().min(1, { message: 'Vui lòng xác nhận mật khẩu' }),
+    password: z
+      .string()
+      .trim() // ✨ Tự động loại bỏ khoảng trắng đầu/cuối khi validate
+      .min(8, { message: 'Mật khẩu phải có từ 8 đến 15 ký tự' })
+      .max(15, { message: 'Mật khẩu phải có từ 8 đến 15 ký tự' })
+      .regex(/[A-Z]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa' })
+      .regex(/[a-z]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ thường' })
+      .regex(/[0-9]/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ số' }),
+    confirmPassword: z.string().trim().min(1, { message: 'Vui lòng xác nhận mật khẩu' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Mật khẩu không khớp',

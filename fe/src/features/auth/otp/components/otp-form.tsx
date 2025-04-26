@@ -1,4 +1,3 @@
-// path: fe/src/features/auth/otp/components/otp-form.tsx
 'use client'
 
 import { HTMLAttributes, useState } from 'react'
@@ -13,24 +12,6 @@ import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
-
-// Import the ArrowLeft icon
-
-// path: fe/src/features/auth/otp/components/otp-form.tsx
 
 // path: fe/src/features/auth/otp/components/otp-form.tsx
 
