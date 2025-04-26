@@ -23,12 +23,12 @@ export const userTypes = [
     value: 'ADMIN',
     icon: IconUserShield,
   },
-  {
-    label: 'Teacher',
-    labelVi: 'Giáo viên',
-    value: 'TEACHER',
-    icon: IconSchool,
-  },
+  // {
+  //   label: 'Teacher',
+  //   labelVi: 'Giáo viên',
+  //   value: 'TEACHER',
+  //   icon: IconSchool,
+  // },
   {
     label: 'Parent',
     labelVi: 'Phụ huynh',
@@ -55,21 +55,21 @@ export const allAdminUsersTypes = [
     labelVi: 'Quản trị hệ thống',
     value: 'SYSADMIN',
     icon: IconShield,
-  }, 
+  },
   {
     label: 'Business Admin',
     labelVi: 'Quản lý',
-    value: 'ADMIN', 
-  }
-]  as const
+    value: 'ADMIN',
+  },
+] as const
 
 export const allUsersExceptAdminsTypes = [
-  {
-    label: 'Teacher',
-    labelVi: 'Giáo viên',
-    value: 'TEACHER',
-    icon: IconSchool,
-  },
+  // {
+  //   label: 'Teacher',
+  //   labelVi: 'Giáo viên',
+  //   value: 'TEACHER',
+  //   icon: IconSchool,
+  // },
   {
     label: 'Parent',
     labelVi: 'Phụ huynh',
