@@ -1,8 +1,8 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
+import { IconEye } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCheckpoints } from '../../context/checkpoints-context'
 import { Checkpoint } from '../../data/schema'
 
@@ -32,9 +32,9 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               setOpen('edit')
             }}
           >
-            Chỉnh sửa
+            Xem chi tiết
             <DropdownMenuShortcut>
-              <IconEdit size={16} />
+              <IconEye size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
 

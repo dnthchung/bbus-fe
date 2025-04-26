@@ -51,8 +51,8 @@ export const columns: ColumnDef<Checkpoint>[] = [
   {
     accessorKey: 'description',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Mô tả' />,
-    cell: ({ row }) => <LongText className='max-w-64'>{row.getValue('description')}</LongText>,
-    meta: { className: 'w-64' },
+    cell: ({ row }) => <LongText className='max-w-40'>{row.getValue('description')}</LongText>,
+    meta: { className: 'w-20' },
   },
   {
     accessorKey: 'latitude',
