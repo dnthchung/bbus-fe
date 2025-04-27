@@ -17,12 +17,12 @@ export function BusesUploadStudentToCamera({ open, onOpenChange }: Props) {
   const handleConfirm = async () => {
     try {
       console.log('handleConfirm')
-      //   const response = await API_SERVICES.camera.upload_student_to_camera()
-      //   if (response.status === 200) {
-      //     toast({ title: 'Tải danh sách học sinh lên camera thành công!', variant: 'success' })
-      //   } else {
-      //     toast({ title: 'Tải danh sách học sinh lên camera thất bại!', variant: 'deny' })
-      //   }
+      const response = await API_SERVICES.camera.upload_student_to_camera()
+      if (response.status === 200) {
+        toast({ title: 'Tải danh sách học sinh lên camera thành công!', variant: 'success' })
+      } else {
+        toast({ title: 'Tải danh sách học sinh lên camera thất bại!', variant: 'deny' })
+      }
       onOpenChange(false)
     } catch (error) {
       console.error('Error uploading student to camera:', error)
