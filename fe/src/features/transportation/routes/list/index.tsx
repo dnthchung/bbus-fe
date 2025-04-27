@@ -113,7 +113,7 @@ function RoutesContent() {
       toast({
         title: 'Thành công',
         description: `Đã tải thông tin tuyến đường ${route.code}`,
-        variant: 'default',
+        variant: 'success',
       })
     } catch (error) {
       console.error('Error selecting route:', error)
@@ -121,7 +121,7 @@ function RoutesContent() {
       toast({
         title: 'Lỗi',
         description: 'Không thể tải thông tin tuyến đường',
-        variant: 'destructive',
+        variant: 'deny',
       })
     } finally {
       setLoadingCheckpoints(false)

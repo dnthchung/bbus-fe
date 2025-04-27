@@ -6,7 +6,7 @@ import { Bus } from '@/features/buses/schema'
 // Hàm giả định để lấy danh sách buses
 
 // Các loại dialog mà chúng ta quản lý
-type BusesDialogType = 'import' | 'add' | 'edit' | 'delete' | 'view-edit-details' | 'change-student-capacity'
+type BusesDialogType = 'import' | 'add' | 'edit' | 'delete' | 'view-edit-details' | 'change-student-capacity' | 'upload-student-to-camera'
 
 // Cấu trúc context cho Buses
 interface BusesContextType {

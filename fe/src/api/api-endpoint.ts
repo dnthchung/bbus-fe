@@ -91,4 +91,7 @@ export const API_ENDPOINTS = {
     REPLY_REQUEST: '/request/reply',
     PROCESS_CHANGE_CHECKPOINT: '/request/process-change-checkpoint',
   },
+  CAMERA: {
+    UPLOAD_STUDENT_TO_CAMERA: '/camera-request/upload-all-unsuccessful',
+  },
 } as const

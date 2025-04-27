@@ -17,7 +17,7 @@ export function BusesPrimaryButtons() {
         <span>Thêm xe buýt mới</span>
         <IconBus size={18} />
       </Button> */}
-      <Button variant='outline' className='space-x-1'>
+      <Button variant='outline' className='space-x-1' onClick={() => setOpen('upload-student-to-camera')}>
         <span>Tải DS học sinh lên camera</span>
         {/*
           cần 1 button để bên ngoài list , để import chay danh sách student vào cam , cần 1 nút kiểu để kích hoạt lại\hoặc lần đầu việc load student từ sys lên cam - load

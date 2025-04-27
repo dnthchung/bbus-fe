@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
@@ -104,11 +105,12 @@ export default function CreateCheckpointPage() {
       })
       return
     }
+
     setIsLoading(true)
     try {
       const checkpointData = {
-        checkpointName: checkpointName,
-        description: description,
+        checkpointName: checkpointName.trim(),
+        description: description.trim(),
         latitude: checkpoint[0].toString(),
         longitude: checkpoint[1].toString(),
       }
@@ -207,17 +209,39 @@ export default function CreateCheckpointPage() {
               </CardTitle>
               <CardDescription>Nhập thông tin chi tiết cho điểm dừng mới</CardDescription>
             </CardHeader>
+            <div className='px-6 py-2'>
+              <Separator className='bg-muted-foreground/10' />
+            </div>
             <CardContent className='space-y-4'>
               <div className='grid grid-cols-1 gap-4'>
                 {/* Checkpoint Name */}
                 <div className='space-y-2'>
                   <Label htmlFor='checkpoint-name'>Tên điểm dừng</Label>
-                  <Input id='checkpoint-name' value={checkpointName} onChange={(e) => setCheckpointName(e.target.value)} placeholder='Nhập tên điểm dừng' />
+                  {/* <Input id='checkpoint-name' value={checkpointName} onChange={(e) => setCheckpointName(e.target.value)} placeholder='Nhập tên điểm dừng' /> */}
+                  <Input
+                    id='checkpoint-name'
+                    value={checkpointName}
+                    onChange={(e) => {
+                      const val = e.target.value.trimStart() // giữ khoảng trắng đầu cho smooth typing
+                      if (val.length <= 128) {
+                        setCheckpointName(val)
+                      }
+                    }}
+                    placeholder='Nhập tên điểm dừng (tối đa 128 ký tự)'
+                  />
                 </div>
                 {/* Description */}
                 <div className='space-y-2'>
                   <Label htmlFor='checkpoint-description'>Mô tả</Label>
-                  <Textarea id='checkpoint-description' value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Nhập mô tả ngắn gọn' rows={3} />
+                  {/* <Textarea id='checkpoint-description' value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Nhập mô tả ngắn gọn' rows={3} /> */}
+
+                  <LimitedTextarea
+                    value={description}
+                    onChange={(val) => setDescription(val)}
+                    placeholder='Nhập mô tả ngắn gọn'
+                    maxLength={3000} // bạn có thể tùy chỉnh nếu cần
+                    disabled={isLoading}
+                  />
                 </div>
                 {/* Coordinates */}
                 <div className='space-y-2'>

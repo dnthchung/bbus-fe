@@ -91,10 +91,16 @@ interface ApiServices {
     reply_request: (request: any) => Promise<any>
     process_change_checkpoint: (requestId: string) => Promise<any>
   }
+  camera: {
+    upload_student_to_camera: () => Promise<any>
+  }
 }
 
 // Add the implementation in the students section of API_SERVICES
 export const API_SERVICES: ApiServices = {
+  camera: {
+    upload_student_to_camera: () => apiClient.get(API_ENDPOINTS.CAMERA.UPLOAD_STUDENT_TO_CAMERA),
+  },
   // -------------------------
   // 1) AUTH
   // -------------------------
