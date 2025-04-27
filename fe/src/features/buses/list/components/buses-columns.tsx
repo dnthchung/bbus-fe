@@ -51,7 +51,7 @@ export const columns: ColumnDef<Bus>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title='Biển số xe' />,
     cell: ({ row }) => {
       const value = row.getValue('licensePlate')
-      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Chưa có biển số' />
+      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
     },
   },
 

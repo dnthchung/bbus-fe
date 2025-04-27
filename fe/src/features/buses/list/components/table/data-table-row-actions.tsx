@@ -46,14 +46,14 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             <IconUserBolt size={16} />
           </DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {/* <DropdownMenuSeparator /> */}
         {/* ===== Xóa ===== */}
-        <DropdownMenuItem onClick={() => {}} className='!text-red-500'>
+        {/* <DropdownMenuItem onClick={() => {}} className='!text-red-500'>
           Xóa
           <DropdownMenuShortcut>
             <IconTrash size={16} />
           </DropdownMenuShortcut>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   )
