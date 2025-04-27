@@ -57,6 +57,8 @@ export default function UsersDetailsContent() {
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
+  const getRole = localStorage.getItem('role')
+
   const MIN_DOB = '1950-01-01'
   const MAX_DOB = '2025-12-31'
 
@@ -585,11 +587,18 @@ export default function UsersDetailsContent() {
                   </tbody>
                 </table>
               </div>
-              <div className='mt-6'>
+              {getRole !== 'SYSADMIN' && (
+                <div className='mt-6'>
+                  <Button variant='destructive' onClick={handleStatusChange} disabled={updatingStatus}>
+                    {updatingStatus ? 'Đang xử lý...' : user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                  </Button>
+                </div>
+              )}
+              {/* <div className='mt-6'>
                 <Button variant='destructive' onClick={handleStatusChange} disabled={updatingStatus}>
                   {updatingStatus ? 'Đang xử lý...' : user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
                 </Button>
-              </div>
+              </div> */}
             </div>
             <div>
               <h2 className='my-6 text-xl font-semibold'>Ảnh đại diện</h2>
