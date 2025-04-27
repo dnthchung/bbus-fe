@@ -167,6 +167,19 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
     }
   }
 
+  const handleCancel = () => {
+    /* reset form to the current student prop */
+    reset({
+      id: student.id,
+      name: student.name ?? '',
+      dob: student.dob ? new Date(student.dob) : undefined,
+      address: student.address ?? '',
+      gender: student.gender ?? 'MALE',
+      className: student.className ?? '1A',
+    })
+    setEditing(false)
+  }
+
   /* ─────────── AVATAR ─────────── */
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -225,7 +238,7 @@ export function StudentsPersonalInfoTab({ student, onStudentUpdate, formatDate }
               <h3 className='text-lg font-medium'>Thông tin cá nhân</h3>
               {editing ? (
                 <div className='space-x-2'>
-                  <Button variant='outline' size='sm' onClick={() => setEditing(false)} type='button'>
+                  <Button variant='outline' size='sm' onClick={handleCancel} type='button'>
                     Hủy
                   </Button>
                   <Button size='sm' type='submit'>
