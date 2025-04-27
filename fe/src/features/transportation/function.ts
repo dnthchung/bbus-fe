@@ -10,10 +10,10 @@ export async function getBusesByCheckpointId(checkpointId: string) {
   try {
     const response = await API_SERVICES.buses.get_list_bus_by_checkpoint_id(checkpointId)
     const listBus = response.data.data
-    console.log('1. list Bus của checkpoint => ', listBus)
+    // console.log('1. list Bus của checkpoint => ', listBus)
     return listBus
   } catch (error) {
-    console.error('Error fetching buses by checkpoint ID:', error)
+    // console.error('Error fetching buses by checkpoint ID:', error)
     throw error
   }
 }
@@ -24,10 +24,10 @@ export async function getStudentsByCheckpointId(checkpointId: string) {
   try {
     const response = await API_SERVICES.students.get_list_student_by_checkpoint_id(checkpointId)
     const students = response.data.data
-    console.log('2. list student đăng ký checkpoint => ', students)
+    // console.log('2. list student đăng ký checkpoint => ', students)
     return students
   } catch (error) {
-    console.error('Error fetching students by checkpoint ID:', error)
+    // console.error('Error fetching students by checkpoint ID:', error)
     throw error
   }
 }
@@ -37,10 +37,10 @@ export async function getStudentsByCheckpointId(checkpointId: string) {
 export async function getListCheckpoint() {
   try {
     const response = await API_SERVICES.checkpoints.get_all()
-    console.log('3. list checkpoint => ', response.data.data.checkpoints)
+    // console.log('3. list checkpoint => ', response.data.data.checkpoints)
     return response.data.data.checkpoints
   } catch (error) {
-    console.error('Error fetching list checkpoint:', error)
+    // console.error('Error fetching list checkpoint:', error)
     throw error
   }
 }
@@ -54,7 +54,7 @@ export async function getNumberOfStudentInEachCheckpoint(checkpointId: string) {
     // console.log('4 studentCount => ', studentCount)
     return studentCount
   } catch (error) {
-    console.error('Error fetching number of student in each checkpoint:', error)
+    // console.error('Error fetching number of student in each checkpoint:', error)
     throw error
   }
 }
@@ -69,7 +69,7 @@ export async function getCheckpointsInARouteByBusId(checkpointId: string) {
   try {
     const req = await API_SERVICES.route.get_a_route_by_bus_id(checkpointId)
     const listCheckpointInRoute = req.data.data
-    console.log('5. list checkpoint in route => ', listCheckpointInRoute)
+    // console.log('5. list checkpoint in route => ', listCheckpointInRoute)
     return listCheckpointInRoute
   } catch (error) {
     toast({
@@ -77,7 +77,7 @@ export async function getCheckpointsInARouteByBusId(checkpointId: string) {
       description: 'Error fetching list checkpoint in route',
       variant: 'deny',
     })
-    console.error('Error fetching list checkpoint in route:', error)
+    // console.error('Error fetching list checkpoint in route:', error)
     throw error
   }
 }
@@ -88,10 +88,10 @@ export async function getCheckpointDetailByCheckpointId(checkpointId: string) {
   try {
     const req = await API_SERVICES.checkpoints.get_a_checkpoint_by_checkpoint_id(checkpointId)
     const checkpointDetail = req.data.data
-    console.log('6. checkpoint detail => ', checkpointDetail)
+    // console.log('6. checkpoint detail => ', checkpointDetail)
     return checkpointDetail
   } catch (error) {
-    console.error('Error fetching checkpoint detail:', error)
+    // console.error('Error fetching checkpoint detail:', error)
     return null
   }
 }
@@ -103,10 +103,10 @@ export async function getAllRoute() {
   try {
     const req = await API_SERVICES.route.get_all_route()
     const listRoute = req.data.routes
-    console.log('7. list route => ', listRoute)
+    // console.log('7. list route => ', listRoute)
     return listRoute
   } catch (error) {
-    console.log('error get all route => ', error)
+    // console.log('error get all route => ', error)
     throw error
   }
 }
@@ -118,11 +118,11 @@ export async function getAllRoute() {
 export async function getRouteByRouteId(routeId: string) {
   try {
     const req = await API_SERVICES.route.get_a_route_by_route_id(routeId)
-    const route = req.data.data
-    console.log('8. route => ', route)
+    const route = req.data.data || req.data
+    console.log('8. route => ', req)
     return route
   } catch (error) {
-    console.log('error get route by routeId => ', error)
+    // console.log('error get route by routeId => ', error)
     // Return a default object instead of throwing
     return { path: '' }
   }
@@ -133,10 +133,10 @@ export async function getBusListByRouteId(routeId: string) {
   try {
     const req = await API_SERVICES.route.get_bus_list_by_route_id(routeId)
     const busList = req.data.data
-    console.log('9. bus list => ', busList)
+    // console.log('9. bus list => ', busList)
     return busList
   } catch (error) {
-    console.log('error get bus list by route id => ', error)
+    // console.log('error get bus list by route id => ', error)
     throw error
   }
 }
@@ -145,14 +145,14 @@ export async function getBusListByRouteId(routeId: string) {
 //result : [ { "id": "080e0ee6-a265-48c1-a8d5-f00cc28fbe47", "name": "test", "description": "test", "latitude": "20.09872", "longitude": "107.02182", "status": "ACTIVE" }, { "id": "9c7dc267-6dc8-49b5-9f4c-1ba317cc516d", "name": "Bến xe Giáp Bát", "description": "Trạm xe buýt ngay Bến xe Giáp Bát", "latitude": "20.995568", "longitude": "105.841293", "status": "ACTIVE" }, { "id": "346b48c3-912f-456f-b2e2-4469260962e6", "name": "Cầu Chương Dương", "description": "Trạm xe buýt ở đầu cầu Chương Dương", "latitude": "21.033028", "longitude": "105.863672", "status": "INACTIVE" }, { "id": "90cd0ab6-9bc0-42be-a996-6f47cfe2b04c", "name": "Hồ Hoàn Kiếm", "description": "Trạm xe buýt đối diện Hồ Hoàn Kiếm", "latitude": "21.028511", "longitude": "105.854203", "status": "ACTIVE" } ]
 export async function getListCheckpointByRouteId(routeId: string) {
   try {
-    console.log('routeId => ', routeId)
+    // console.log('routeId => ', routeId)
     const req = await API_SERVICES.route.get_list_checkpoint_by_route_id(routeId)
     // Handle different response structures
     const listCheckpoint = req.data?.data || req.data || []
-    console.log('10. list checkpoint => ', listCheckpoint)
+    // console.log('10. list checkpoint => ', listCheckpoint)
     return listCheckpoint
   } catch (error) {
-    console.log('error get list checkpoint by route id => ', error)
+    // console.log('error get list checkpoint by route id => ', error)
     return []
   }
 }
@@ -162,7 +162,7 @@ export async function createRoute(route: any) {
   try {
     const req = await API_SERVICES.route.create_a_route(route)
     const newRoute = req.data.data
-    console.log('11. new route => ', newRoute)
+    // console.log('11. new route => ', newRoute)
   } catch (error) {
     toast({
       title: 'Tạo tuyến xe thất bại',
@@ -180,10 +180,10 @@ export async function getAllCheckpointButNotInRoute() {
   try {
     const req = await API_SERVICES.checkpoints.get_all_checkpoint_no_route()
     const listCheckpoint = req.data.data || req.data
-    console.log('12. list checkpoint => ', listCheckpoint)
+    // console.log('12. list checkpoint => ', listCheckpoint)
     return listCheckpoint
   } catch (error) {
-    console.log('error get all checkpoint but not in route => ', error)
+    // console.log('error get all checkpoint but not in route => ', error)
     return []
   }
 }
@@ -191,11 +191,11 @@ export async function getAllCheckpointButNotInRoute() {
 //edit route by routeId
 export async function editRouteByRouteId(routeId: string, route: any) {
   try {
-    console.log('routeId: ', routeId)
-    console.log('route: ', route)
+    // console.log('routeId: ', routeId)
+    // console.log('route: ', route)
     const req = await API_SERVICES.route.edit_route_by_route_id(routeId, route)
-    const updatedRoute = req.data.data
-    console.log('13. updated route => ', updatedRoute)
+    // const updatedRoute = req.data.data
+    // console.log('13. updated route => ', updatedRoute)
   } catch (error) {
     toast({
       title: 'Cập nhật tuyến xe thất bại',

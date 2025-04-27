@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet-routing-machine'
 import 'leaflet/dist/leaflet.css'
@@ -28,18 +28,16 @@ function MapUpdater({ center }: { center: [number, number] | null }) {
 // Component to handle routing between checkpoints
 function RoutingMachine({ checkpoints }: { checkpoints: Checkpoint[] }) {
   const map = useMap()
+  const routingControlRef = useRef<L.Routing.Control | null>(null)
 
   useEffect(() => {
     if (!checkpoints || checkpoints.length < 2) return
 
     // Remove any existing routing control
-    map.eachLayer((layer) => {
-      // @ts-ignore - Type checking for instanceof L.Routing.Control
-      if (layer instanceof L.Routing.Control) {
-        // map.removeLayer(layer)
-        map.removeControl(routingControl)
-      }
-    })
+    if (routingControlRef.current) {
+      map.removeControl(routingControlRef.current)
+      routingControlRef.current = null
+    }
 
     // Filter out invalid checkpoints
     const validCheckpoints = checkpoints.filter((cp) => !cp.isInvalid)

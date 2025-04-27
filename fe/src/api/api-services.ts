@@ -77,7 +77,7 @@ interface ApiServices {
     delete_batch: (date: string) => Promise<any>
   }
   route: {
-    edit_route_by_route_id: (routeId: string, route: any) => Promise<any>
+    edit_route_by_route_id: (routeId: string, orderedCheckpointIds: string[]) => Promise<any>
     get_a_route_by_bus_id: (busId: string) => Promise<any>
     get_all_route: () => Promise<any>
     get_a_route_by_route_id: (routeId: string) => Promise<any>
@@ -276,10 +276,10 @@ export const API_SERVICES: ApiServices = {
   // 11) route
   //--------------------------
   route: {
-    edit_route_by_route_id: (routeId: string, route: any) => apiClient.patch(API_ENDPOINTS.ROUTE.EDIT_ROUTE_BY_ROUTE_ID, { routeId, route }),
+    edit_route_by_route_id: (routeId: string, orderedCheckpointIds: string[]) => apiClient.patch(API_ENDPOINTS.ROUTE.EDIT_ROUTE_BY_ROUTE_ID, { routeId, orderedCheckpointIds }),
     get_a_route_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_BUS_ID}?busId=${busId}`),
     get_all_route: () => apiClient.get(API_ENDPOINTS.ROUTE.GET_ALL_ROUTE),
-    get_a_route_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_ROUTE_ID}?routeId=${routeId}`),
+    get_a_route_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_ROUTE_ID}/${routeId}`),
     get_bus_list_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_BUS_LIST_BY_ROUTE_ID}?routeId=${routeId}`),
     get_list_checkpoint_by_route_id: (routeId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_LIST_CHECKPOINT_BY_ROUTE_ID}?routeId=${routeId}`),
     create_a_route: (route: any) => apiClient.post(API_ENDPOINTS.ROUTE.CREATE_A_ROUTE, route),
