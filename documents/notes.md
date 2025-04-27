@@ -356,3 +356,4 @@ Directory structure:
 
 ----
 
+//path : fe/src/features/buses/list/components/tab/basic-info-tab.tsx : dùng useCallback để tạo ra một hàm callback mà không bị thay đổi giữa các lần render. Điều này giúp tối ưu hóa hiệu suất của component và tránh việc tạo ra các hàm mới không cần thiết trong mỗi lần render.

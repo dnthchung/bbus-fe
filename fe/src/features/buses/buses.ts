@@ -15,7 +15,7 @@ export async function getAllBuses(): Promise<Bus[]> {
       return []
     }
 
-    console.log('Raw buses data:', rawBuses)
+    // console.log('Raw buses data:', rawBuses)
     const parsedBuses = busListSchema.parse(rawBuses)
     return parsedBuses
   } catch (error) {

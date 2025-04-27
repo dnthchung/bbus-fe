@@ -1,8 +1,11 @@
+//path : fe/src/features/buses/list/components/tab/basic-info-tab.tsx
 import React, { useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { Link } from '@tanstack/react-router'
-import { IconEye } from '@tabler/icons-react'
+import { IconEye, IconLoader } from '@tabler/icons-react'
 import { isValidVietnamLicensePlate, validateVietnamLicensePlateParts } from '@/helpers/vietnamese-plate-check'
 import { Loader2 } from 'lucide-react'
+import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,22 +31,33 @@ interface Parent {
   role: string
 }
 
-interface Student {
-  id: string
+// interface Student {
+//   id: string
+//   rollNumber: string
+//   name: string
+//   avatar: string
+//   dob: string
+//   address: string
+//   gender: string
+//   status: string
+//   parentId: string
+//   busId: string
+//   busName: string
+//   parent: Parent
+//   checkpointId: string
+//   checkpointName: string
+//   checkpointDescription: string
+// }
+
+export interface Student {
+  studentId: string
+  studentName: string
   rollNumber: string
-  name: string
-  avatar: string
-  dob: string
+  gender: 'MALE' | 'FEMALE' // hoặc string nếu cần linh hoạt
   address: string
-  gender: string
   status: string
-  parentId: string
-  busId: string
-  busName: string
-  parent: Parent
-  checkpointId: string
+  parentName: string
   checkpointName: string
-  checkpointDescription: string
 }
 
 interface BasicInfoTabProps {
@@ -61,6 +75,42 @@ function truncateName(fullName: string, maxWords = 3) {
   return words.slice(0, maxWords).join(' ') + '...'
 }
 
+async function reCallUploadStudentsToCamera(busId: string, onUpdateStudentList: (students: Student[]) => void, setIsUploading: (loading: boolean) => void) {
+  try {
+    setIsUploading(true)
+    toast({
+      title: 'Đang tải lên...',
+      description: 'Vui lòng chờ trong giây lát.',
+      variant: 'default',
+    })
+
+    const response = await API_SERVICES.camera.upload_student_to_camera()
+    if (response.status === 200) {
+      toast({
+        title: 'Thành công',
+        description: 'Tải danh sách học sinh lên camera thành công!',
+        variant: 'success',
+      })
+      const updatedStudents = await getStudentsByBusId(busId)
+      onUpdateStudentList(updatedStudents)
+    } else {
+      toast({
+        title: 'Thất bại',
+        description: 'Tải danh sách học sinh lên camera thất bại!',
+        variant: 'deny',
+      })
+    }
+  } catch (error) {
+    toast({
+      title: 'Thất bại',
+      description: `Đã xảy ra lỗi khi tải danh sách học sinh lên camera: ${error instanceof Error ? error.message : 'Đã xảy ra lỗi không xác định'}`,
+      variant: 'deny',
+    })
+  } finally {
+    setIsUploading(false)
+  }
+}
+
 export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
   const [editing, setEditing] = useState(false)
   const [licensePlate, setLicensePlate] = useState(bus.licensePlate || '')
@@ -75,6 +125,12 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const PAGE_SIZE = 5
+
+  const [isUploading, setIsUploading] = useState(false)
+  const handleUploadStudents = useCallback(() => {
+    if (isUploading) return // Nếu đang loading thì bỏ qua không cho click
+    reCallUploadStudentsToCamera(bus.id, setStudentList, setIsUploading)
+  }, [bus.id, setStudentList, isUploading])
 
   // Lấy danh sách học sinh
   useEffect(() => {
@@ -159,7 +215,7 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
   }
 
   // Lọc student theo tên (searchTerm)
-  const filteredStudents = studentList.filter((student) => student.name.toLowerCase().includes(searchTerm.toLowerCase().trim()))
+  const filteredStudents = studentList.filter((student) => student.studentName.toLowerCase().includes(searchTerm.toLowerCase().trim()))
 
   // Tính tổng số trang
   const totalPages = Math.ceil(filteredStudents.length / PAGE_SIZE)
@@ -285,44 +341,42 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
                 <table className='w-full text-sm'>
                   <thead className='bg-muted/50'>
                     <tr>
-                      <th className='px-4 py-2 text-left font-medium'>Mã số</th>
+                      <th className='px-4 py-2 text-left font-medium'>Mã HS</th>
                       <th className='px-4 py-2 text-left font-medium'>Tên</th>
-                      <th className='px-4 py-2 text-left font-medium'>Giới tính</th>
-                      <th className='px-4 py-2 text-left font-medium'>Tên phụ huynh</th>
-                      <th className='px-4 py-2 text-left font-medium'>Chi tiết</th>
+                      <th className='px-4 py-2 text-left font-medium'>Trạng thái</th>
+                      <th className='px-4 py-2 text-left font-medium'>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentStudents.length > 0 ? (
                       currentStudents.map((student) => {
-                        const truncatedStudentName = truncateName(student.name, 3)
-                        const truncatedParentName = truncateName(student.parent?.name || '', 3)
+                        const truncatedStudentName = truncateName(student.studentName, 3)
                         return (
-                          <tr key={student.id} className='border-t'>
+                          <tr key={student.studentId} className='border-t'>
                             <td className='px-4 py-2'>{student.rollNumber}</td>
                             <td className='px-4 py-2'>
                               <Tooltip>
                                 <TooltipTrigger>{truncatedStudentName}</TooltipTrigger>
-                                <TooltipContent>{student.name}</TooltipContent>
+                                <TooltipContent>{student.studentName}</TooltipContent>
                               </Tooltip>
                             </td>
-                            <td className='px-4 py-2'>{student.gender === 'MALE' ? 'Nam' : student.gender === 'FEMALE' ? 'Nữ' : student.gender}</td>
-                            <td className='px-4 py-2'>
-                              {student.parent ? (
-                                <Tooltip>
-                                  <TooltipTrigger>{truncatedParentName}</TooltipTrigger>
-                                  <TooltipContent>{student.parent.name}</TooltipContent>
-                                </Tooltip>
-                              ) : (
-                                'N/A'
-                              )}
+                            <td>
+                              <Status color='blue' showDot={true}>
+                                {student.status}
+                              </Status>
                             </td>
-                            <td className='px-4 py-2'>
-                              <Link to={`/students/details/${student.id}`}>
+                            <td className='flex gap-1 px-4 py-2'>
+                              <Link to={`/students/details/${student.studentId}`}>
                                 <div className='flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 hover:bg-muted'>
                                   <IconEye size={18} className='cursor-pointer text-muted-foreground' />
                                 </div>
                               </Link>
+                              <div onClick={handleUploadStudents} className={`flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 hover:bg-muted ${isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                <Tooltip>
+                                  <TooltipTrigger>{isUploading ? <Loader2 size={18} className='animate-spin text-primary' /> : <IconLoader size={18} className='text-muted-foreground' />}</TooltipTrigger>
+                                  <TooltipContent>Tải lại danh sách học sinh</TooltipContent>
+                                </Tooltip>
+                              </div>
                             </td>
                           </tr>
                         )

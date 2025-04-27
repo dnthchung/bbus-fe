@@ -28,6 +28,7 @@ import { Route as AuthenticatedTransportationRoutesAddIndexImport } from './rout
 import { Route as AuthenticatedUsersListDetailsIdImport } from './routes/_authenticated/users/list/details/$id'
 import { Route as AuthenticatedBusesListStudentListIdImport } from './routes/_authenticated/buses/list/student-list/$id'
 import { Route as AuthenticatedTransportationRoutesListDetailsIdImport } from './routes/_authenticated/transportation/routes/list/details/$id'
+import { Route as AuthenticatedTransportationRoutesListDetailsEditIdImport } from './routes/_authenticated/transportation/routes/list/details/edit/$id'
 
 // Create Virtual Routes
 
@@ -452,6 +453,13 @@ const AuthenticatedTransportationRoutesListDetailsIdRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
+const AuthenticatedTransportationRoutesListDetailsEditIdRoute =
+  AuthenticatedTransportationRoutesListDetailsEditIdImport.update({
+    id: '/transportation/routes/list/details/edit/$id',
+    path: '/transportation/routes/list/details/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -743,6 +751,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransportationRoutesListDetailsIdImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/transportation/routes/list/details/edit/$id': {
+      id: '/_authenticated/transportation/routes/list/details/edit/$id'
+      path: '/transportation/routes/list/details/edit/$id'
+      fullPath: '/transportation/routes/list/details/edit/$id'
+      preLoaderRoute: typeof AuthenticatedTransportationRoutesListDetailsEditIdImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
   }
 }
 
@@ -797,6 +812,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTransportationRoutesAddIndexRoute: typeof AuthenticatedTransportationRoutesAddIndexRoute
   AuthenticatedTransportationRoutesListIndexRoute: typeof AuthenticatedTransportationRoutesListIndexRoute
   AuthenticatedTransportationRoutesListDetailsIdRoute: typeof AuthenticatedTransportationRoutesListDetailsIdRoute
+  AuthenticatedTransportationRoutesListDetailsEditIdRoute: typeof AuthenticatedTransportationRoutesListDetailsEditIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -836,6 +852,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedTransportationRoutesListIndexRoute,
   AuthenticatedTransportationRoutesListDetailsIdRoute:
     AuthenticatedTransportationRoutesListDetailsIdRoute,
+  AuthenticatedTransportationRoutesListDetailsEditIdRoute:
+    AuthenticatedTransportationRoutesListDetailsEditIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -882,6 +900,7 @@ export interface FileRoutesByFullPath {
   '/transportation/routes/add': typeof AuthenticatedTransportationRoutesAddIndexRoute
   '/transportation/routes/list': typeof AuthenticatedTransportationRoutesListIndexRoute
   '/transportation/routes/list/details/$id': typeof AuthenticatedTransportationRoutesListDetailsIdRoute
+  '/transportation/routes/list/details/edit/$id': typeof AuthenticatedTransportationRoutesListDetailsEditIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -923,6 +942,7 @@ export interface FileRoutesByTo {
   '/transportation/routes/add': typeof AuthenticatedTransportationRoutesAddIndexRoute
   '/transportation/routes/list': typeof AuthenticatedTransportationRoutesListIndexRoute
   '/transportation/routes/list/details/$id': typeof AuthenticatedTransportationRoutesListDetailsIdRoute
+  '/transportation/routes/list/details/edit/$id': typeof AuthenticatedTransportationRoutesListDetailsEditIdRoute
 }
 
 export interface FileRoutesById {
@@ -968,6 +988,7 @@ export interface FileRoutesById {
   '/_authenticated/transportation/routes/add/': typeof AuthenticatedTransportationRoutesAddIndexRoute
   '/_authenticated/transportation/routes/list/': typeof AuthenticatedTransportationRoutesListIndexRoute
   '/_authenticated/transportation/routes/list/details/$id': typeof AuthenticatedTransportationRoutesListDetailsIdRoute
+  '/_authenticated/transportation/routes/list/details/edit/$id': typeof AuthenticatedTransportationRoutesListDetailsEditIdRoute
 }
 
 export interface FileRouteTypes {
@@ -1013,6 +1034,7 @@ export interface FileRouteTypes {
     | '/transportation/routes/add'
     | '/transportation/routes/list'
     | '/transportation/routes/list/details/$id'
+    | '/transportation/routes/list/details/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -1053,6 +1075,7 @@ export interface FileRouteTypes {
     | '/transportation/routes/add'
     | '/transportation/routes/list'
     | '/transportation/routes/list/details/$id'
+    | '/transportation/routes/list/details/edit/$id'
   id:
     | '__root__'
     | '/_authenticated'
@@ -1096,6 +1119,7 @@ export interface FileRouteTypes {
     | '/_authenticated/transportation/routes/add/'
     | '/_authenticated/transportation/routes/list/'
     | '/_authenticated/transportation/routes/list/details/$id'
+    | '/_authenticated/transportation/routes/list/details/edit/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -1180,7 +1204,8 @@ export const routeTree = rootRoute
         "/_authenticated/users/list/details/$id",
         "/_authenticated/transportation/routes/add/",
         "/_authenticated/transportation/routes/list/",
-        "/_authenticated/transportation/routes/list/details/$id"
+        "/_authenticated/transportation/routes/list/details/$id",
+        "/_authenticated/transportation/routes/list/details/edit/$id"
       ]
     },
     "/(auth)/500": {
@@ -1336,6 +1361,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/transportation/routes/list/details/$id": {
       "filePath": "_authenticated/transportation/routes/list/details/$id.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/transportation/routes/list/details/edit/$id": {
+      "filePath": "_authenticated/transportation/routes/list/details/edit/$id.tsx",
       "parent": "/_authenticated"
     }
   }

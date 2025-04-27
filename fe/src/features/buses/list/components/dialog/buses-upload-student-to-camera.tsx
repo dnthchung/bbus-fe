@@ -26,7 +26,11 @@ export function BusesUploadStudentToCamera({ open, onOpenChange }: Props) {
       onOpenChange(false)
     } catch (error) {
       console.error('Error uploading student to camera:', error)
-      toast({ title: 'Có lỗi xảy ra khi tải danh sách học sinh lên camera!', variant: 'deny' })
+      toast({
+        title: 'Thất bại',
+        description: `Đã xảy ra lỗi khi tải danh sách học sinh lên camera: ${error instanceof Error ? error.message : 'Đã xảy ra lỗi không xác định'}`,
+        variant: 'deny',
+      })
     } finally {
       setOpen(null)
     }

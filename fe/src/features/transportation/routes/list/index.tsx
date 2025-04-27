@@ -1,7 +1,13 @@
 'use client'
 
-//path : fe/src/features/transportation/routes/list/index.tsx:
+//path : //path : fe/src/features/transportation/routes/list/index.tsx
+// ============================
+// Import packages, hooks, components
+// ============================
 import { useState } from 'react'
+import { Link, Route as EditRoute } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
+import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { Loader2, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -24,6 +30,9 @@ import { RoutesPrimaryButtons } from '../components/routes-primary-buttons'
 import { columns } from '../components/table/routes-columns'
 import { RoutesTable } from '../components/table/routes-table'
 
+// ============================
+// Interface definitions
+// ============================
 interface Checkpoint {
   id: string
   name: string
@@ -44,16 +53,26 @@ interface Route {
   periodEnd: string
 }
 
+// ============================
+// Main content component
+// ============================
 function RoutesContent() {
+  // ============================
+  // Hooks and States
+  // ============================
   const { routes, loading } = useRoutes()
   const { toast } = useToast()
+  const navigate = useNavigate()
+
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([])
   const [loadingCheckpoints, setLoadingCheckpoints] = useState(false)
   const [activeTab, setActiveTab] = useState('routes')
   const [error, setError] = useState<string | null>(null)
 
+  // ============================
   // Function to handle route selection
+  // ============================
   const handleRouteSelect = async (route: Route) => {
     try {
       setSelectedRoute(route)
@@ -128,8 +147,22 @@ function RoutesContent() {
     }
   }
 
+  const handleEditClick = () => {
+    if (!selectedRoute) return
+    navigate({
+      to: `/transportation/routes/list/details/edit/${selectedRoute.id}`,
+    })
+  }
+  // const goToEditRoutePage = () => {
+  //   navigate({ to: `/transportation/routes/list/details/edit/${selectedRoute.id}` })
+  // }
+
+  // ============================
+  // Render
+  // ============================
   return (
     <>
+      {/* Header */}
       <Header fixed className='z-50'>
         <div className='flex w-full items-center'>
           <Breadcrumb className='flex-1'>
@@ -154,7 +187,10 @@ function RoutesContent() {
           </div>
         </div>
       </Header>
+
+      {/* Main Content */}
       <Main>
+        {/* Page Header */}
         <div className='mb-4 flex flex-wrap items-center justify-between space-y-2'>
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Danh sách tuyến đường</h2>
@@ -163,15 +199,17 @@ function RoutesContent() {
           <RoutesPrimaryButtons />
         </div>
 
+        {/* Main Layout: Map + Tabs */}
         <div className='flex h-[calc(100vh-180px)] flex-col gap-4 lg:flex-row'>
           {/* Left side - Map */}
           <div className='h-full w-full lg:w-1/2'>
             <RouteMap selectedRouteId={selectedRoute?.id} checkpoints={checkpoints} />
           </div>
 
-          {/* Right side - Tabbed interface */}
+          {/* Right side - Tabs */}
           <div className='h-full w-full overflow-auto lg:w-1/2'>
             <Tabs value={activeTab} onValueChange={setActiveTab} className='flex h-full flex-col'>
+              {/* Tabs header */}
               <TabsList className='grid w-full grid-cols-2'>
                 <TabsTrigger value='routes'>Danh sách tuyến đường</TabsTrigger>
                 <TabsTrigger value='checkpoints' disabled={!selectedRoute}>
@@ -179,8 +217,9 @@ function RoutesContent() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Routes Tab */}
+              {/* Tabs content */}
               <TabsContent value='routes' className='flex-1 overflow-auto'>
+                {/* Routes table */}
                 {loading ? (
                   <div className='flex items-center justify-center p-8'>
                     <Loader2 className='mr-2 h-5 w-5 animate-spin' />
@@ -191,13 +230,51 @@ function RoutesContent() {
                 )}
               </TabsContent>
 
-              {/* Checkpoints Tab */}
               <TabsContent value='checkpoints' className='flex-1 overflow-auto'>
+                {/* Checkpoints list */}
                 <Card>
                   <CardHeader className='pb-2'>
-                    <CardTitle className='text-lg'>{selectedRoute ? `Điểm dừng - ${selectedRoute.code}` : 'Chọn tuyến đường để xem điểm dừng'}</CardTitle>
+                    <div className='flex items-center justify-between'>
+                      {/* Tiêu đề */}
+                      <div className='text-lg font-semibold'>{selectedRoute ? `Điểm dừng - ${selectedRoute.code}` : 'Chọn tuyến đường để xem điểm dừng'}</div>
+
+                      {/* Các button hành động */}
+                      {selectedRoute && (
+                        <div className='flex gap-2'>
+                          {/* Nút Sửa */}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div onClick={handleEditClick} className='flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-muted/100 hover:bg-muted'>
+                                  <IconPencil size={18} className='text-muted-foreground' />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Sửa tuyến đường</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          {/* Nút Xóa - từ từ */}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button className='flex h-8 w-8 items-center justify-center rounded-md bg-muted/100 hover:bg-muted'>
+                                  <IconTrash size={18} className='text-muted-foreground' />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Xóa tuyến đường</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      )}
+                    </div>
                   </CardHeader>
+
                   <CardContent>
+                    {/* Error Alert */}
                     {error && (
                       <Alert variant='destructive' className='mb-4'>
                         <AlertTriangle className='h-4 w-4' />
@@ -206,6 +283,7 @@ function RoutesContent() {
                       </Alert>
                     )}
 
+                    {/* Loading checkpoints */}
                     {loadingCheckpoints ? (
                       <div className='flex items-center justify-center py-4'>
                         <Loader2 className='mr-2 h-5 w-5 animate-spin' />
@@ -213,15 +291,19 @@ function RoutesContent() {
                       </div>
                     ) : checkpoints.length > 0 ? (
                       <Table>
+                        {/* ======================================================================== */}
                         <TableHeader>
                           <TableRow>
                             <TableHead>STT</TableHead>
                             <TableHead>Tên điểm dừng</TableHead>
-                            <TableHead>Mô tả</TableHead>
+                            {/* <TableHead>Mô tả</TableHead> */}
                             <TableHead>Trạng thái</TableHead>
-                            <TableHead className='text-right'>Số HS</TableHead>
+                            <TableHead className='text-left'>Số HS</TableHead>
+                            {/* thao tác : chỉnh sửa , xóa */}
+                            {/* <TableHead>Thao tác</TableHead> */}
                           </TableRow>
                         </TableHeader>
+                        {/* ======================================================================== */}
                         <TableBody>
                           {checkpoints.map((checkpoint, index) => (
                             <TableRow key={checkpoint.id}>
@@ -230,7 +312,7 @@ function RoutesContent() {
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <div className='cursor-default whitespace-normal break-words'>{checkpoint.name || '—'}</div>
+                                      <div className='max-w-[150px] cursor-default truncate'>{checkpoint.name || '—'}</div>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p>{checkpoint.name}</p>
@@ -238,8 +320,7 @@ function RoutesContent() {
                                   </Tooltip>
                                 </TooltipProvider>
                               </TableCell>
-
-                              <TableCell>
+                              {/* <TableCell>
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -250,22 +331,37 @@ function RoutesContent() {
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
-                              </TableCell>
-
+                              </TableCell> */}
                               <TableCell>
-                                {/* <Badge variant={checkpoint.status === 'ACTIVE' ? 'default' : 'secondary'}>{checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}</Badge> */}
-                                <TableCell>
-                                  <Status color={checkpoint.status === 'ACTIVE' ? 'green' : 'red'} showDot={true}>
-                                    {checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
-                                  </Status>
-                                </TableCell>
+                                <Status color={checkpoint.status === 'ACTIVE' ? 'green' : 'red'} showDot={true}>
+                                  {checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                                </Status>
                               </TableCell>
-                              <TableCell className='text-right'>
+                              <TableCell className='text-left'>
                                 <Badge variant='outline'>{checkpoint.studentCount || 0}</Badge>
                               </TableCell>
+                              {/* ======================================================================== */}
+                              {/* <TableCell className='text-right'>
+                                <div className='flex gap-1 px-4 py-2'>
+                                  <Link to={`/students/details/1`}>
+                                    <div className='flex h-7 w-7 items-center justify-center rounded-md bg-muted/100 hover:bg-muted'>
+                                      <IconPencil size={18} className='cursor-pointer text-muted-foreground' />
+                                    </div>
+                                  </Link>
+                                </div>
+                              </TableCell> */}
+                              {/* <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className='cursor-pointer text-primary hover:underline'>Chỉnh sửa</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Chỉnh sửa điểm dừng</TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider> */}
                             </TableRow>
                           ))}
                         </TableBody>
+                        {/* ======================================================================== */}
                       </Table>
                     ) : selectedRoute && !loadingCheckpoints && !error ? (
                       <div className='py-4 text-center text-muted-foreground'>Không có điểm dừng nào cho tuyến đường này</div>
@@ -283,6 +379,9 @@ function RoutesContent() {
   )
 }
 
+// ============================
+// Page Wrapper with Provider
+// ============================
 export default function Routes() {
   return (
     <RoutesProvider>

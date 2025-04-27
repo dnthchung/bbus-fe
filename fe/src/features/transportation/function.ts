@@ -187,3 +187,22 @@ export async function getAllCheckpointButNotInRoute() {
     return []
   }
 }
+
+//edit route by routeId
+export async function editRouteByRouteId(routeId: string, route: any) {
+  try {
+    console.log('routeId: ', routeId)
+    console.log('route: ', route)
+    const req = await API_SERVICES.route.edit_route_by_route_id(routeId, route)
+    const updatedRoute = req.data.data
+    console.log('13. updated route => ', updatedRoute)
+  } catch (error) {
+    toast({
+      title: 'Cập nhật tuyến xe thất bại',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      variant: 'deny',
+    })
+    // console.log('error edit route => ', error instanceof Error ? error.message : 'Unknown error')
+    throw error
+  }
+}

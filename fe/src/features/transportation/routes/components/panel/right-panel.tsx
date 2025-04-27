@@ -147,7 +147,7 @@ export default function RightPanel({ buses, students, selectedCheckpoint, select
                     toast({
                       title: 'Không có dữ liệu tuyến đường',
                       description: 'Không tìm thấy thông tin về các trạm dừng trong tuyến đường này',
-                      variant: 'destructive',
+                      variant: 'deny',
                     })
                   }
                 }}

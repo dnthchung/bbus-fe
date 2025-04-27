@@ -23,7 +23,7 @@ export default function BusList() {
       try {
         setLoading(true)
         const data = await getAllBuses()
-        console.log('Data:', data)
+        // console.log('Data:', data)
         setBusList(data)
       } catch (error) {
         console.error('Error fetching buses in index.tsx:', error)
