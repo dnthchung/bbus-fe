@@ -3,8 +3,10 @@
 
 import React, { useEffect, useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { getAllCheckpoints } from '../data/checkpoints'
+import { getAllCheckpoints } from '../data/functions'
 import { Checkpoint } from '../data/schema'
+
+// path: fe/src/features/transportation/checkpoints/context/checkpoints-context.tsx
 
 // path: fe/src/features/transportation/checkpoints/context/checkpoints-context.tsx
 

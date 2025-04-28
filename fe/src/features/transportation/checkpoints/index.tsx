@@ -1,5 +1,6 @@
 'use client'
 
+//path url : fe/src/features/transportation/checkpoints
 import { useState, useMemo } from 'react'
 import { MapPin } from 'lucide-react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -20,6 +21,7 @@ import { columns } from '@/features/transportation/checkpoints/components/table/
 import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 import CheckpointsProvider from '@/features/transportation/checkpoints/context/checkpoints-context'
 import type { Checkpoint } from '@/features/transportation/checkpoints/data/schema'
+import EvenPage from './components/page/even-page'
 
 // Separate content component that uses the context
 function CheckpointsContent() {
@@ -76,8 +78,10 @@ function CheckpointsContent() {
             <TabsList>
               <TabsTrigger value='list'>Danh sách</TabsTrigger>
               <TabsTrigger value='create'>Tạo mới</TabsTrigger>
+              <TabsTrigger value='events'>Cài đặt sự kiện</TabsTrigger>
             </TabsList>
           </div>
+          {/* ====================================== */}
           <TabsContent value='list' className='space-y-4'>
             <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
               <div>
@@ -175,6 +179,18 @@ function CheckpointsContent() {
                 <p className='text-muted-foreground'>Tạo điểm dừng xe buýt mới</p>
               </div>
               <CreateCheckpointPage />
+            </div>
+          </TabsContent>
+          {/* ====================================== */}
+          <TabsContent value='events' className='space-y-4'>
+            <div className='pb-4'>
+              <div className='mb-6'>
+                <h2 className='text-2xl font-bold tracking-tight'>Quản lý điểm dừng xe bus</h2>
+                <p className='text-muted-foreground'>Cài đặt sự kiện cho lịch di chuyển của các xe bus</p>
+              </div>
+              <div className='flex items-center justify-between'>
+                <EvenPage />
+              </div>
             </div>
           </TabsContent>
         </Tabs>
