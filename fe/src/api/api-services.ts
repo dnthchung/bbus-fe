@@ -77,6 +77,7 @@ interface ApiServices {
     delete_batch: (date: string) => Promise<any>
   }
   route: {
+    delete_a_route: (routeId: string) => Promise<any>
     edit_route_by_route_id: (routeId: string, orderedCheckpointIds: string[]) => Promise<any>
     get_a_route_by_bus_id: (busId: string) => Promise<any>
     get_all_route: () => Promise<any>
@@ -276,6 +277,7 @@ export const API_SERVICES: ApiServices = {
   // 11) route
   //--------------------------
   route: {
+    delete_a_route: (routeId: string) => apiClient.delete(`${API_ENDPOINTS.ROUTE.DELETE_A_ROUTE}/${routeId}`),
     edit_route_by_route_id: (routeId: string, orderedCheckpointIds: string[]) => apiClient.patch(API_ENDPOINTS.ROUTE.EDIT_ROUTE_BY_ROUTE_ID, { routeId, orderedCheckpointIds }),
     get_a_route_by_bus_id: (busId: string) => apiClient.get(`${API_ENDPOINTS.ROUTE.GET_A_ROUTE_BY_BUS_ID}?busId=${busId}`),
     get_all_route: () => apiClient.get(API_ENDPOINTS.ROUTE.GET_ALL_ROUTE),

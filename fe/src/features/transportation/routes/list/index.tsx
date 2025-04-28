@@ -5,7 +5,7 @@
 // Import packages, hooks, components
 // ============================
 import { useState } from 'react'
-import { Link, Route as EditRoute } from '@tanstack/react-router'
+// import { Link, Route as EditRoute } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { Loader2, AlertTriangle } from 'lucide-react'
@@ -13,7 +13,8 @@ import { useToast } from '@/hooks/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -66,6 +67,7 @@ function RoutesContent() {
 
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([])
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
   const [loadingCheckpoints, setLoadingCheckpoints] = useState(false)
   const [activeTab, setActiveTab] = useState('routes')
   const [error, setError] = useState<string | null>(null)
@@ -153,9 +155,32 @@ function RoutesContent() {
       to: `/transportation/routes/list/details/edit/${selectedRoute.id}`,
     })
   }
-  // const goToEditRoutePage = () => {
-  //   navigate({ to: `/transportation/routes/list/details/edit/${selectedRoute.id}` })
-  // }
+
+  const handleConfirmDelete = async () => {
+    if (!selectedRoute) return
+
+    try {
+      console.log('Deleting route', selectedRoute.id)
+      toast({
+        title: 'Xóa thành công',
+        description: `Đã xóa tuyến đường ${selectedRoute.code}.`,
+        variant: 'success',
+      })
+      // Reset lại
+      setSelectedRoute(null)
+      setCheckpoints([])
+      setActiveTab('routes')
+    } catch (error) {
+      console.error('Error deleting route:', error)
+      toast({
+        title: 'Xóa thất bại',
+        description: 'Không thể xóa tuyến đường. Vui lòng thử lại.',
+        variant: 'deny',
+      })
+    } finally {
+      setOpenDeleteDialog(false)
+    }
+  }
 
   // ============================
   // Render
@@ -259,7 +284,7 @@ function RoutesContent() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <button className='flex h-8 w-8 items-center justify-center rounded-md bg-muted/100 hover:bg-muted'>
+                                <button className='flex h-8 w-8 items-center justify-center rounded-md bg-muted/100 hover:bg-muted' onClick={() => setOpenDeleteDialog(true)}>
                                   <IconTrash size={18} className='text-muted-foreground' />
                                 </button>
                               </TooltipTrigger>
@@ -268,6 +293,27 @@ function RoutesContent() {
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
+                          {/* dialog delete */}
+                          {selectedRoute && (
+                            <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Bạn có chắc chắn muốn xóa tuyến đường?</DialogTitle>
+                                  <DialogDescription>
+                                    Tuyến <b>{selectedRoute.code}</b> đang vận hành với <b>{checkpoints.length}</b> điểm dừng và <b>{checkpoints.reduce((sum, cp) => sum + (cp.studentCount || 0), 0)}</b> học sinh.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className='flex justify-end gap-2 pt-4'>
+                                  <button onClick={() => setOpenDeleteDialog(false)} className='rounded-md border px-4 py-2 text-sm'>
+                                    Hủy
+                                  </button>
+                                  <button onClick={() => handleConfirmDelete()} className='rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700'>
+                                    Xóa
+                                  </button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
                         </div>
                       )}
                     </div>

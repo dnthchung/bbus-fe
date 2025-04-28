@@ -206,3 +206,20 @@ export async function editRouteByRouteId(routeId: string, route: any) {
     throw error
   }
 }
+
+//delete route by routeId
+export async function deleteRouteByRouteId(routeId: string) {
+  try {
+    const req = await API_SERVICES.route.delete_a_route(routeId)
+    // console.log('14. delete route => ', req.data.data)
+    return req.data.data
+  } catch (error) {
+    toast({
+      title: 'Xóa tuyến xe thất bại',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      variant: 'deny',
+    })
+    // console.log('error delete route => ', error instanceof Error ? error.message : 'Unknown error')
+    throw error
+  }
+}

@@ -77,6 +77,7 @@ export const API_ENDPOINTS = {
     DELETE_BATCH: '/bus-schedule',
   },
   ROUTE: {
+    DELETE_A_ROUTE: '/route',
     EDIT_ROUTE_BY_ROUTE_ID: '/route/update-info-and-checkpoints',
     GET_A_ROUTE_BY_BUS_ID: '/route/by-bus',
     GET_ALL_ROUTE: '/route/list',
