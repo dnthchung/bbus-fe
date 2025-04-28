@@ -96,4 +96,9 @@ export const API_ENDPOINTS = {
   CAMERA: {
     UPLOAD_STUDENT_TO_CAMERA: '/camera-request/upload-all-unsuccessful',
   },
+  EVENT: {
+    CREATE_EVENT: '/event/add',
+    UPDATE_EVENT: '/event/upd',
+    GET_EVENT_BY_NAME: (name: string) => `/event/${name}`,
+  },
 } as const

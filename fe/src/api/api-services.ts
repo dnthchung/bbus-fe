@@ -96,6 +96,11 @@ interface ApiServices {
   camera: {
     upload_student_to_camera: () => Promise<any>
   }
+  event: {
+    create_event: (data: { name: string; start: string; end: string }) => Promise<any>
+    update_event: (data: { name: string; startDate: string; endDate: string }) => Promise<any>
+    get_event_by_name: (name: string) => Promise<any>
+  }
 }
 
 // Add the implementation in the students section of API_SERVICES
@@ -292,5 +297,10 @@ export const API_SERVICES: ApiServices = {
     get_a_request_details_by_request_id: (requestId: string) => apiClient.get(`${API_ENDPOINTS.REQUESTS.GET_A_REQUEST_DETAILS_BY_REQUEST_ID}/${requestId}`),
     reply_request: (request: any) => apiClient.patch(API_ENDPOINTS.REQUESTS.REPLY_REQUEST, request),
     process_change_checkpoint: (requestId: string) => apiClient.post(`${API_ENDPOINTS.REQUESTS.PROCESS_CHANGE_CHECKPOINT}/${requestId}`),
+  },
+  event: {
+    create_event: (data: { name: string; start: string; end: string }) => apiClient.post(API_ENDPOINTS.EVENT.CREATE_EVENT, data),
+    update_event: (data: { name: string; startDate: string; endDate: string }) => apiClient.put(API_ENDPOINTS.EVENT.UPDATE_EVENT, data),
+    get_event_by_name: (name: string) => apiClient.get(API_ENDPOINTS.EVENT.GET_EVENT_BY_NAME(name)),
   },
 }
