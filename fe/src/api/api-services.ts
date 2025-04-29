@@ -100,6 +100,10 @@ interface ApiServices {
     create_event: (data: { name: string; start: string; end: string }) => Promise<any>
     update_event: (data: { name: string; startDate: string; endDate: string }) => Promise<any>
     get_event_by_name: (name: string) => Promise<any>
+    lay_thoi_gian_mo_don: () => Promise<any>
+    lay_tg_nam_hoc_hien_tai: () => Promise<any>
+    doi_thoi_gian_nam_hoc_hien_tai: (data: { name: string; startDate: string; endDate: string }) => Promise<any>
+    doi_thoi_gian_mo_don: (data: { name: string; start: string; end: string }) => Promise<any>
   }
 }
 
@@ -301,6 +305,10 @@ export const API_SERVICES: ApiServices = {
   event: {
     create_event: (data: { name: string; start: string; end: string }) => apiClient.post(API_ENDPOINTS.EVENT.CREATE_EVENT, data),
     update_event: (data: { name: string; startDate: string; endDate: string }) => apiClient.put(API_ENDPOINTS.EVENT.UPDATE_EVENT, data),
-    get_event_by_name: (name: string) => apiClient.get(API_ENDPOINTS.EVENT.GET_EVENT_BY_NAME(name)),
+    lay_thoi_gian_mo_don: () => apiClient.get(API_ENDPOINTS.EVENT.LAY_THOI_GIAN_MO_DON),
+    lay_tg_nam_hoc_hien_tai: () => apiClient.get(API_ENDPOINTS.EVENT.LAY_TG_NAM_HOC_HIEN_TAI),
+    doi_thoi_gian_nam_hoc_hien_tai: (data: { name: string; startDate: string; endDate: string }) => apiClient.put(API_ENDPOINTS.EVENT.DOI_THOI_GIAN_NAM_HOC_HIEN_TAI, data),
+    doi_thoi_gian_mo_don: (data: { name: string; start: string; end: string }) => apiClient.put(API_ENDPOINTS.EVENT.DOI_THOI_GIAN_MO_DON, data),
+    get_event_by_name: (name: string) => apiClient.get(`${API_ENDPOINTS.EVENT.LAY_TG_NAM_HOC_HIEN_TAI}?name=${name}`),
   },
 }

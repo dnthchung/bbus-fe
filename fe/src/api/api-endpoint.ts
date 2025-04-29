@@ -99,6 +99,9 @@ export const API_ENDPOINTS = {
   EVENT: {
     CREATE_EVENT: '/event/add',
     UPDATE_EVENT: '/event/upd',
-    GET_EVENT_BY_NAME: (name: string) => `/event/${name}`,
+    LAY_TG_NAM_HOC_HIEN_TAI: '/event',
+    LAY_THOI_GIAN_MO_DON: '/event',
+    DOI_THOI_GIAN_NAM_HOC_HIEN_TAI: '/event/upd',
+    DOI_THOI_GIAN_MO_DON: '/event/upd',
   },
 } as const

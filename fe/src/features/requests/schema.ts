@@ -17,7 +17,7 @@ const requestSchema = z.object({
   toDate: z.string().datetime().nullable(),
   reason: z.string(),
   reply: z.string(),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED']),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 })

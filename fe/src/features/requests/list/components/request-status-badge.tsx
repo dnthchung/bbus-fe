@@ -14,6 +14,8 @@ export function RequestStatusBadge({ status }: RequestStatusBadgeProps) {
       return <Status color='red'>Từ chối</Status>
     case 'READ':
       return <Status color='blue'>Đã xem</Status>
+    case 'CANCELLED':
+      return <Status color='gray'>Bị hủy</Status>
     default:
       return <Status color='gray'>{status}</Status>
   }
