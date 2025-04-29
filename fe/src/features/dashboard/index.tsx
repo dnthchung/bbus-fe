@@ -130,11 +130,10 @@ export default function Dashboard() {
           <TabsContent value='overview' className='space-y-4'>
             {/* KPI Cards */}
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-              <AnalyticsCard label='Tỉ lệ điểm danh' value='12,450' change={{ value: 15.8, isPositive: true }} />
-
+              <AnalyticsCard label='Học sinh đang hoạt động ' value='12,450' changeText='94.6% đang hoạt động' />
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-sm font-medium'>Học sinh đang hoạt động</CardTitle>
+                  <CardTitle className='text-sm font-medium'>HS đang hoạt động</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className='text-2xl font-bold'>
