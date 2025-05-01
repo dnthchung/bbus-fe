@@ -188,6 +188,17 @@ export async function getAllCheckpointButNotInRoute() {
   }
 }
 
+export async function getAllCheckpointButNotInRouteWithoutInActive() {
+  try {
+    const req = await API_SERVICES.checkpoints.get_all_checkpoint_no_route()
+    const listCheckpoint = req.data.data || req.data || []
+    const activeCheckpoints = listCheckpoint.filter((cp: any) => cp.status === 'ACTIVE')
+    return activeCheckpoints
+  } catch (error) {
+    return []
+  }
+}
+
 //edit route by routeId
 export async function editRouteByRouteId(routeId: string, route: any) {
   try {

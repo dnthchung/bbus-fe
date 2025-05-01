@@ -23,7 +23,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { Status } from '@/components/mine/status'
-import { getAllCheckpointButNotInRoute, getRouteByRouteId, editRouteByRouteId, getNumberOfStudentInEachCheckpoint, getListCheckpointByRouteId } from '@/features/transportation/function'
+import { getAllCheckpointButNotInRoute, getAllCheckpointButNotInRouteWithoutInActive, getRouteByRouteId, editRouteByRouteId, getNumberOfStudentInEachCheckpoint, getListCheckpointByRouteId } from '@/features/transportation/function'
 
 // Define interfaces
 interface Checkpoint {
@@ -108,7 +108,7 @@ export default function EditRouteManagement() {
         setSelectedCheckpoints(checkpointsWithStudentCount)
 
         // Fetch available checkpoints
-        const availableCheckpoints = await getAllCheckpointButNotInRoute()
+        const availableCheckpoints = await getAllCheckpointButNotInRouteWithoutInActive()
         // Sort available checkpoints by student count (descending)
         const sortedCheckpoints = availableCheckpoints
           ? [...availableCheckpoints].sort((a, b) => {
@@ -184,7 +184,9 @@ export default function EditRouteManagement() {
 
   // Move checkpoint up
   const moveCheckpointUp = (index: number) => {
-    if (index === 0) return // Already at the top
+    // if (index === 0) return
+    // Không cho move điểm cuối cùng
+    if (index === 0 || index === selectedCheckpoints.length - 1) return
 
     const updatedCheckpoints = [...selectedCheckpoints]
     const temp = updatedCheckpoints[index]
@@ -196,7 +198,9 @@ export default function EditRouteManagement() {
 
   // Move checkpoint down
   const moveCheckpointDown = (index: number) => {
-    if (index === selectedCheckpoints.length - 1) return // Already at the bottom
+    // if (index === selectedCheckpoints.length - 1) return // Already at the bottom
+    // Không cho move điểm cuối cùng
+    if (index === selectedCheckpoints.length - 1 || index === selectedCheckpoints.length - 2) return
 
     const updatedCheckpoints = [...selectedCheckpoints]
     const temp = updatedCheckpoints[index]
@@ -216,6 +220,15 @@ export default function EditRouteManagement() {
       toast({
         title: 'Không thể xóa',
         description: `Điểm dừng "${checkpointToRemove.name}" đang có ${checkpointToRemove.studentCount} học sinh đăng ký.`,
+        variant: 'deny',
+      })
+      return
+    }
+
+    if (index === selectedCheckpoints.length - 1) {
+      toast({
+        title: 'Không thể xóa điểm đích',
+        description: 'Điểm đến cuối cùng của tuyến đường phải được giữ cố định.',
         variant: 'deny',
       })
       return
@@ -532,7 +545,6 @@ export default function EditRouteManagement() {
                     {/* Checkpoint list */}
                     <div>
                       <h3 className='mb-2 font-medium'>Danh sách điểm dừng ({selectedCheckpoints.length})</h3>
-
                       {selectedCheckpoints.length === 0 ? (
                         <div className='rounded-md border border-dashed p-6 text-center text-muted-foreground'>Chưa có điểm dừng nào trong tuyến đường này</div>
                       ) : (
@@ -580,7 +592,7 @@ export default function EditRouteManagement() {
                                       <TooltipProvider>
                                         <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <Button variant='ghost' size='icon' onClick={() => moveCheckpointUp(index)} disabled={index === 0} className='h-8 w-8'>
+                                            <Button variant='ghost' size='icon' onClick={() => moveCheckpointUp(index)} disabled={index === 0 || index === selectedCheckpoints.length - 1} className='h-8 w-8'>
                                               <ArrowUp className='h-4 w-4' />
                                             </Button>
                                           </TooltipTrigger>
@@ -591,7 +603,7 @@ export default function EditRouteManagement() {
                                       <TooltipProvider>
                                         <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <Button variant='ghost' size='icon' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1} className='h-8 w-8'>
+                                            <Button variant='ghost' size='icon' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1 || index === selectedCheckpoints.length - 2} className='h-8 w-8'>
                                               <ArrowDown className='h-4 w-4' />
                                             </Button>
                                           </TooltipTrigger>
