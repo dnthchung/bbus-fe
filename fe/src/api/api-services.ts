@@ -30,6 +30,7 @@ interface ApiServices {
   }
   checkpoints: {
     get_all: () => Promise<any>
+    get_all_with_student_count: () => Promise<any>
     add_one: (checkpoint: any) => Promise<any>
     count_students_of_one_checkpoint: (checkpointId: string) => Promise<any>
     get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => Promise<any>
@@ -189,6 +190,7 @@ export const API_SERVICES: ApiServices = {
   // -------------------------
   checkpoints: {
     get_all: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL),
+    get_all_with_student_count: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL_WITH_STUDENT_COUNT),
     add_one: (checkpoint: any) => apiClient.post(API_ENDPOINTS.CHECKPOINTS.ADD_ONE, checkpoint),
     count_students_of_one_checkpoint: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.COUNT_STUDENTS_OF_ONE_CHECKPOINT}?checkpointId=${checkpointId}`),
     get_a_checkpoint_by_checkpoint_id: (checkpointId: string) => apiClient.get(`${API_ENDPOINTS.CHECKPOINTS.GET_A_CHECKPOINT_BY_CHECKPOINT_ID}/${checkpointId}`),

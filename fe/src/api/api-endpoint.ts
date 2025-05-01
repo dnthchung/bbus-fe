@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
   },
   CHECKPOINTS: {
     GET_ALL: '/checkpoint/list',
+    GET_ALL_WITH_STUDENT_COUNT: '/checkpoint/get-an-checkpoint-with-student-count',
     GET_ALL_NO_ROUTE: '/checkpoint/no-route',
     ADD_ONE: '/checkpoint/add',
     COUNT_STUDENTS_OF_ONE_CHECKPOINT: '/checkpoint/count-students',

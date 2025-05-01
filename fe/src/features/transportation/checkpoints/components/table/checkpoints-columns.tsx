@@ -1,8 +1,7 @@
 // path: fe/src/features/transportation/checkpoints/list/table/checkpoints-columns.tsx
 import { ColumnDef } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
 import LongText from '@/components/common/long-text'
+import { Badge } from '@/components/mine/badge'
 import { Status } from '@/components/mine/status'
 import { checkpointStatusLabels } from '../../data/data'
 import { Checkpoint, CheckpointStatus } from '../../data/schema'
@@ -17,17 +16,6 @@ const checkpointStatusColors: Record<CheckpointStatus, 'green' | 'red'> = {
 
 // ✅ Cột bảng Checkpoints
 export const columns: ColumnDef<Checkpoint>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
-  //   meta: {
-  //     className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
-  //   },
-  //   cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
-  // --- Cột số thứ tự ---
   {
     id: 'index',
     header: () => <div className='text-center text-sm text-muted-foreground'>#</div>,
@@ -78,6 +66,27 @@ export const columns: ColumnDef<Checkpoint>[] = [
     enableHiding: false,
     enableSorting: false,
   },
+  {
+    accessorKey: 'id',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
+    cell: ({ row }) => {
+      const checkpointId = row.getValue('id') as string
+      return <div>{checkpointId}</div>
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: 'amountOfStudent',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='Số học sinh' />,
+    cell: ({ row }) => {
+      const studentCount = row.getValue('amountOfStudent') as number
+      return <div>{studentCount}</div>
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+
   {
     id: 'actions',
     cell: DataTableRowActions,
