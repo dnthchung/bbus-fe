@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Status } from '@/components/mine/status'
 import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 import type { Checkpoint } from '@/features/transportation/checkpoints/data/schema'
+import { getNumberOfStudentInEachCheckpoint } from '@/features/transportation/function'
 
 interface Props {
   currentRow?: Checkpoint
@@ -19,6 +20,7 @@ interface Props {
 export function CheckpointsActionDialog({ currentRow, open, onOpenChange }: Props) {
   const [saving, setSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [studentCount, setStudentCount] = useState<number | null>(null)
   const [checkpointDetails, setCheckpointDetails] = useState<Checkpoint | null>(null)
 
   const { refreshCheckpoints } = useCheckpoints()
@@ -27,35 +29,73 @@ export function CheckpointsActionDialog({ currentRow, open, onOpenChange }: Prop
     const fetchDetails = async () => {
       if (!currentRow) return setIsLoading(true)
       try {
-        // Có thể gọi API chi tiết tại đây nếu cần
         setCheckpointDetails(currentRow)
+
+        // 👇 Gọi API lấy số học sinh
+        const count = await getNumberOfStudentInEachCheckpoint(currentRow.id)
+        setStudentCount(count)
       } catch (error) {
-        console.error('Error loading checkpoint:', error)
+        console.error('Error loading checkpoint or student count:', error)
       } finally {
         setIsLoading(false)
       }
     }
-
     fetchDetails()
   }, [currentRow])
 
+  // const toggleStatus = async () => {
+  //   if (!currentRow) return
+  //   const newStatus = currentRow.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+  //   setSaving(true)
+
+  //   try {
+  //     // await API_SERVICES.checkpoints.update_status(currentRow.id, newStatus)
+  //     await API_SERVICES.checkpoints.update_status_auto_in_backend(currentRow.id) // Gọi API cập nhật trạng thái
+  //     await refreshCheckpoints()
+  //     onOpenChange(false) // Đóng sau khi refresh xong
+
+  //     toast({
+  //       title: 'Cập nhật trạng thái thành công',
+  //       description: newStatus === 'ACTIVE' ? 'Điểm dừng đã được kích hoạt.' : 'Điểm dừng đã được dừng hoạt động.',
+  //       variant: 'success',
+  //     })
+  //   } catch {
+  //     toast({
+  //       title: 'Thất bại',
+  //       description: 'Không thể cập nhật trạng thái.',
+  //       variant: 'deny',
+  //     })
+  //   } finally {
+  //     setSaving(false)
+  //   }
+  // }
   const toggleStatus = async () => {
     if (!currentRow) return
-    const newStatus = currentRow.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-    setSaving(true)
 
+    // 👉 Nếu đang có học sinh thì không cho đổi trạng thái
+    if (studentCount && studentCount > 0) {
+      toast({
+        title: 'Không thể thay đổi trạng thái',
+        description: `Hiện có ${studentCount} học sinh đã đăng ký tại điểm dừng này. Vui lòng chuyển học sinh trước.`,
+        variant: 'deny',
+      })
+      return
+    }
+
+    setSaving(true)
     try {
-      // await API_SERVICES.checkpoints.update_status(currentRow.id, newStatus)
-      await API_SERVICES.checkpoints.update_status_auto_in_backend(currentRow.id) // Gọi API cập nhật trạng thái
+      const newStatus = currentRow.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+
+      await API_SERVICES.checkpoints.update_status_auto_in_backend(currentRow.id)
       await refreshCheckpoints()
-      onOpenChange(false) // Đóng sau khi refresh xong
+      onOpenChange(false)
 
       toast({
         title: 'Cập nhật trạng thái thành công',
         description: newStatus === 'ACTIVE' ? 'Điểm dừng đã được kích hoạt.' : 'Điểm dừng đã được dừng hoạt động.',
         variant: 'success',
       })
-    } catch {
+    } catch (error) {
       toast({
         title: 'Thất bại',
         description: 'Không thể cập nhật trạng thái.',
@@ -81,6 +121,7 @@ export function CheckpointsActionDialog({ currentRow, open, onOpenChange }: Prop
             <Skeleton className='h-6 w-1/2' />
             <Skeleton className='h-6 w-1/2' />
             <Skeleton className='h-6 w-1/4' />
+            <Skeleton className='h-6 w-1/4' />
           </div>
         ) : checkpointDetails ? (
           <div className='space-y-6 py-4'>
@@ -98,6 +139,7 @@ export function CheckpointsActionDialog({ currentRow, open, onOpenChange }: Prop
                     </Status>
                   }
                 />
+                <InfoRow label='Số học sinh' value={studentCount ?? 'Đang tải...'} />
               </tbody>
             </table>
           </div>
