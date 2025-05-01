@@ -79,7 +79,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     // Rule 1: Required fields - name is fixed so we only check dates
     if (!start || !end) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: 'Vui lòng điền đầy đủ thông tin',
       })
       return false
@@ -90,7 +90,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     const endDate = new Date(end)
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: 'Thời gian không hợp lệ',
       })
       return false
@@ -99,7 +99,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     // Rule 4: End time must be after start time
     if (endDate <= startDate) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: 'Thời gian kết thúc phải sau thời gian bắt đầu',
       })
       return false
@@ -108,7 +108,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     // Rule 5: Must be within school year
     if (startDate < SCHOOL_YEAR.start || endDate > SCHOOL_YEAR.end) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: `Thời gian phải nằm trong năm học (${SCHOOL_YEAR.start.toISOString().slice(0, 10)} đến ${SCHOOL_YEAR.end.toISOString().slice(0, 10)})`,
       })
       return false
@@ -119,7 +119,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     const minimumEndTime = new Date(now.getTime() + 5 * 60 * 60 * 1000) // now + 5 hours
     if (endDate <= minimumEndTime) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: 'Thời gian kết thúc phải cách thời điểm hiện tại ít nhất 5 giờ',
         description: `Thời gian kết thúc tối thiểu là ${minimumEndTime.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}`,
       })
@@ -130,7 +130,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     const diffHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
     if (diffHours < MIN_EVENT_DURATION) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: 'Thời gian bắt đầu và kết thúc phải cách nhau ít nhất 5 giờ',
       })
       return false
@@ -139,7 +139,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     // Rule 8: Maximum event duration
     if (diffHours > MAX_EVENT_DURATION) {
       toast({
-        variant: 'deny',
+        variant: 'destructive',
         title: `Khoảng thời gian mở đơn không được vượt quá ${MAX_EVENT_DURATION / 24} ngày`,
       })
       return false
@@ -205,10 +205,6 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
         </DialogHeader>
         <div className='grid gap-4 py-4'>
           <div className='grid gap-2'>
-            <Label htmlFor='event-name'>Tên sự kiện</Label>
-            <div className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground'>{FIXED_EVENT_NAME}</div>
-          </div>
-          <div className='grid gap-2'>
             <Label htmlFor='event-start'>Thời gian bắt đầu</Label>
             <Input id='event-start' type='datetime-local' value={formState.start} onChange={handleInputChange('start')} />
           </div>
@@ -223,7 +219,6 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
               <div className='w-full rounded border border-gray-100 dark:border-gray-600'>
                 <table className='w-full table-fixed text-sm'>
                   <tbody>
-                    <InfoRow label='Tên sự kiện' value={FIXED_EVENT_NAME} />
                     <InfoRow label='Bắt đầu' value={formatDate(registeredEvent.start)} />
                     <InfoRow label='Kết thúc' value={formatDate(registeredEvent.end)} />
                     <InfoRow label='Ngày tạo' value={formatDate(registeredEvent.createdAt)} />

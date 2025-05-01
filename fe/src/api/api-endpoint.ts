@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     GET_A_CHECKPOINT_BY_CHECKPOINT_ID: '/checkpoint',
     GET_ALL_BY_PAGE_SIZE: '/checkpoint/list',
     UPDATE_STATUS: '/checkpoint/status',
+    UPDATE_STATUS_AUTO_IN_BACKEND: '/checkpoint',
   },
   STUDENTS: {
     LIST: '/student/list?size=10000',

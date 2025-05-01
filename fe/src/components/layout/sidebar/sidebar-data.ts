@@ -22,7 +22,7 @@ export const sidebarData: SidebarData = {
       title: 'Tổng quan',
       items: [
         {
-          title: 'Thống kê',
+          title: 'Bảng điều khiển',
           url: '/',
           icon: IconLayoutDashboard,
         },

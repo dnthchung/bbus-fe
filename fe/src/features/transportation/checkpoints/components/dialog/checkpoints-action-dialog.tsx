@@ -45,18 +45,19 @@ export function CheckpointsActionDialog({ currentRow, open, onOpenChange }: Prop
     setSaving(true)
 
     try {
-      await API_SERVICES.checkpoints.update_status(currentRow.id, newStatus)
+      // await API_SERVICES.checkpoints.update_status(currentRow.id, newStatus)
+      await API_SERVICES.checkpoints.update_status_auto_in_backend(currentRow.id) // Gọi API cập nhật trạng thái
       await refreshCheckpoints()
       onOpenChange(false) // Đóng sau khi refresh xong
 
       toast({
-        title: 'Đã cập nhật',
+        title: 'Cập nhật trạng thái thành công',
         description: newStatus === 'ACTIVE' ? 'Điểm dừng đã được kích hoạt.' : 'Điểm dừng đã được dừng hoạt động.',
         variant: 'success',
       })
     } catch {
       toast({
-        title: 'Lỗi',
+        title: 'Thất bại',
         description: 'Không thể cập nhật trạng thái.',
         variant: 'deny',
       })
@@ -126,7 +127,7 @@ function InfoRow({ label, value, multiline = false }: { label: string; value: Re
   return (
     <tr className='border-t border-gray-300 dark:border-gray-600'>
       <td className='w-1/3 whitespace-nowrap bg-gray-100 p-2 align-top text-sm font-medium dark:bg-gray-800'>{label}:</td>
-      <td className={`p-2 text-sm ${multiline ? 'whitespace-pre-wrap break-words' : 'whitespace-nowrap'}`}>{value}</td>
+      <td className={`p-2 text-sm ${multiline ? 'max-w-[300px] whitespace-pre-wrap break-words' : 'max-w-[300px] whitespace-nowrap break-words'}`}>{value}</td>
     </tr>
   )
 }

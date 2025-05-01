@@ -42,7 +42,7 @@ export default function Dashboard() {
         <div className='mb-2 flex items-center justify-between'>
           <h1 className='text-2xl font-bold tracking-tight'>Bảng điều khiển</h1>
           <div className='flex gap-2'>
-            <Button
+            {/* <Button
               onClick={() => {
                 toast({
                   title: 'Tải xuống thành công',
@@ -52,7 +52,7 @@ export default function Dashboard() {
               }}
             >
               Tải xuống
-            </Button>
+            </Button> */}
             <Button variant='outline' onClick={() => setEventDialogOpen(true)}>
               Mở ngày đăng ký
             </Button>

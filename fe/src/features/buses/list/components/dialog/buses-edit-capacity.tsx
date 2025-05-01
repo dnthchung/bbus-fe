@@ -1,6 +1,5 @@
 'use client'
 
-//path : fe/src/features/buses/list/components/dialog/buses-edit-capacity.tsx
 import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -12,8 +11,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
+// Zod schema: bắt buộc nhập số từ 20 -> 40
 const formSchema = z.object({
-  amountOfStudent: z.number({ invalid_type_error: 'Phải là số' }).min(0, 'Số học sinh không thể nhỏ hơn 0'),
+  amountOfStudent: z
+    .number({
+      required_error: 'Bắt buộc nhập số',
+      invalid_type_error: 'Phải là số',
+    })
+    .min(20, 'Số học sinh phải lớn hơn hoặc bằng 20')
+    .max(40, 'Số học sinh phải nhỏ hơn hoặc bằng 40'),
 })
 
 type CapacityForm = z.infer<typeof formSchema>
@@ -30,7 +36,7 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
   const form = useForm<CapacityForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amountOfStudent: 0,
+      amountOfStudent: undefined, // Input mặc định là trống
     },
   })
 
@@ -39,8 +45,7 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
   const handleFormSubmit = async (values: CapacityForm) => {
     try {
       setIsSubmitting(true)
-      
-      // Call the API to update capacity for all buses
+
       await API_SERVICES.buses.update_max_capacity_for_all({
         maxCapacity: values.amountOfStudent,
       })
@@ -76,7 +81,7 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle>Chỉnh sửa số học sinh</DialogTitle>
-          <DialogDescription>Nhập số lượng học sinh tối đa cho tất cả xe buýt.</DialogDescription>
+          <DialogDescription>Nhập số lượng học sinh tối đa (từ 20 đến 40).</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -88,7 +93,18 @@ export function BusesEditCapacityDialog({ open, onOpenChange, onSubmit }: Props)
                 <FormItem>
                   <FormLabel>Số học sinh tối đa</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} placeholder='Nhập số học sinh' {...field} value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} />
+                    <Input
+                      type='number'
+                      min={20}
+                      max={40}
+                      placeholder='Nhập số học sinh'
+                      {...field}
+                      value={field.value === undefined ? '' : field.value}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        field.onChange(value === '' ? undefined : Number(value))
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

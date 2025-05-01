@@ -36,6 +36,7 @@ interface ApiServices {
     get_all_by_page_size: (page: number, size: number) => Promise<any>
     get_all_checkpoint_no_route: () => Promise<any>
     update_status: (checkpointId: string, status: string) => Promise<any>
+    update_status_auto_in_backend: (checkpointId: string) => Promise<any>
   }
   students: {
     list: () => Promise<any>
@@ -196,6 +197,7 @@ export const API_SERVICES: ApiServices = {
     },
     get_all_checkpoint_no_route: () => apiClient.get(API_ENDPOINTS.CHECKPOINTS.GET_ALL_NO_ROUTE),
     update_status: (checkpointId: string, status: string) => apiClient.patch(API_ENDPOINTS.CHECKPOINTS.UPDATE_STATUS, { id: checkpointId, status: status }),
+    update_status_auto_in_backend: (checkpointId: string) => apiClient.patch(`${API_ENDPOINTS.CHECKPOINTS.UPDATE_STATUS_AUTO_IN_BACKEND}/${checkpointId}/toggle-status`),
   },
   //-------------------------
   // 4) STUDENTS
