@@ -52,6 +52,7 @@ interface Route {
   path: string
   periodStart: string
   periodEnd: string
+  checkpointTime?: string
 }
 
 // ============================

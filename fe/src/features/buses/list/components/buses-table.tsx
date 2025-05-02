@@ -1,6 +1,7 @@
 // Đường dẫn: fe/src/features/buses/components/buses-table.tsx
 import { useState } from 'react'
 import { ColumnDef, ColumnFiltersState, RowData, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
+import { cn } from '@/lib/utils'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Bus } from '@/features/buses/schema'
 import { DataTablePagination } from './table/data-table-pagination'
@@ -56,11 +57,23 @@ export function BusesTable({ columns, data }: DataTableProps) {
       {/* Bảng dữ liệu */}
       <div className='rounded-md border'>
         <Table>
-          <TableHeader>
+          {/* <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className='group/row'>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} colSpan={header.colSpan} className={header.column.columnDef.meta?.className ?? ''}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader> */}
+          {/* Phần tiêu đề bảng */}
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className='group/row bg-muted/100 text-foreground dark:bg-muted/20'>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} colSpan={header.colSpan} className={cn('text-sm font-semibold text-foreground', header.column.columnDef.meta?.className ?? '')}>
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}

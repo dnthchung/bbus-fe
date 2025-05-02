@@ -42,7 +42,7 @@ export function RequestTable({ requests, onViewRequest }: RequestTableProps) {
   return (
     <div className='rounded-md border'>
       <Table>
-        <TableHeader>
+        <TableHeader className='text-bold bg-muted/100 dark:bg-muted/20'>
           <TableRow>
             <TableHead className='w-[80px]'>STT</TableHead>
             <TableHead>Người gửi</TableHead>

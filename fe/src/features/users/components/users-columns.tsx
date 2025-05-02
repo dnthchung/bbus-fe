@@ -1,7 +1,4 @@
-// fe/src/features/users/components/users-columns.tsx
 import { ColumnDef } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import LongText from '@/components/common/long-text'
 import { Status } from '@/components/mine/status'
@@ -11,7 +8,7 @@ import { User } from '../schema'
 import { DataTableColumnHeader } from './table/data-table-column-header'
 import { DataTableRowActions } from './table/data-table-row-actions'
 
-// Hàm tiện ích format ngày dạng ISO -> DD/MM/YYYY
+// Format ngày
 function formatDate(dateStr: string) {
   const date = new Date(dateStr)
   return new Intl.DateTimeFormat('vi-VN', {
@@ -22,84 +19,68 @@ function formatDate(dateStr: string) {
 }
 
 export const columns: ColumnDef<User>[] = [
-  // -- CỘT CHỌN ROW --
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Chọn tất cả' className='translate-y-[2px]' />,
-  //   meta: {
-  //     className: cn('sticky md:table-cell left-0 z-10 rounded-tl', 'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'),
-  //   },
-  //   cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Chọn dòng' className='translate-y-[2px]' />,
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
-  // --- Cột số thứ tự ---
+  // --- STT ---
   {
     id: 'index',
     header: () => <div className='text-center text-sm text-muted-foreground'>#</div>,
-    cell: ({ row }) => {
-      // Số thứ tự = index của row + 1
-      return <div className='text-center text-sm text-muted-foreground'>{row.index + 1}</div>
-    },
+    cell: ({ row }) => <div className='text-center text-sm text-muted-foreground'>{row.index + 1}</div>,
     enableSorting: false,
     enableHiding: false,
-    size: 40, // Đặt chiều rộng cột nhỏ hơn
+    meta: { className: 'w-10 text-center' },
   },
-  // -- CỘT HÌNH ẢNH --
+
+  // --- Hình ảnh ---
   {
     accessorKey: 'avatar',
     header: 'Hình ảnh',
     cell: ({ row }) => {
       const avatarUrl = row.getValue('avatar') as string
-      return <AvatarThumbnail url={avatarUrl} alt='user-avatar' className='h-20 w-20' />
+      return <AvatarThumbnail url={avatarUrl} alt='user-avatar' className='h-14 w-14' />
     },
     enableSorting: false,
+    meta: { className: 'w-20 text-center' },
   },
-  // -- CỘT HỌ VÀ TÊN --
+
+  // --- Họ và tên ---
   {
     accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Họ và tên' />,
     cell: ({ row }) => {
       const fullName = row.getValue('name') as string
-      return <LongText className='max-w-36'>{fullName}</LongText>
+      return <LongText className='max-w-[160px]'>{fullName}</LongText>
     },
-    meta: { className: 'w-36' },
+    meta: { className: 'w-44' },
   },
 
-  // -- CỘT EMAIL --
+  // --- Email ---
   {
     accessorKey: 'email',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Email' />,
-    cell: ({ row }) => <div className='w-fit text-nowrap'>{row.getValue('email')}</div>,
+    cell: ({ row }) => <div className='max-w-[200px] truncate'>{row.getValue('email')}</div>,
+    meta: { className: 'w-52' },
   },
 
-  // -- CỘT SỐ ĐIỆN THOẠI --
+  // --- Số điện thoại ---
   {
     accessorKey: 'phone',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Số điện thoại' />,
     cell: ({ row }) => <div>{row.getValue('phone')}</div>,
     enableSorting: false,
+    meta: { className: 'w-36' },
   },
 
-  // -- CỘT VAI TRÒ --
+  // --- Vai trò ---
   {
     id: 'role',
-    accessorFn: (row) => row.role ?? 'N/A', // Lấy role trực tiếp
+    accessorFn: (row) => row.role ?? 'N/A',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Vai trò' />,
     cell: ({ getValue }) => {
-      const roleValue = getValue() as string // Ví dụ "TEACHER" hoặc "ADMIN"
-      if (!roleValue || roleValue === 'N/A') {
-        return <span className='text-sm'>N/A</span>
-      }
-      // Tìm userType tương ứng để hiển thị tên tiếng Việt
+      const roleValue = getValue() as string
       const userType = userTypes.find((t) => t.value === roleValue)
-      if (!userType) {
-        return <span className='text-sm'>{roleValue}</span> // Nếu không tìm thấy, hiển thị role gốc
-      }
       return (
-        <div className='flex items-center gap-x-2'>
-          {userType.icon && <userType.icon size={16} className='text-muted-foreground' />}
-          <span className='text-sm'>{userType.labelVi}</span>
+        <div className='flex items-center gap-2'>
+          {userType?.icon && <userType.icon size={16} className='text-muted-foreground' />}
+          <span>{userType?.labelVi || roleValue}</span>
         </div>
       )
     },
@@ -107,7 +88,9 @@ export const columns: ColumnDef<User>[] = [
       const rowValue = row.getValue(id) as string
       return filterValues.includes(rowValue)
     },
+    meta: { className: 'w-44' },
   },
+
   // --- Ngày cập nhật ---
   {
     accessorKey: 'updatedAt',
@@ -115,8 +98,6 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const updatedAt = row.getValue('updatedAt') as string
       if (!updatedAt) return <span>-</span>
-
-      // Xử lý đúng định dạng timestamp MongoDB
       return (
         <TooltipProvider>
           <Tooltip>
@@ -138,31 +119,32 @@ export const columns: ColumnDef<User>[] = [
       )
     },
     sortingFn: 'datetime',
+    meta: { className: 'w-32 text-center' },
   },
-  // -- CỘT TRẠNG THÁI TÀI KHOẢN --
+
+  // --- Trạng thái tài khoản ---
   {
     accessorKey: 'status',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Trạng thái tài khoản' />,
     cell: ({ row }) => {
-      // Lấy status gốc, vd "ACTIVE"
       const status = row.original.status
-      // Lấy nhãn tiếng Việt từ statusLabels
-      const statusLabel = statusLabels[status] || status // fallback
+      const statusLabel = statusLabels[status] || status
       return (
-        <div className='flex space-x-2'>
+        <div className='flex justify-center'>
           <Status color={status === 'ACTIVE' ? 'green' : 'red'}>{statusLabel}</Status>
         </div>
       )
     },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
+    filterFn: (row, id, value) => value.includes(row.getValue(id)),
     enableHiding: false,
     enableSorting: false,
+    meta: { className: 'w-40 text-center' },
   },
-  // -- CỘT HÀNH ĐỘNG (thường là menu ... ) --
+
+  // --- Hành động ---
   {
     id: 'actions',
     cell: DataTableRowActions,
+    meta: { className: 'w-16 text-center' },
   },
 ]

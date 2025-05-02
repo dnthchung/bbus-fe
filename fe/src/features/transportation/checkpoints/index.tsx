@@ -5,7 +5,6 @@ import { useState, useMemo } from 'react'
 import { MapPin } from 'lucide-react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileDropdown } from '@/components/common/profile-dropdown'
 import { Search } from '@/components/common/search'
@@ -28,7 +27,7 @@ function CheckpointsContent() {
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint | null>(null)
   const [viewMode, setViewMode] = useState<'table' | 'map-table'>('table')
 
-  const { checkpoints: checkpointList, loading, refreshCheckpoints } = useCheckpoints()
+  const { checkpoints: checkpointList, loading } = useCheckpoints()
 
   const handleCheckpointClick = (checkpoint: Checkpoint) => {
     setSelectedCheckpoint(checkpoint)
