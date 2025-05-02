@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { formatVietnamTime } from '@/helpers/format-vietnam-time '
 import { Bus, Calendar, Camera, CheckCircle, Clock, Filter, MapPin, User, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -29,7 +30,7 @@ type RawRecord = {
 const mapRecord = (r: RawRecord) => ({
   id: r.id,
   date: r.date,
-  time: r.status === 'ABSENT' ? '--:--' : r.direction === 'PICK_UP' ? (r.checkin?.slice(11, 16) ?? '--:--') : (r.checkout?.slice(11, 16) ?? '--:--'),
+  time: '', // bỏ nếu không dùng nữa
   status: r.status === 'ABSENT' ? 'absent' : r.direction === 'PICK_UP' ? 'boarded' : 'exited',
   busRoute: r.routeCode,
   driver: r.driverName,
@@ -38,6 +39,8 @@ const mapRecord = (r: RawRecord) => ({
   notes: r.modifiedBy ?? '',
   direction: r.direction === 'PICK_UP' ? 'to_school' : 'from_school',
   isSuccessful: r.status !== 'ABSENT',
+  checkin: r.checkin,
+  checkout: r.checkout,
 })
 
 export default function AttendanceDetails() {
@@ -150,25 +153,36 @@ export default function AttendanceDetails() {
                   </CardHeader>
                   <CardContent className='p-4 pt-2'>
                     <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-                      <div className='flex items-center gap-2 text-sm'>
-                        <Calendar className='h-4 w-4' />
-                        <span>{new Date(r.date).toLocaleDateString('vi-VN')}</span>
+                      {/* Cột trái: Thông tin chung */}
+                      <div className='space-y-2'>
+                        <div className='flex items-center gap-2 text-sm'>
+                          <Calendar className='h-4 w-4' />
+                          <span>{new Date(r.date).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <div className='flex items-center gap-2 text-sm'>
+                          <Bus className='h-4 w-4' />
+                          <span>Lái xe: {r.driver}</span>
+                        </div>
+                        <div className='flex items-center gap-2 text-sm'>
+                          <MapPin className='h-4 w-4' />
+                          <span>{r.location}</span>
+                        </div>
                       </div>
-                      <div className='flex items-center gap-2 text-sm'>
-                        <Clock className='h-4 w-4' />
-                        <span>{r.time}</span>
-                      </div>
-                      <div className='flex items-center gap-2 text-sm'>
-                        <Bus className='h-4 w-4' />
-                        <span>Lái xe: {r.driver}</span>
-                      </div>
-                      <div className='flex items-center gap-2 text-sm'>
-                        <User className='h-4 w-4' />
-                        <span>Phụ xe: {r.busAttendant}</span>
-                      </div>
-                      <div className='flex items-center gap-2 text-sm'>
-                        <MapPin className='h-4 w-4' />
-                        <span>{r.location}</span>
+
+                      {/* Cột phải: Thông tin giờ giấc */}
+                      <div className='space-y-2'>
+                        <div className='flex items-center gap-2 text-sm'>
+                          <Clock className='h-4 w-4' />
+                          <span>Giờ lên xe: {formatVietnamTime(r.checkin)}</span>
+                        </div>
+                        <div className='flex items-center gap-2 text-sm'>
+                          <Clock className='h-4 w-4' />
+                          <span>Giờ xuống xe: {formatVietnamTime(r.checkout)}</span>
+                        </div>
+                        <div className='flex items-center gap-2 text-sm'>
+                          <User className='h-4 w-4' />
+                          <span>Phụ xe: {r.busAttendant}</span>
+                        </div>
                       </div>
                     </div>
 
