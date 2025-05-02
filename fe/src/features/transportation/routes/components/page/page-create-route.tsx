@@ -1,11 +1,12 @@
 'use client'
 
+//path : fe/src/features/transportation/routes/components/page/page-create-route.tsx
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconSearch } from '@tabler/icons-react'
-import { MapPin, Trash2, ArrowUp, ArrowDown, Info } from 'lucide-react'
+import { MapPin, Trash2, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -24,7 +25,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { LimitedTextarea } from '@/components/mine/limited-textarea'
-import { Status } from '@/components/mine/status'
+import { TimePickerDialog } from '@/components/mine/time-picker-dialog'
 import { createRoute } from '@/features/transportation/function'
 import { getAllCheckpointButNotInRoute } from './checkpoint-service'
 import LeafletMap from './leaflet-map'
@@ -47,6 +48,9 @@ const routeFormSchema = z.object({
 })
 
 export default function PageCreateRoute() {
+  const [checkpointTimes, setCheckpointTimes] = useState<string[]>([])
+  const [openDialog, setOpenDialog] = useState<{ index: number; type: 'go' | 'return' } | null>(null)
+
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCheckpoints, setSelectedCheckpoints] = useState<Checkpoint[]>([])
@@ -82,6 +86,7 @@ export default function PageCreateRoute() {
   const addCheckpoint = (checkpoint: Checkpoint) => {
     if (!selectedCheckpoints.some((cp) => cp.id === checkpoint.id)) {
       setSelectedCheckpoints((prev) => [...prev, checkpoint])
+      setCheckpointTimes((prev) => [...prev, ''])
       // Remove the added checkpoint from the available checkpoints list
       setCheckpoints((prev) => prev.filter((cp) => cp.id !== checkpoint.id))
       setOpen(false)
@@ -97,6 +102,7 @@ export default function PageCreateRoute() {
   const removeCheckpoint = (index: number) => {
     const removedCheckpoint = selectedCheckpoints[index]
     setSelectedCheckpoints((prev) => prev.filter((_, i) => i !== index))
+    setCheckpointTimes((prev) => prev.filter((_, i) => i !== index))
     // Add the removed checkpoint back to the available checkpoints list
     setCheckpoints((prev) => [...prev, removedCheckpoint])
   }
@@ -120,10 +126,10 @@ export default function PageCreateRoute() {
   }
 
   const onSubmit = async (values: RouteFormValues) => {
-    if (selectedCheckpoints.length < 2) {
+    if (selectedCheckpoints.length < 3 && checkpointTimes.length > 5) {
       toast({
         title: 'Lỗi xác thực',
-        description: 'Vui lòng chọn ít nhất 2 điểm dừng cho tuyến đường',
+        description: 'Vui lòng chọn ít nhất 3 điểm dừng và tối đa 5 điểm dừng.',
         variant: 'deny',
       })
       return
@@ -136,7 +142,21 @@ export default function PageCreateRoute() {
     }
 
     try {
-      await createRoute(payload)
+      const invalidIndex = checkpointTimes.findIndex((t) => {
+        const [go, ret] = t.split('/')
+        return !go || !ret
+      })
+
+      if (invalidIndex !== -1) {
+        toast({
+          title: 'Thiếu thời gian',
+          description: `Vui lòng chọn giờ đi và về cho điểm dừng thứ ${invalidIndex + 1}.`,
+          variant: 'deny',
+        })
+        return
+      }
+
+      await createRoute(payload, checkpointTimes)
       toast({
         title: 'Thành công ',
         description: 'Tạo tuyến đường thành công',
@@ -164,7 +184,7 @@ export default function PageCreateRoute() {
       loadCheckpoints()
     } catch (error) {
       toast({
-        title: 'Thât bại',
+        title: 'Thất bại',
         description: 'Tạo tuyến đường thất bại',
         variant: 'destructive',
       })
@@ -208,9 +228,9 @@ export default function PageCreateRoute() {
             <p className='text-muted-foreground'>Chọn điểm dừng và nhập thông tin để khởi tạo tuyến đường mới.</p>
           </div>
         </div>
-        <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-6 lg:grid-cols-5'>
           {/* Checkpoints Panel */}
-          <Card className='lg:col-span-1'>
+          <Card className='lg:col-span-3'>
             <CardHeader>
               <CardTitle>Danh sách điểm dừng</CardTitle>
               <CardDescription>Chọn và thêm điểm dừng vào tuyến đường của bạn</CardDescription>
@@ -288,21 +308,37 @@ export default function PageCreateRoute() {
                                 <Badge variant='outline' className='flex h-6 w-6 items-center justify-center rounded-full p-0'>
                                   {index + 1}
                                 </Badge>
+
                                 <div className='min-w-0 flex-1'>
                                   <p className='truncate font-medium'>{checkpoint.name}</p>
                                   <p className='truncate text-xs text-muted-foreground'>{checkpoint.description}</p>
                                 </div>
                               </div>
-                              <div className='flex items-center gap-1'>
-                                <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointUp(index)} disabled={index === 0}>
-                                  <ArrowUp className='h-4 w-4' />
-                                </Button>
-                                <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1}>
-                                  <ArrowDown className='h-4 w-4' />
-                                </Button>
-                                <Button size='icon' variant='ghost' className='h-7 w-7 text-destructive hover:text-destructive' onClick={() => removeCheckpoint(index)}>
-                                  <Trash2 className='h-4 w-4' />
-                                </Button>
+
+                              <div className='flex items-center justify-end gap-1'>
+                                <div className='item mt-1 flex gap-1'>
+                                  <Button size='sm' variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'go' })}>
+                                    {checkpointTimes[index]?.split('/')[0] || '--:--'}
+                                    <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                  </Button>
+                                  <span className='flex items-center text-xs'>-</span>
+                                  <Button size='sm' variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'return' })}>
+                                    {checkpointTimes[index]?.split('/')[1] || '--:--'}
+                                    <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                  </Button>
+                                </div>
+
+                                <div className='flex items-center gap-1'>
+                                  <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointUp(index)} disabled={index === 0}>
+                                    <ArrowUp className='h-4 w-4' />
+                                  </Button>
+                                  <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1}>
+                                    <ArrowDown className='h-4 w-4' />
+                                  </Button>
+                                  <Button size='icon' variant='ghost' className='h-7 w-7 text-destructive hover:text-destructive' onClick={() => removeCheckpoint(index)}>
+                                    <Trash2 className='h-4 w-4' />
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -354,6 +390,23 @@ export default function PageCreateRoute() {
             </CardContent>
           </Card>
         </div>
+
+        {openDialog && (
+          <TimePickerDialog
+            open={true}
+            initialTime={checkpointTimes[openDialog.index]?.split('/')[openDialog.type === 'go' ? 0 : 1]}
+            title={`Chọn giờ ${openDialog.type === 'go' ? 'sáng đi' : 'chiều về'}`}
+            onClose={() => setOpenDialog(null)}
+            onConfirm={(newTime) => {
+              setCheckpointTimes((prev) => {
+                const updated = [...prev]
+                const [go, ret] = updated[openDialog.index]?.split('/') ?? []
+                updated[openDialog.index] = openDialog.type === 'go' ? `${newTime}/${ret || ''}` : `${go || ''}/${newTime}`
+                return updated
+              })
+            }}
+          />
+        )}
       </Main>
     </>
   )
