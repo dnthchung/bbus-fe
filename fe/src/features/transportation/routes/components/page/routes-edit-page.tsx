@@ -4,8 +4,9 @@
 import type React from 'react'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { validateCheckpointTimesWithStar } from '@/helpers/validate-checkpoint-times'
 import { Route } from '@/routes/_authenticated/transportation/routes/list/details/edit/$id'
-import { Loader2, ArrowUp, ArrowDown, Plus, X, AlertTriangle, Save, ArrowLeft, SearchIcon } from 'lucide-react'
+import { Loader2, ArrowUp, ArrowDown, Plus, X, AlertTriangle, Save, ArrowLeft, SearchIcon, Clock } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +25,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { Status } from '@/components/mine/status'
+import { TimePickerDialog } from '@/components/mine/time-picker-dialog'
 import { getAllCheckpointButNotInRouteWithoutInActive, getRouteByRouteId, editRouteByRouteId, getNumberOfStudentInEachCheckpoint, getListCheckpointByRouteId } from '@/features/transportation/function'
 
 // Define interfaces
@@ -64,6 +66,9 @@ export default function EditRouteManagement() {
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [showLeaveDialog, setShowLeaveDialog] = useState(false)
   const [checkpointTimes, setCheckpointTimes] = useState<string[]>([])
+  const [openDialog, setOpenDialog] = useState<{ index: number; type: 'go' | 'return' } | null>(null)
+  const [initialCheckpoints, setInitialCheckpoints] = useState<Checkpoint[]>([])
+  const [initialTimes, setInitialTimes] = useState<string[]>([])
 
   // Fetch route data
   useEffect(() => {
@@ -108,11 +113,12 @@ export default function EditRouteManagement() {
         )
 
         setSelectedCheckpoints(checkpointsWithStudentCount)
+        setInitialCheckpoints(checkpointsWithStudentCount)
         const timeString = routeData.checkpointTime || ''
         const timeArray = timeString.split(' ').filter(Boolean)
         const paddedTimes = checkpointsWithStudentCount.map((_, i) => timeArray[i] || '') // fallback nếu thiếu
         setCheckpointTimes(paddedTimes)
-
+        setInitialTimes(paddedTimes)
         // Fetch available checkpoints
         const availableCheckpoints = await getAllCheckpointButNotInRouteWithoutInActive()
         // Sort available checkpoints by student count (descending)
@@ -356,12 +362,20 @@ export default function EditRouteManagement() {
 
   // Handle save button click
   const handleSaveClick = () => {
-    if (selectedCheckpoints.length < 2) {
+    const checkpointCount = selectedCheckpoints.length
+
+    if (checkpointCount < 3 || checkpointCount > 5) {
       toast({
         title: 'Không thể lưu',
-        description: 'Tuyến đường phải có ít nhất 2 điểm dừng',
+        description: 'Tuyến đường phải có từ 3 đến 5 điểm dừng (bao gồm cả Trường Ngôi Sao).',
         variant: 'deny',
       })
+      return
+    }
+
+    const result = validateCheckpointTimesWithStar(selectedCheckpoints, checkpointTimes)
+    if (!result.valid) {
+      toast({ title: 'Lỗi thời gian', description: result.message, variant: 'deny' })
       return
     }
 
@@ -391,6 +405,18 @@ export default function EditRouteManagement() {
       return updated
     })
     setHasChanges(true)
+  }
+
+  const handleResetChanges = () => {
+    setSelectedCheckpoints(initialCheckpoints)
+    setCheckpointTimes(initialTimes)
+    setHasChanges(false)
+
+    toast({
+      title: 'Đã khôi phục',
+      description: 'Tuyến đường đã được đặt lại như ban đầu.',
+      variant: 'success',
+    })
   }
 
   return (
@@ -571,10 +597,12 @@ export default function EditRouteManagement() {
                               <TableRow>
                                 <TableHead style={{ width: 50 }}>STT</TableHead>
                                 <TableHead>Tên điểm dừng</TableHead>
-                                <TableHead>Mã</TableHead>
+                                {/* <TableHead>Mã</TableHead> */}
                                 <TableHead>Trạng thái</TableHead>
                                 <TableHead>Số HS</TableHead>
-                                <TableHead>Giờ đi / về</TableHead>
+                                <TableHead className='flex items-center justify-center'>
+                                  <p>Giờ đi / về</p>
+                                </TableHead>
                                 <TableHead style={{ width: 120 }}>Thứ tự</TableHead>
                                 <TableHead style={{ width: 50 }}></TableHead>
                               </TableRow>
@@ -598,7 +626,7 @@ export default function EditRouteManagement() {
                                     </TooltipProvider>
                                   </TableCell>
 
-                                  <TableCell>{checkpoint.id}</TableCell>
+                                  {/* <TableCell>{checkpoint.id}</TableCell> */}
 
                                   <TableCell>
                                     <Status color={checkpoint.status === 'ACTIVE' ? 'green' : 'red'} showDot={true}>
@@ -611,49 +639,63 @@ export default function EditRouteManagement() {
                                   </TableCell>
                                   {/* time checkpoint */}
                                   <TableCell>
-                                    <div className='flex gap-1'>
-                                      <Input className='w-20' value={checkpointTimes[index]?.split('/')[0] || ''} onChange={(e) => handleTimeChange(index, e.target.value, 'go')} placeholder='Đi' />
-                                      /
-                                      <Input className='w-20' value={checkpointTimes[index]?.split('/')[1] || ''} onChange={(e) => handleTimeChange(index, e.target.value, 'return')} placeholder='Về' />
+                                    <div className='flex items-center justify-center gap-1'>
+                                      <div className='flex gap-1'>
+                                        <Button variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'go' })}>
+                                          {checkpointTimes[index]?.split('/')[0] || '--:--'}
+                                          <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                        </Button>
+                                        <span className='flex items-center px-5'>-</span>
+                                        <Button variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'return' })}>
+                                          {checkpointTimes[index]?.split('/')[1] || '--:--'}
+                                          <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                        </Button>
+                                      </div>
                                     </div>
                                   </TableCell>
-
+                                  {/* move checkpoint up/down */}
                                   <TableCell>
-                                    <div className='flex space-x-1'>
+                                    {index !== selectedCheckpoints.length - 1 && (
+                                      <div className='flex space-x-1'>
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button variant='ghost' size='icon' onClick={() => moveCheckpointUp(index)} disabled={index === 0} className='h-8 w-8'>
+                                                <ArrowUp className='h-4 w-4' />
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Di chuyển lên</TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button variant='ghost' size='icon' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 2} className='h-8 w-8'>
+                                                <ArrowDown className='h-4 w-4' />
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Di chuyển xuống</TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      </div>
+                                    )}
+                                  </TableCell>
+
+                                  {/* remove checkpoint */}
+                                  <TableCell>
+                                    {index !== selectedCheckpoints.length - 1 && (
                                       <TooltipProvider>
                                         <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <Button variant='ghost' size='icon' onClick={() => moveCheckpointUp(index)} disabled={index === 0 || index === selectedCheckpoints.length - 1} className='h-8 w-8'>
-                                              <ArrowUp className='h-4 w-4' />
+                                            <Button variant='ghost' size='icon' onClick={() => handleRemoveCheckpoint(index)} className={checkpoint.studentCount && checkpoint.studentCount > 0 ? 'cursor-not-allowed opacity-50' : ''}>
+                                              <X className='h-4 w-4' />
                                             </Button>
                                           </TooltipTrigger>
-                                          <TooltipContent>Di chuyển lên</TooltipContent>
+                                          <TooltipContent>{checkpoint.studentCount && checkpoint.studentCount > 0 ? 'Không thể xóa điểm dừng có học sinh' : 'Xóa điểm dừng'}</TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
-
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button variant='ghost' size='icon' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1 || index === selectedCheckpoints.length - 2} className='h-8 w-8'>
-                                              <ArrowDown className='h-4 w-4' />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>Di chuyển xuống</TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Button variant='ghost' size='icon' onClick={() => handleRemoveCheckpoint(index)} className={checkpoint.studentCount && checkpoint.studentCount > 0 ? 'cursor-not-allowed opacity-50' : ''}>
-                                            <X className='h-4 w-4' />
-                                          </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>{checkpoint.studentCount && checkpoint.studentCount > 0 ? 'Không thể xóa điểm dừng có học sinh' : 'Xóa điểm dừng'}</TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
+                                    )}
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -665,9 +707,13 @@ export default function EditRouteManagement() {
                   </div>
                 </CardContent>
                 <CardFooter className='flex justify-end gap-2'>
-                  <Button variant='outline' onClick={handleCancelClick}>
+                  <Button variant='destructive' onClick={handleCancelClick}>
                     Hủy
                   </Button>
+                  <Button variant='outline' onClick={handleResetChanges} disabled={!hasChanges}>
+                    Đặt lại thay đổi
+                  </Button>
+
                   <Button onClick={handleSaveClick} disabled={saving || selectedCheckpoints.length < 2}>
                     {saving ? (
                       <>
@@ -730,6 +776,8 @@ export default function EditRouteManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {openDialog && <TimePickerDialog open={true} initialTime={checkpointTimes[openDialog.index]?.split('/')[openDialog.type === 'go' ? 0 : 1]} onClose={() => setOpenDialog(null)} onConfirm={(newTime) => handleTimeChange(openDialog.index, newTime, openDialog.type)} title={`Chọn giờ ${openDialog.type === 'go' ? 'sáng đi' : 'chiều về'}`} />}
     </>
   )
 }
