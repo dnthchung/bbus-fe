@@ -43,7 +43,6 @@ export const columns: ColumnDef<Bus>[] = [
     accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tên xe buýt' />,
     cell: ({ row }) => <LongText className='max-w-40'>{row.getValue('name')}</LongText>,
-    meta: { className: 'w-40' },
   },
 
   {
@@ -109,14 +108,14 @@ export const columns: ColumnDef<Bus>[] = [
   //   },
   // },
 
-  {
-    accessorKey: 'cameraFacesluice',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Camera ID' />,
-    cell: ({ row }) => {
-      const value = row.getValue('cameraFacesluice')
-      return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
-    },
-  },
+  // {
+  //   accessorKey: 'cameraFacesluice',
+  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Camera ID' />,
+  //   cell: ({ row }) => {
+  //     const value = row.getValue('cameraFacesluice')
+  //     return value ? <div>{value as string}</div> : <EmptyValueBadge text='Trống' />
+  //   },
+  // },
 
   {
     accessorKey: 'busStatus',
@@ -130,8 +129,22 @@ export const columns: ColumnDef<Bus>[] = [
 
   {
     accessorKey: 'amountOfStudents',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Số học sinh' />,
-    cell: ({ row }) => <div>{row.getValue('amountOfStudents')}</div>,
+    header: ({ column }) => (
+      <div className='flex items-center justify-center'>
+        <DataTableColumnHeader column={column} title='Số học sinh' />
+      </div>
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue('amountOfStudents') as number
+      const color = value > 0 ? 'green' : 'blue'
+      return (
+        <div className='flex justify-center'>
+          <Badge color={color} size='sm' variant='soft'>
+            {value}
+          </Badge>
+        </div>
+      )
+    },
   },
 
   // CỘT HÀNH ĐỘNG
