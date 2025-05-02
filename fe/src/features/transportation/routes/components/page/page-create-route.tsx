@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconSearch } from '@tabler/icons-react'
+import { validateCheckpointTimesWithoutStar } from '@/helpers/validate-checkpoint-times-without-star'
 import { MapPin, Trash2, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -126,62 +127,59 @@ export default function PageCreateRoute() {
   }
 
   const onSubmit = async (values: RouteFormValues) => {
-    if (selectedCheckpoints.length < 3 && checkpointTimes.length > 5) {
+    if (selectedCheckpoints.length < 2 || selectedCheckpoints.length > 5) {
       toast({
         title: 'Lỗi xác thực',
-        description: 'Vui lòng chọn ít nhất 3 điểm dừng và tối đa 5 điểm dừng.',
+        description: 'Vui lòng chọn ít nhất 2 điểm dừng và tối đa 5 điểm dừng.',
+        variant: 'deny',
+      })
+      return
+    }
+
+    const emptyIndex = checkpointTimes.findIndex((t) => {
+      const [go, ret] = t.split('/')
+      return !go || !ret
+    })
+    if (emptyIndex !== -1) {
+      toast({
+        title: 'Thiếu thời gian',
+        description: `Vui lòng chọn giờ đi và về cho điểm dừng thứ ${emptyIndex + 1}.`,
+        variant: 'deny',
+      })
+      return
+    }
+
+    // ✅ Áp dụng validate giờ giấc nâng cao
+    const validation = validateCheckpointTimesWithoutStar(selectedCheckpoints, checkpointTimes)
+    if (!validation.valid) {
+      toast({
+        title: 'Lỗi thời gian',
+        description: validation.message,
         variant: 'deny',
       })
       return
     }
 
     const path = selectedCheckpoints.map((cp) => cp.id).join(' ')
+    const checkpointTimeString = checkpointTimes.join(' ')
+
     const payload = {
       path,
-      description: values.description,
+      description: values.description.trim(),
+      checkpointTime: checkpointTimeString,
     }
 
     try {
-      const invalidIndex = checkpointTimes.findIndex((t) => {
-        const [go, ret] = t.split('/')
-        return !go || !ret
-      })
+      console.log(payload)
 
-      if (invalidIndex !== -1) {
-        toast({
-          title: 'Thiếu thời gian',
-          description: `Vui lòng chọn giờ đi và về cho điểm dừng thứ ${invalidIndex + 1}.`,
-          variant: 'deny',
-        })
-        return
-      }
-
-      await createRoute(payload, checkpointTimes)
-      toast({
-        title: 'Thành công ',
-        description: 'Tạo tuyến đường thành công',
-        variant: 'success',
-      })
+      await createRoute(payload)
+      toast({ title: 'Thành công', description: 'Tạo tuyến đường thành công', variant: 'success' })
       form.reset()
       setSelectedCheckpoints([])
+      setCheckpointTimes([])
 
-      // Reload checkpoints to get the updated list after creating the route
-      const loadCheckpoints = async () => {
-        try {
-          setLoading(true)
-          const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
-          setCheckpoints(data)
-        } catch (error) {
-          toast({
-            title: 'Thất bại',
-            description: 'Xảy ra lỗi khi tải lại danh sách điểm dừng',
-            variant: 'deny',
-          })
-        } finally {
-          setLoading(false)
-        }
-      }
-      loadCheckpoints()
+      const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
+      setCheckpoints(data)
     } catch (error) {
       toast({
         title: 'Thất bại',

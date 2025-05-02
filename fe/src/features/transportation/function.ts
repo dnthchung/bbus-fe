@@ -160,9 +160,9 @@ export async function getListCheckpointByRouteId(routeId: string) {
 }
 
 //create a route
-export async function createRoute(route: any, checkpointTime: any) {
+export async function createRoute(route: any) {
   try {
-    const req = await API_SERVICES.route.create_a_route(route, checkpointTime)
+    const req = await API_SERVICES.route.create_a_route(route)
     const newRoute = req.data.data
     // console.log('11. new route => ', newRoute)
   } catch (error) {
