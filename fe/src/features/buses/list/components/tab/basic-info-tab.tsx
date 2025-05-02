@@ -353,7 +353,16 @@ export function BasicInfoTab({ bus, onBusUpdate }: BasicInfoTabProps) {
                         const truncatedStudentName = truncateName(student.studentName, 3)
                         return (
                           <tr key={student.studentId} className='border-t'>
-                            <td className='px-4 py-2'>{student.rollNumber}</td>
+                            <td className='px-4 py-2'>
+                              {student.rollNumber.length > 10 ? (
+                                <Tooltip>
+                                  <TooltipTrigger>{student.rollNumber.slice(0, 10) + '...'}</TooltipTrigger>
+                                  <TooltipContent>{student.rollNumber}</TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                student.rollNumber
+                              )}
+                            </td>
                             <td className='px-4 py-2'>
                               <Tooltip>
                                 <TooltipTrigger>{truncatedStudentName}</TooltipTrigger>
