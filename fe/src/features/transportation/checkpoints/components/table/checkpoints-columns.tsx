@@ -38,13 +38,13 @@ export const columns: ColumnDef<Checkpoint>[] = [
   {
     accessorKey: 'latitude',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Vĩ độ' />,
-    cell: ({ row }) => <div className='text-center'>{row.getValue('latitude')}</div>,
+    cell: ({ row }) => <div className=''>{row.getValue('latitude')}</div>,
     meta: { className: 'w-32 text-center' },
   },
   {
     accessorKey: 'longitude',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Kinh độ' />,
-    cell: ({ row }) => <div className='text-center'>{row.getValue('longitude')}</div>,
+    cell: ({ row }) => <div className=''>{row.getValue('longitude')}</div>,
     meta: { className: 'w-32 text-center' },
   },
   {
