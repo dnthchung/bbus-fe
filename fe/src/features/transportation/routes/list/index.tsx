@@ -53,6 +53,8 @@ interface Route {
   periodStart: string
   periodEnd: string
   checkpointTime?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 // ============================

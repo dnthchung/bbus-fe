@@ -39,6 +39,7 @@ export default function RoutesProvider({ children }: Props) {
     try {
       setLoading(true)
       const parsedRoutes = await getAllRoute()
+
       setRoutes(parsedRoutes)
       setError(null)
     } catch (err) {

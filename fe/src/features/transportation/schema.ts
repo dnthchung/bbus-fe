@@ -30,6 +30,8 @@ export const routeSchema = z.object({
   path: z.string(), // Path as space-separated checkpoint IDs
   periodStart: z.string(), // Start date of the route period
   periodEnd: z.string(), // End date of the route period
+  updatedAt: z.string(), // Last updated date of the route
+  createdAt: z.string(), // Creation date of the route
 })
 
 // Export types

@@ -105,10 +105,16 @@ export async function getAllRoute() {
   try {
     const req = await API_SERVICES.route.get_all_route()
     const listRoute = req.data.routes
-    // console.log('7. list route => ', listRoute)
-    return listRoute
+
+    // Sort theo updatedAt mới nhất (nếu không có thì fallback về createdAt)
+    const sortedList = [...listRoute].sort((a: any, b: any) => {
+      const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime()
+      const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime()
+      return dateB - dateA // Mới nhất lên đầu
+    })
+
+    return sortedList
   } catch (error) {
-    // console.log('error get all route => ', error)
     throw error
   }
 }
