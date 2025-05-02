@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -14,10 +15,8 @@ import { ImportErrorDialog } from '@/components/common/import-error-dialog'
 import { allUsersExceptAdminsTypes, allAdminUsersTypes, userTypes } from '@/features/users/data'
 import { useUsers } from '../../context/users-context'
 
-// ✅ Chỉ cho phép định dạng Excel
+// ✅ File schema
 const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm']
-
-// Zod schema validate file
 const fileSchema = z
   .instanceof(FileList)
   .refine((files) => files.length === 1, {
@@ -35,10 +34,9 @@ const fileSchema = z
   )
 
 const formSchema = z.object({
-  file: fileSchema.optional(), // vẫn optional để form linh hoạt hơn
+  file: fileSchema.optional(),
   role: z.string().min(1, 'Vui lòng chọn vai trò'),
 })
-
 type UserImportForm = z.infer<typeof formSchema>
 
 interface Props {
@@ -50,6 +48,8 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
   const [importErrors, setImportErrors] = useState<Record<string, string>>({})
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
   const { refreshUsers } = useUsers()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -70,13 +70,10 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
 
   const handleClearFile = () => {
     form.setValue('file', undefined, { shouldValidate: true })
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const onSubmit = async (values: UserImportForm) => {
-    // ✅ Kiểm tra thủ công vì file vẫn có thể undefined
     if (!values.file) {
       toast({
         title: 'Vui lòng chọn file',
@@ -86,6 +83,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
       return
     }
 
+    setIsLoading(true)
     try {
       await API_SERVICES.users.importUserFile(values.file, values.role)
 
@@ -129,6 +127,8 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
           variant: 'deny',
         })
       }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -154,7 +154,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
 
           <Form {...form}>
             <form id='user-import-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-              {/* Chọn vai trò */}
+              {/* Vai trò */}
               <FormField
                 control={form.control}
                 name='role'
@@ -180,7 +180,7 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
                 )}
               />
 
-              {/* File upload */}
+              {/* Upload file */}
               <FormField
                 control={form.control}
                 name='file'
@@ -209,10 +209,19 @@ export function UsersImportDialog({ open, onOpenChange }: Props) {
 
           <DialogFooter className='gap-y-2'>
             <DialogClose asChild>
-              <Button variant='outline'>Hủy</Button>
+              <Button variant='outline' disabled={isLoading}>
+                Hủy
+              </Button>
             </DialogClose>
-            <Button type='submit' form='user-import-form'>
-              Nhập
+            <Button type='submit' form='user-import-form' disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Đang xử lý...
+                </>
+              ) : (
+                'Nhập'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

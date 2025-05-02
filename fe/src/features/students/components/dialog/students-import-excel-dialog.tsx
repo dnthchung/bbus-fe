@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -12,12 +13,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { ImportErrorDialog } from '@/components/common/import-error-dialog'
 import { useStudents } from '../../context/students-context'
 
-// Giả định bạn có context tương tự
-
-// Các định dạng file cho phép
+// ✅ Định dạng file được hỗ trợ
 const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltx', 'xltm', 'csv', 'txt', 'tsv', 'xlsb', 'ods', 'xml', 'html', 'pdf', 'xla', 'xlam']
 
-// Zod schema cho form
+// ✅ Schema xác thực bằng Zod
 const fileSchema = z
   .instanceof(FileList)
   .refine((files) => files.length === 1, {
@@ -29,13 +28,11 @@ const fileSchema = z
       const extension = file.name.split('.').pop()?.toLowerCase()
       return extension ? allowedExtensions.includes(extension) : false
     },
-    {
-      message: 'Định dạng file không được hỗ trợ.',
-    }
+    { message: 'Định dạng file không được hỗ trợ.' }
   )
 
 const formSchema = z.object({
-  file: fileSchema.optional(), // Để xóa được file
+  file: fileSchema.optional(), // optional để có thể xóa
 })
 
 type StudentImportForm = z.infer<typeof formSchema>
@@ -48,25 +45,23 @@ interface Props {
 export function StudentsImportDialog({ open, onOpenChange }: Props) {
   const [importErrors, setImportErrors] = useState<Record<string, string>>({})
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false)
-  const { refreshStudents } = useStudents() // Giả định bạn có context này
+  const [isLoading, setIsLoading] = useState(false)
+
+  const { refreshStudents } = useStudents()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const form = useForm<StudentImportForm>({
     resolver: zodResolver(formSchema),
   })
 
-  // Hàm xử lý xóa file
   const handleClearFile = () => {
-    // Reset giá trị trong form
     form.setValue('file', undefined, { shouldValidate: true })
-    // Reset trực tiếp input element để UI cũng được cập nhật
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
 
   const onSubmit = async (values: StudentImportForm) => {
-    // Kiểm tra nếu chưa có file
     if (!values.file) {
       toast({
         title: 'Vui lòng chọn file',
@@ -76,8 +71,8 @@ export function StudentsImportDialog({ open, onOpenChange }: Props) {
       return
     }
 
+    setIsLoading(true)
     try {
-      // Gọi API để gửi file (cần thêm method này vào API_SERVICES)
       await API_SERVICES.students.importStudentFile(values.file)
 
       toast({
@@ -97,7 +92,7 @@ export function StudentsImportDialog({ open, onOpenChange }: Props) {
         fileInputRef.current.value = ''
       }
       onOpenChange(false)
-      refreshStudents() // Làm mới danh sách học sinh
+      refreshStudents()
     } catch (error: any) {
       const response = error?.response?.data
       const details = response?.details
@@ -117,6 +112,8 @@ export function StudentsImportDialog({ open, onOpenChange }: Props) {
           variant: 'deny',
         })
       }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -152,7 +149,7 @@ export function StudentsImportDialog({ open, onOpenChange }: Props) {
                   const selectedFile = form.watch('file')
                   return (
                     <FormItem>
-                      <FormLabel>File Excel</FormLabel>
+                      <FormLabel>File học sinh</FormLabel>
                       <FormControl>
                         <div className='flex items-center gap-2'>
                           <input type='file' ref={fileInputRef} accept={allowedExtensions.map((e) => `.${e}`).join(',')} onChange={(e) => field.onChange(e.target.files)} />
@@ -173,10 +170,19 @@ export function StudentsImportDialog({ open, onOpenChange }: Props) {
 
           <DialogFooter className='gap-y-2'>
             <DialogClose asChild>
-              <Button variant='outline'>Hủy</Button>
+              <Button variant='outline' disabled={isLoading}>
+                Hủy
+              </Button>
             </DialogClose>
-            <Button type='submit' form='student-import-form'>
-              Nhập
+            <Button type='submit' form='student-import-form' disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Đang xử lý...
+                </>
+              ) : (
+                'Nhập'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
