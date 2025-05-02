@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { formatVietnamTime } from '@/helpers/format-vietnam-time '
 import { Bus, Calendar, Camera, CheckCircle, Clock, Filter, MapPin, User, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,10 +10,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getStudentHistoryStudentId } from '../functions'
 import { useAttendanceStore } from '../stores/attendance-store'
 
-// đúng kiểu backend
+function formatVietnamTime(utcString: string | null): string {
+  if (!utcString) return 'Trống'
+  const date = new Date(utcString)
+  return new Intl.DateTimeFormat('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour12: false,
+  }).format(date)
+}
+
+// Kiểu backend trả về
 type RawRecord = {
   id: string
-  date: string // yyyy-mm-dd
+  date: string
   direction: 'PICK_UP' | 'DROP_OFF'
   status: 'IN_BUS' | 'ABSENT' | 'ATTENDED'
   checkin: string | null
@@ -26,12 +36,11 @@ type RawRecord = {
   modifiedBy: string | null
 }
 
-// map sang data cũ để giữ UI y hệt
+// Ánh xạ dữ liệu từ backend sang dùng cho UI
 const mapRecord = (r: RawRecord) => ({
   id: r.id,
   date: r.date,
-  time: '', // bỏ nếu không dùng nữa
-  status: r.status === 'ABSENT' ? 'absent' : r.direction === 'PICK_UP' ? 'boarded' : 'exited',
+  status: r.status,
   busRoute: r.routeCode,
   driver: r.driverName,
   busAttendant: r.assistantName,
@@ -49,33 +58,38 @@ export default function AttendanceDetails() {
   const [records, setRecords] = useState<ReturnType<typeof mapRecord>[]>([])
   const [loading, setLoading] = useState(false)
 
-  // fetch khi đổi học sinh
   useEffect(() => {
     if (!selectedStudentId) return
     ;(async () => {
       setLoading(true)
-      console.log('id check at file attend-detail => ', selectedStudentId)
       const raw = await getStudentHistoryStudentId(selectedStudentId)
       setRecords(raw.map(mapRecord))
       setLoading(false)
     })()
   }, [selectedStudentId])
 
-  // lọc
   const filtered = useMemo(() => {
     if (filter === 'all') return records
     if (filter === 'to_school') return records.filter((r) => r.direction === 'to_school')
     if (filter === 'from_school') return records.filter((r) => r.direction === 'from_school')
-    return records.filter((r) => r.status === filter)
+    return records.filter((r) => r.status === filter.toUpperCase())
   }, [records, filter])
 
-  // badge
-  const badge = (status: string) =>
-    ({
-      boarded: <Badge className='bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'>Lên xe</Badge>,
-      exited: <Badge className='bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'>Xuống xe</Badge>,
-      absent: <Badge className='bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'>Vắng mặt</Badge>,
-    })[status] ?? <Badge>Không xác định</Badge>
+  const badge = (status: RawRecord['status']) => {
+    const statusLabels: Record<RawRecord['status'], string> = {
+      ABSENT: 'Vắng mặt',
+      ATTENDED: 'Đã đến',
+      IN_BUS: 'Đang trên xe',
+    }
+
+    const colorMap: Record<RawRecord['status'], string> = {
+      ABSENT: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      ATTENDED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      IN_BUS: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    }
+
+    return <Badge className={colorMap[status]}>{statusLabels[status]}</Badge>
+  }
 
   const success = (ok: boolean) =>
     ok ? (
@@ -99,7 +113,6 @@ export default function AttendanceDetails() {
       {/* filter header */}
       <div className='flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center'>
         <h3 className='text-lg font-semibold'>Lịch sử điểm danh</h3>
-
         <div className='flex items-center gap-2'>
           <Select defaultValue='all' onValueChange={setFilter}>
             <SelectTrigger className='h-9 w-[180px]'>
@@ -112,12 +125,11 @@ export default function AttendanceDetails() {
               <SelectItem value='all'>Tất cả</SelectItem>
               <SelectItem value='to_school'>Đi đến trường</SelectItem>
               <SelectItem value='from_school'>Về từ trường</SelectItem>
-              <SelectItem value='boarded'>Lên xe</SelectItem>
-              <SelectItem value='exited'>Xuống xe</SelectItem>
-              <SelectItem value='absent'>Vắng mặt</SelectItem>
+              <SelectItem value='ATTENDED'>Đã đến</SelectItem>
+              <SelectItem value='IN_BUS'>Đang trên xe</SelectItem>
+              <SelectItem value='ABSENT'>Vắng mặt</SelectItem>
             </SelectContent>
           </Select>
-
           <Button variant='outline' size='sm' className='h-9'>
             Xuất báo cáo
           </Button>
@@ -147,13 +159,13 @@ export default function AttendanceDetails() {
                       </div>
                       <div className='flex flex-col items-end'>
                         {badge(r.status)}
-                        {r.status !== 'absent' && success(r.isSuccessful)}
+                        {r.status !== 'ABSENT' && success(r.isSuccessful)}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className='p-4 pt-2'>
                     <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-                      {/* Cột trái: Thông tin chung */}
+                      {/* Left: thông tin chung */}
                       <div className='space-y-2'>
                         <div className='flex items-center gap-2 text-sm'>
                           <Calendar className='h-4 w-4' />
@@ -169,7 +181,7 @@ export default function AttendanceDetails() {
                         </div>
                       </div>
 
-                      {/* Cột phải: Thông tin giờ giấc */}
+                      {/* Right: giờ & phụ xe */}
                       <div className='space-y-2'>
                         <div className='flex items-center gap-2 text-sm'>
                           <Clock className='h-4 w-4' />
@@ -204,7 +216,6 @@ export default function AttendanceDetails() {
           )}
         </TabsContent>
 
-        {/* tổng quan */}
         <TabsContent value='summary'>
           <p className='text-sm text-gray-500'>Tính năng sẽ bổ sung sau…</p>
         </TabsContent>
