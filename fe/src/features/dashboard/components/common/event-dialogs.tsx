@@ -26,7 +26,7 @@ const SCHOOL_YEAR = {
 
 const MIN_EVENT_DURATION = 5
 const MAX_EVENT_DURATION = 30 * 24
-const FIXED_EVENT_NAME = 'Mở ngày đăng ký điểm đón'
+const FIXED_EVENT_NAME = 'Set up time registration'
 
 export function EventDialog({ open, onClose, mode, title, submitLabel, defaultValues }: EventDialogProps) {
   const { toast } = useToast()
@@ -39,8 +39,12 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     if (open) {
       API_SERVICES.event
         .lay_thoi_gian_mo_don()
-        .then((res) => setOpenEvent(res))
-        .catch(() => {
+        .then((res) => {
+          console.log('[lay_thoi_gian_mo_don] API response:', res.data)
+          setOpenEvent(res.data)
+        })
+        .catch((err) => {
+          console.error('[lay_thoi_gian_mo_don] API error:', err)
           setOpenEvent(null)
         })
     }
@@ -91,7 +95,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
 
     if (startDate < SCHOOL_YEAR.start || endDate > SCHOOL_YEAR.end) {
       toast({
-        variant: 'destructive',
+        variant: 'deny',
         title: `Thời gian phải nằm trong năm học (${SCHOOL_YEAR.start.toISOString().slice(0, 10)} đến ${SCHOOL_YEAR.end.toISOString().slice(0, 10)})`,
       })
       return false
@@ -101,7 +105,7 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     const minimumEndTime = new Date(now.getTime() + 5 * 60 * 60 * 1000)
     if (endDate <= minimumEndTime) {
       toast({
-        variant: 'destructive',
+        variant: 'deny',
         title: 'Thời gian kết thúc phải cách hiện tại ít nhất 5 giờ',
         description: `Kết thúc tối thiểu: ${minimumEndTime.toLocaleString('vi-VN', {
           dateStyle: 'short',

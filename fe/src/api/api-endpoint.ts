@@ -102,8 +102,8 @@ export const API_ENDPOINTS = {
     CREATE_EVENT: '/event/add',
     UPDATE_EVENT: '/event/upd',
     LAY_TG_NAM_HOC_HIEN_TAI: '/event',
-    LAY_THOI_GIAN_MO_DON: '/event',
+    LAY_THOI_GIAN_MO_DON: '/event/Set%20up%20time%20registration',
     DOI_THOI_GIAN_NAM_HOC_HIEN_TAI: '/event/upd',
-    DOI_THOI_GIAN_MO_DON: '/event/Set%20up%20time%20registration',
+    DOI_THOI_GIAN_MO_DON: '/event/upd',
   },
 } as const
