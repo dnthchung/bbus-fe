@@ -1,6 +1,8 @@
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
 
+//path : fe/src/features/transportation/function.ts
+
 //chọn DS tuyến đường ở sidebar => thấy được DS checkpoint và có hiển thị số lượng học sinh đã đăng ký checkpoint đó cho mỗi checkpoint
 //admin chọn 1 checkpoint bất kì => sẽ thấy được DS xe bus tại checkpoint và DS student tại check point đó
 
@@ -200,20 +202,16 @@ export async function getAllCheckpointButNotInRouteWithoutInActive() {
 }
 
 //edit route by routeId
-export async function editRouteByRouteId(routeId: string, route: any) {
+export async function editRouteByRouteId(routeId: string, orderedCheckpointIds: string[], orderedCheckpointTimes: string[]) {
   try {
-    // console.log('routeId: ', routeId)
-    // console.log('route: ', route)
-    const req = await API_SERVICES.route.edit_route_by_route_id(routeId, route)
-    // const updatedRoute = req.data.data
-    // console.log('13. updated route => ', updatedRoute)
+    console.log('orderedCheckpointTimes: ', orderedCheckpointTimes)
+    await API_SERVICES.route.edit_route_by_route_id(routeId, orderedCheckpointIds, orderedCheckpointTimes)
   } catch (error) {
     toast({
       title: 'Cập nhật tuyến xe thất bại',
       description: error instanceof Error ? error.message : 'Unknown error',
       variant: 'deny',
     })
-    // console.log('error edit route => ', error instanceof Error ? error.message : 'Unknown error')
     throw error
   }
 }

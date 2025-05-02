@@ -1,5 +1,6 @@
 'use client'
 
+//path : fe/src/features/transportation/routes/components/page/routes-edit-page.tsx
 import type React from 'react'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
@@ -23,7 +24,7 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { Status } from '@/components/mine/status'
-import { getAllCheckpointButNotInRoute, getAllCheckpointButNotInRouteWithoutInActive, getRouteByRouteId, editRouteByRouteId, getNumberOfStudentInEachCheckpoint, getListCheckpointByRouteId } from '@/features/transportation/function'
+import { getAllCheckpointButNotInRouteWithoutInActive, getRouteByRouteId, editRouteByRouteId, getNumberOfStudentInEachCheckpoint, getListCheckpointByRouteId } from '@/features/transportation/function'
 
 // Define interfaces
 interface Checkpoint {
@@ -62,6 +63,7 @@ export default function EditRouteManagement() {
   const [hasChanges, setHasChanges] = useState(false)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [showLeaveDialog, setShowLeaveDialog] = useState(false)
+  const [checkpointTimes, setCheckpointTimes] = useState<string[]>([])
 
   // Fetch route data
   useEffect(() => {
@@ -106,6 +108,10 @@ export default function EditRouteManagement() {
         )
 
         setSelectedCheckpoints(checkpointsWithStudentCount)
+        const timeString = routeData.checkpointTime || ''
+        const timeArray = timeString.split(' ').filter(Boolean)
+        const paddedTimes = checkpointsWithStudentCount.map((_, i) => timeArray[i] || '') // fallback nếu thiếu
+        setCheckpointTimes(paddedTimes)
 
         // Fetch available checkpoints
         const availableCheckpoints = await getAllCheckpointButNotInRouteWithoutInActive()
@@ -184,30 +190,40 @@ export default function EditRouteManagement() {
 
   // Move checkpoint up
   const moveCheckpointUp = (index: number) => {
-    // if (index === 0) return
-    // Không cho move điểm cuối cùng
     if (index === 0 || index === selectedCheckpoints.length - 1) return
 
-    const updatedCheckpoints = [...selectedCheckpoints]
-    const temp = updatedCheckpoints[index]
-    updatedCheckpoints[index] = updatedCheckpoints[index - 1]
-    updatedCheckpoints[index - 1] = temp
+    const newCheckpoints = [...selectedCheckpoints]
+    const newTimes = [...checkpointTimes]
 
-    setSelectedCheckpoints(updatedCheckpoints)
+    // Swap checkpoints
+    const tempCP = newCheckpoints[index]
+    newCheckpoints[index] = newCheckpoints[index - 1]
+    newCheckpoints[index - 1] = tempCP
+
+    // Times giữ nguyên — reassign
+    const reassignedTimes = newCheckpoints.map((_, i) => newTimes[i])
+    setSelectedCheckpoints(newCheckpoints)
+    setCheckpointTimes(reassignedTimes)
+    setHasChanges(true)
   }
 
   // Move checkpoint down
   const moveCheckpointDown = (index: number) => {
-    // if (index === selectedCheckpoints.length - 1) return // Already at the bottom
     // Không cho move điểm cuối cùng
     if (index === selectedCheckpoints.length - 1 || index === selectedCheckpoints.length - 2) return
 
     const updatedCheckpoints = [...selectedCheckpoints]
+    // Swap checkpoint tại index với index + 1
     const temp = updatedCheckpoints[index]
     updatedCheckpoints[index] = updatedCheckpoints[index + 1]
     updatedCheckpoints[index + 1] = temp
 
+    // Không swap thời gian – chỉ reassign từ list thời gian cũ theo vị trí mới
+    const reassignedTimes = updatedCheckpoints.map((_, i) => checkpointTimes[i])
+
     setSelectedCheckpoints(updatedCheckpoints)
+    setCheckpointTimes(reassignedTimes)
+    setHasChanges(true)
   }
 
   // Remove checkpoint
@@ -302,23 +318,17 @@ export default function EditRouteManagement() {
       if (!routeData) {
         throw new Error('Không có dữ liệu tuyến đường để lưu')
       }
-      const orderedCheckpointIds = selectedCheckpoints.map((cp) => cp.id)
+
       // Prepare data for API
-      // const updateData = {
-      //   routeId: id,
-      //   orderedCheckpointIds: selectedCheckpoints.map((cp) => cp.id),
-      // }
-
-      console.log('Route data:', orderedCheckpointIds)
-      console.log('id route', id)
-      // const dataSend = {
-      //   routeId: id,
-      //   orderedCheckpointIds: orderedCheckpointIds,
-      // }
       const routeId = id
+      const orderedCheckpointIds = selectedCheckpoints.map((cp) => cp.id)
+      const orderedCheckpointTimes = checkpointTimes.map((t) => t.trim())
 
-      // Call API to update route
-      await editRouteByRouteId(routeId, orderedCheckpointIds)
+      console.log('id route', routeId)
+      console.log('CP ids', orderedCheckpointIds)
+      console.log('Checkpoint times:', orderedCheckpointTimes)
+
+      await editRouteByRouteId(routeId, orderedCheckpointIds, orderedCheckpointTimes)
 
       toast({
         title: 'Thành công',
@@ -328,9 +338,6 @@ export default function EditRouteManagement() {
 
       setHasChanges(false)
       setShowSaveDialog(false)
-
-      // Navigate back to routes list
-      // navigate({ to: '/transportation/routes/list' })
 
       await reloadRouteData()
     } catch (error: any) {
@@ -374,6 +381,16 @@ export default function EditRouteManagement() {
   const handleLeaveWithoutSaving = () => {
     setShowLeaveDialog(false)
     navigate({ to: '/transportation/routes/list' })
+  }
+
+  const handleTimeChange = (index: number, newTime: string, type: 'go' | 'return') => {
+    setCheckpointTimes((prev) => {
+      const updated = [...prev]
+      const [go, ret] = (updated[index] || '').split('/')
+      updated[index] = type === 'go' ? `${newTime}/${ret || ''}` : `${go || ''}/${newTime}`
+      return updated
+    })
+    setHasChanges(true)
   }
 
   return (
@@ -557,6 +574,7 @@ export default function EditRouteManagement() {
                                 <TableHead>Mã</TableHead>
                                 <TableHead>Trạng thái</TableHead>
                                 <TableHead>Số HS</TableHead>
+                                <TableHead>Giờ đi / về</TableHead>
                                 <TableHead style={{ width: 120 }}>Thứ tự</TableHead>
                                 <TableHead style={{ width: 50 }}></TableHead>
                               </TableRow>
@@ -565,6 +583,7 @@ export default function EditRouteManagement() {
                               {selectedCheckpoints.map((checkpoint, index) => (
                                 <TableRow key={checkpoint.id}>
                                   <TableCell>{index + 1}</TableCell>
+                                  {/* tên  */}
                                   <TableCell>
                                     <TooltipProvider>
                                       <Tooltip>
@@ -578,15 +597,27 @@ export default function EditRouteManagement() {
                                       </Tooltip>
                                     </TooltipProvider>
                                   </TableCell>
+
                                   <TableCell>{checkpoint.id}</TableCell>
+
                                   <TableCell>
                                     <Status color={checkpoint.status === 'ACTIVE' ? 'green' : 'red'} showDot={true}>
                                       {checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                     </Status>
                                   </TableCell>
+                                  {/* student count */}
                                   <TableCell>
                                     <Badge variant='outline'>{checkpoint.studentCount || 0}</Badge>
                                   </TableCell>
+                                  {/* time checkpoint */}
+                                  <TableCell>
+                                    <div className='flex gap-1'>
+                                      <Input className='w-20' value={checkpointTimes[index]?.split('/')[0] || ''} onChange={(e) => handleTimeChange(index, e.target.value, 'go')} placeholder='Đi' />
+                                      /
+                                      <Input className='w-20' value={checkpointTimes[index]?.split('/')[1] || ''} onChange={(e) => handleTimeChange(index, e.target.value, 'return')} placeholder='Về' />
+                                    </div>
+                                  </TableCell>
+
                                   <TableCell>
                                     <div className='flex space-x-1'>
                                       <TooltipProvider>

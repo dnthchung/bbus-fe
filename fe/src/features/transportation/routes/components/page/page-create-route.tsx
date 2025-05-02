@@ -26,7 +26,7 @@ import { Main } from '@/components/layout/main'
 import { LimitedTextarea } from '@/components/mine/limited-textarea'
 import { Status } from '@/components/mine/status'
 import { createRoute } from '@/features/transportation/function'
-import { getNumberOfStudentInEachCheckpoint, getAllCheckpointButNotInRoute } from './checkpoint-service'
+import { getAllCheckpointButNotInRoute } from './checkpoint-service'
 import LeafletMap from './leaflet-map'
 
 interface Checkpoint {
@@ -36,7 +36,6 @@ interface Checkpoint {
   latitude: string
   longitude: string
   status: string
-  studentCount?: number
 }
 
 interface RouteFormValues {
@@ -66,19 +65,7 @@ export default function PageCreateRoute() {
       try {
         setLoading(true)
         const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
-
-        const checkpointsWithStudentCount = await Promise.all(
-          data.map(async (checkpoint: Checkpoint) => {
-            try {
-              const studentCount = await getNumberOfStudentInEachCheckpoint(checkpoint.id)
-              return { ...checkpoint, studentCount }
-            } catch {
-              return { ...checkpoint, studentCount: 0 }
-            }
-          })
-        )
-
-        setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
+        setCheckpoints(data)
       } catch (error) {
         toast({
           title: 'Thất bại',
@@ -89,7 +76,6 @@ export default function PageCreateRoute() {
         setLoading(false)
       }
     }
-
     loadCheckpoints()
   }, [toast])
 
@@ -112,7 +98,7 @@ export default function PageCreateRoute() {
     const removedCheckpoint = selectedCheckpoints[index]
     setSelectedCheckpoints((prev) => prev.filter((_, i) => i !== index))
     // Add the removed checkpoint back to the available checkpoints list
-    setCheckpoints((prev) => [...prev, removedCheckpoint].sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
+    setCheckpoints((prev) => [...prev, removedCheckpoint])
   }
 
   const moveCheckpointUp = (index: number) => {
@@ -158,24 +144,13 @@ export default function PageCreateRoute() {
       })
       form.reset()
       setSelectedCheckpoints([])
+
       // Reload checkpoints to get the updated list after creating the route
       const loadCheckpoints = async () => {
         try {
           setLoading(true)
           const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
-
-          const checkpointsWithStudentCount = await Promise.all(
-            data.map(async (checkpoint: Checkpoint) => {
-              try {
-                const studentCount = await getNumberOfStudentInEachCheckpoint(checkpoint.id)
-                return { ...checkpoint, studentCount }
-              } catch {
-                return { ...checkpoint, studentCount: 0 }
-              }
-            })
-          )
-
-          setCheckpoints(checkpointsWithStudentCount.sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0)))
+          setCheckpoints(data)
         } catch (error) {
           toast({
             title: 'Thất bại',
@@ -186,7 +161,6 @@ export default function PageCreateRoute() {
           setLoading(false)
         }
       }
-
       loadCheckpoints()
     } catch (error) {
       toast({
@@ -227,7 +201,6 @@ export default function PageCreateRoute() {
           </div>
         </div>
       </Header>
-
       <Main>
         <div className='mb-4 flex flex-wrap items-center justify-between space-y-2'>
           <div>
@@ -235,7 +208,6 @@ export default function PageCreateRoute() {
             <p className='text-muted-foreground'>Chọn điểm dừng và nhập thông tin để khởi tạo tuyến đường mới.</p>
           </div>
         </div>
-
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
           {/* Checkpoints Panel */}
           <Card className='lg:col-span-1'>
@@ -273,9 +245,6 @@ export default function PageCreateRoute() {
                                 <div className='flex w-full flex-col'>
                                   <div className='flex items-center justify-between'>
                                     <span className='max-w-[160px] truncate'>{checkpoint.name ?? 'Trống'}</span>
-                                    <Status color={(checkpoint.studentCount ?? 0) > 0 ? 'green' : 'red'} showDot={false} className='text-sm'>
-                                      {checkpoint.studentCount ?? 0} học sinh
-                                    </Status>
                                   </div>
                                   <span className='max-w-[210px] truncate text-xs text-muted-foreground'>{checkpoint.description ?? 'Không có mô tả'}</span>
                                 </div>
@@ -286,7 +255,6 @@ export default function PageCreateRoute() {
                       </Command>
                     </PopoverContent>
                   </Popover>
-
                   {/* Selected Checkpoints List */}
                   <div>
                     <div className='mb-2 flex items-center justify-between'>
@@ -305,7 +273,6 @@ export default function PageCreateRoute() {
                         </TooltipProvider>
                       )}
                     </div>
-
                     {selectedCheckpoints.length === 0 ? (
                       <div className='flex flex-col items-center justify-center rounded-md border p-6 text-center text-muted-foreground'>
                         <MapPin className='mb-2 h-8 w-8 opacity-50' />
@@ -347,7 +314,6 @@ export default function PageCreateRoute() {
               )}
             </CardContent>
           </Card>
-
           {/* Route Form Panel */}
           <Card className='lg:col-span-2'>
             <CardHeader>
