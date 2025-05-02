@@ -15,7 +15,7 @@ interface Student {
   name: string
   rollNumber: string
   avatar: string
-  busName: string // trả về luôn "Chưa có xe" hoặc "Bus 001"
+  busName: string | null
   busId: string | null
 }
 
@@ -34,7 +34,7 @@ export default function StudentList() {
     })()
   }, [])
 
-  const filtered = students.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()) || s.rollNumber.toLowerCase().includes(search.toLowerCase()) || s.busName.toLowerCase().includes(search.toLowerCase()))
+  const filtered = students.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()) || s.rollNumber.toLowerCase().includes(search.toLowerCase()) || (s.busName?.toLowerCase() ?? '').includes(search.toLowerCase()))
 
   return (
     <div className='flex h-full flex-col'>
