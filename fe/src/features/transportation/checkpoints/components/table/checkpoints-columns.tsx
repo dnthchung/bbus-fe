@@ -26,26 +26,26 @@ export const columns: ColumnDef<Checkpoint>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tên điểm dừng' />,
-    cell: ({ row }) => <LongText className='max-w-[160px]'>{row.getValue('name')}</LongText>,
+    cell: ({ row }) => <LongText className='max-w-[500px]'>{row.getValue('name')}</LongText>,
     meta: { className: 'w-48' },
   },
-  {
-    accessorKey: 'description',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Mô tả' />,
-    cell: ({ row }) => <LongText className='max-w-[180px]'>{row.getValue('description')}</LongText>,
-    meta: { className: 'w-52' },
-  },
+  // {
+  //   accessorKey: 'description',
+  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Mô tả' />,
+  //   cell: ({ row }) => <LongText className='max-w-[180px]'>{row.getValue('description')}</LongText>,
+  //   meta: { className: 'w-52' },
+  // },
   {
     accessorKey: 'latitude',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Vĩ độ' />,
     cell: ({ row }) => <div className=''>{row.getValue('latitude')}</div>,
-    meta: { className: 'w-32 text-center' },
+    meta: { className: 'w-32 ' },
   },
   {
     accessorKey: 'longitude',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Kinh độ' />,
     cell: ({ row }) => <div className=''>{row.getValue('longitude')}</div>,
-    meta: { className: 'w-32 text-center' },
+    meta: { className: 'w-32 ' },
   },
   {
     accessorKey: 'amountOfStudent',

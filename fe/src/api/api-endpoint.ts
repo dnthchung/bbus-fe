@@ -104,6 +104,6 @@ export const API_ENDPOINTS = {
     LAY_TG_NAM_HOC_HIEN_TAI: '/event',
     LAY_THOI_GIAN_MO_DON: '/event',
     DOI_THOI_GIAN_NAM_HOC_HIEN_TAI: '/event/upd',
-    DOI_THOI_GIAN_MO_DON: '/event/upd',
+    DOI_THOI_GIAN_MO_DON: '/event/Set%20up%20time%20registration',
   },
 } as const

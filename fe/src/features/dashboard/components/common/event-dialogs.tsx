@@ -7,15 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/mine/badge'
 
-export const registeredEvent = {
-  id: '6844bb7d-2825-46c4-a295-72b6232e161b',
-  createdAt: '2025-04-24T17:07:51.876+00:00',
-  updatedAt: '2025-04-28T07:50:45.175+00:00',
-  name: 'Mở ngày đăng ký điểm đón',
-  start: '2025-04-28T14:44:00.000+00:00',
-  end: '2025-04-29T01:10:10.000+00:00',
-}
-
 type EventDialogProps = {
   open: boolean
   onClose: () => void
@@ -28,30 +19,33 @@ type EventDialogProps = {
   }
 }
 
-// School year constants
 const SCHOOL_YEAR = {
   start: new Date('2024-09-01T00:00:00Z'),
   end: new Date('2025-06-01T00:00:00Z'),
 }
 
-// Minimum and maximum event duration in hours
-const MIN_EVENT_DURATION = 5 // Changed from 1 hour to 5 hours
-const MAX_EVENT_DURATION = 30 * 24 // 30 days
-
-// Fixed event name
+const MIN_EVENT_DURATION = 5
+const MAX_EVENT_DURATION = 30 * 24
 const FIXED_EVENT_NAME = 'Mở ngày đăng ký điểm đón'
 
 export function EventDialog({ open, onClose, mode, title, submitLabel, defaultValues }: EventDialogProps) {
   const { toast } = useToast()
 
-  // Form state
-  const [formState, setFormState] = useState({
-    start: '',
-    end: '',
-  })
+  const [formState, setFormState] = useState({ start: '', end: '' })
   const [loading, setLoading] = useState(false)
+  const [openEvent, setOpenEvent] = useState<any | null>(null)
 
-  // Initialize form with default values when dialog opens or defaultValues change
+  useEffect(() => {
+    if (open) {
+      API_SERVICES.event
+        .lay_thoi_gian_mo_don()
+        .then((res) => setOpenEvent(res))
+        .catch(() => {
+          setOpenEvent(null)
+        })
+    }
+  }, [open])
+
   useEffect(() => {
     if (defaultValues) {
       setFormState({
@@ -59,24 +53,16 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
         end: defaultValues.end ? new Date(defaultValues.end).toISOString().slice(0, 16) : '',
       })
     } else {
-      setFormState({
-        start: '',
-        end: '',
-      })
+      setFormState({ start: '', end: '' })
     }
   }, [open, defaultValues])
 
   const handleInputChange = (field: keyof typeof formState) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState({
-      ...formState,
-      [field]: e.target.value,
-    })
+    setFormState({ ...formState, [field]: e.target.value })
   }
 
   const validateInputs = () => {
     const { start, end } = formState
-
-    // Rule 1: Required fields - name is fixed so we only check dates
     if (!start || !end) {
       toast({
         variant: 'destructive',
@@ -85,7 +71,6 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
       return false
     }
 
-    // Rule 2 & 3: Valid date formats and values
     const startDate = new Date(start)
     const endDate = new Date(end)
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -96,7 +81,6 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
       return false
     }
 
-    // Rule 4: End time must be after start time
     if (endDate <= startDate) {
       toast({
         variant: 'destructive',
@@ -105,7 +89,6 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
       return false
     }
 
-    // Rule 5: Must be within school year
     if (startDate < SCHOOL_YEAR.start || endDate > SCHOOL_YEAR.end) {
       toast({
         variant: 'destructive',
@@ -114,33 +97,33 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
       return false
     }
 
-    // Rule 6: End time must be at least 5 hours in the future from current time
     const now = new Date()
-    const minimumEndTime = new Date(now.getTime() + 5 * 60 * 60 * 1000) // now + 5 hours
+    const minimumEndTime = new Date(now.getTime() + 5 * 60 * 60 * 1000)
     if (endDate <= minimumEndTime) {
       toast({
         variant: 'destructive',
-        title: 'Thời gian kết thúc phải cách thời điểm hiện tại ít nhất 5 giờ',
-        description: `Thời gian kết thúc tối thiểu là ${minimumEndTime.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}`,
+        title: 'Thời gian kết thúc phải cách hiện tại ít nhất 5 giờ',
+        description: `Kết thúc tối thiểu: ${minimumEndTime.toLocaleString('vi-VN', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        })}`,
       })
       return false
     }
 
-    // Rule 7: Start and end must be at least 5 hours apart
     const diffHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
     if (diffHours < MIN_EVENT_DURATION) {
       toast({
         variant: 'destructive',
-        title: 'Thời gian bắt đầu và kết thúc phải cách nhau ít nhất 5 giờ',
+        title: 'Bắt đầu và kết thúc phải cách nhau ít nhất 5 giờ',
       })
       return false
     }
 
-    // Rule 8: Maximum event duration
     if (diffHours > MAX_EVENT_DURATION) {
       toast({
         variant: 'destructive',
-        title: `Khoảng thời gian mở đơn không được vượt quá ${MAX_EVENT_DURATION / 24} ngày`,
+        title: `Khoảng thời gian không vượt quá ${MAX_EVENT_DURATION / 24} ngày`,
       })
       return false
     }
@@ -153,30 +136,26 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
 
     try {
       setLoading(true)
-
-      // Format dates to ISO 8601
       const formattedStart = new Date(formState.start).toISOString()
       const formattedEnd = new Date(formState.end).toISOString()
 
-      if (mode === 'create') {
-        console.log('Creating new event with data:')
-        // await API_SERVICES.event.create_event({
-        //   name: FIXED_EVENT_NAME,
-        //   start: formattedStart,
-        //   end: formattedEnd,
-        // })
+      if (openEvent) {
+        await API_SERVICES.event.update_event({
+          name: FIXED_EVENT_NAME,
+          start: formattedStart,
+          end: formattedEnd,
+        })
       } else {
-        console.log('Updating event with data:')
-        // await API_SERVICES.event.update_event({
-        //   name: FIXED_EVENT_NAME,
-        //   start: formattedStart,
-        //   end: formattedEnd,
-        // })
+        await API_SERVICES.event.create_event({
+          name: FIXED_EVENT_NAME,
+          start: formattedStart,
+          end: formattedEnd,
+        })
       }
 
       toast({
         title: 'Thành công',
-        description: mode === 'create' ? 'Đã tạo sự kiện mới' : 'Đã cập nhật thông tin',
+        description: openEvent ? 'Đã cập nhật thời gian mở đơn' : 'Đã tạo mới thời gian mở đơn',
       })
       onClose()
     } catch (error) {
@@ -190,11 +169,10 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
     }
   }
 
-  // Helper function for formatting dates
   const formatDate = (date?: string) => {
     if (!date) return ''
     const d = new Date(date)
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
   }
 
   return (
@@ -213,16 +191,16 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
             <Input id='event-end' type='datetime-local' value={formState.end} onChange={handleInputChange('end')} />
           </div>
 
-          {mode === 'edit' && registeredEvent && (
+          {openEvent && (
             <div className='mt-4'>
-              <h3 className='mb-2 text-sm font-medium'>Thông tin sự kiện</h3>
+              <h3 className='mb-2 text-sm font-medium'>Thông tin sự kiện đã có</h3>
               <div className='w-full rounded border border-gray-100 dark:border-gray-600'>
                 <table className='w-full table-fixed text-sm'>
                   <tbody>
-                    <InfoRow label='Bắt đầu' value={formatDate(registeredEvent.start)} />
-                    <InfoRow label='Kết thúc' value={formatDate(registeredEvent.end)} />
-                    <InfoRow label='Ngày tạo' value={formatDate(registeredEvent.createdAt)} />
-                    <InfoRow label='Cập nhật cuối' value={formatDate(registeredEvent.updatedAt)} />
+                    <InfoRow label='Bắt đầu' value={formatDate(openEvent.start)} />
+                    <InfoRow label='Kết thúc' value={formatDate(openEvent.end)} />
+                    <InfoRow label='Ngày tạo' value={formatDate(openEvent.createdAt)} />
+                    <InfoRow label='Cập nhật cuối' value={formatDate(openEvent.updatedAt)} />
                   </tbody>
                 </table>
               </div>
@@ -242,7 +220,6 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
   )
 }
 
-/* -------- Row helper component -------- */
 function InfoRow({ label, value, multiline = false }: { label: string; value: React.ReactNode; multiline?: boolean }) {
   return (
     <tr className='border-t border-gray-300 dark:border-gray-600'>

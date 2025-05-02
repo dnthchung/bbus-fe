@@ -30,6 +30,8 @@ export async function getAllCheckpoints(): Promise<Checkpoint[]> {
       return []
     }
 
+    console.log('rawCheckpoints', rawCheckpoints)
+
     return rawCheckpoints
   } catch (error) {
     console.error('Error getAllCheckpoints in checkpoints.ts:', error)
