@@ -325,7 +325,7 @@ export default function StudentsDetailsContent() {
               </TabsContent>
             </Tabs>
 
-            <div className='border-t pt-4'>
+            {/* <div className='border-t pt-4'>
               {student.status === 'ACTIVE' ? (
                 <Button variant='destructive' onClick={handleStatusUpdate} disabled={updatingStatus}>
                   {updatingStatus ? 'Đang xử lý...' : 'Vô hiệu hóa'}
@@ -335,7 +335,7 @@ export default function StudentsDetailsContent() {
                   {updatingStatus ? 'Đang xử lý...' : 'Kích hoạt'}
                 </Button>
               )}
-            </div>
+            </div> */}
           </>
         )}
       </Main>
