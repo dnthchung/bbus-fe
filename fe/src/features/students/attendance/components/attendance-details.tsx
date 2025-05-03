@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { JSX, useEffect, useMemo, useState } from 'react'
 import { Bus, Calendar, Camera, CheckCircle, Clock, Filter, MapPin, User, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,15 +10,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getStudentHistoryStudentId } from '../functions'
 import { useAttendanceStore } from '../stores/attendance-store'
 
-function formatVietnamTime(utcString: string | null): string {
-  if (!utcString) return 'Trống'
+// function formatVietnamTime(utcString: string | null): string {
+//   if (!utcString) return 'Trống'
+//   const date = new Date(utcString)
+//   return new Intl.DateTimeFormat('vi-VN', {
+//     hour: '2-digit',
+//     minute: '2-digit',
+//     timeZone: 'Asia/Ho_Chi_Minh',
+//     hour12: false,
+//   }).format(date)
+// }
+
+function formatVietnamTime(utcString: string | null): JSX.Element | string {
+  if (!utcString) {
+    return <span className='italic text-muted-foreground text-red-500'>Trống</span>
+  }
+
   const date = new Date(utcString)
-  return new Intl.DateTimeFormat('vi-VN', {
+  const formatted = new Intl.DateTimeFormat('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Asia/Ho_Chi_Minh',
     hour12: false,
   }).format(date)
+
+  return formatted
 }
 
 type RawRecord = {

@@ -55,7 +55,7 @@ export default function Attendance() {
             <p className='text-muted-foreground'>Theo dõi điểm danh tự động của học sinh trên xe buýt thông qua camera AI.</p>
           </div>
           <div className='flex h-[calc(100vh-12rem)] flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'>
-            <AdvancedBusLoader size='xl' variant='primary' animation='drive' text='Đang tải dữ liệu điểm danh...' />
+            <AdvancedBusLoader size='xl' variant='default' animation='drive' text='Đang tải dữ liệu điểm danh...' />
           </div>
         </Main>
       </>
