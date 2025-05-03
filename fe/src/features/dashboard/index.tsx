@@ -1,7 +1,7 @@
 'use client'
 
 // ===== Imports =====
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IconBus, IconDropletQuestion, IconUser, IconFileTypeDoc } from '@tabler/icons-react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
@@ -17,14 +17,52 @@ import { DownloadableReports } from './components/common/downloadable-reports'
 import { EventDialog } from './components/common/event-dialogs'
 import { Overview } from './components/overview'
 import { dashboardData, summaryMetrics } from './fake-data'
+import { dem_so_hoc_sinh, dem_so_yeu_cau, thong_so_account, tong_tuyen_duong } from './functions'
 
 //path : fe/src/features/dashboard/index.tsx
+
+type Metrics = {
+  studentCount: number
+  busRouteCount: number
+  totalAccounts: number
+  pendingRequests: number
+}
 
 // ===== Dashboard Component =====
 export default function Dashboard() {
   const attendanceDiff = Number.parseFloat((dashboardData.attendanceRateThisMonth - dashboardData.attendanceRateLastMonth).toFixed(1))
   const [loading, setLoading] = useState(false)
   const [eventDialogOpen, setEventDialogOpen] = useState(false)
+  const [metrics, setMetrics] = useState<Metrics>({
+    studentCount: 0,
+    busRouteCount: 0,
+    totalAccounts: 0,
+    pendingRequests: 0,
+  })
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        const [student, totalUsers, totalRoutes, requestStats] = await Promise.all([
+          dem_so_hoc_sinh(), // Trả về số: 53
+          thong_so_account(), // Trả về số: 61
+          tong_tuyen_duong(), // Trả về số: 2
+          dem_so_yeu_cau(), // Trả về object: { pendingRequests, totalRequests }
+        ])
+
+        setMetrics({
+          studentCount: student ?? 0,
+          totalAccounts: totalUsers ?? 0,
+          busRouteCount: totalRoutes ?? 0,
+          pendingRequests: requestStats?.pendingRequests ?? 0,
+        })
+      } catch (err) {
+        console.error('Dashboard fetch failed', err)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
 
   return (
     <>
@@ -101,13 +139,13 @@ export default function Dashboard() {
           <TabsContent value='overview' className='space-y-4'>
             {/* KPI Cards */}
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-              <AnalyticsCard icon={<IconUser className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số học sinh đang hoạt động' value={summaryMetrics.activeStudents} changeText={`${((summaryMetrics.activeStudents / dashboardData.totalStudents) * 100).toFixed(1)}%`} changeTextVariant='green' />
+              <AnalyticsCard icon={<IconUser className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số học sinh đang hoạt động' value={metrics.studentCount} changeText='Học sinh sử dụng hệ thống' changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconBus className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tuyến xe bus đang hoạt động' value={summaryMetrics.activeBuses} changeText={`${((summaryMetrics.activeBuses / dashboardData.totalBuses) * 100).toFixed(1)}%`} changeTextVariant='green' />
+              <AnalyticsCard icon={<IconBus className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tuyến xe bus trong hệ thống' value={metrics.busRouteCount} changeText='Tổng tuyến xe hiện có' changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconFileTypeDoc className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tài khoản người dùng' value={summaryMetrics.totalAccounts} changeText={`Tổng số tài khoản trong hệ thống`} changeTextVariant='green' />
+              <AnalyticsCard icon={<IconFileTypeDoc className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tài khoản người dùng' value={metrics.totalAccounts} changeText='Tài khoản người dùng hệ thống' changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconDropletQuestion className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Yêu cầu đang chờ' value={summaryMetrics.pendingRequests} changeText={`Cần xử lý ${summaryMetrics.pendingRequests} yêu cầu`} changeTextVariant='red' />
+              <AnalyticsCard icon={<IconDropletQuestion className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Yêu cầu đang chờ cần xử lý' value={metrics.pendingRequests} changeText={`Cần xử lý ${metrics.pendingRequests} yêu cầu`} changeTextVariant='red' />
             </div>
 
             {/* Chart + Mini Blocks */}
@@ -117,6 +155,7 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle>Tổng quan điểm danh</CardTitle>
                   <CardDescription>Tỉ lệ điểm danh (%) theo tháng</CardDescription>
+                  {/* Attendance Rate (%) = (Số lượt điểm danh thành công / Tổng số lượt cần điểm danh) * 100 Ví dụ: Tổng số học sinh cần đi học hôm nay: 500 Mỗi học sinh có 2 lượt cần điểm danh (lên xe và xuống xe) → Tổng lượt cần điểm danh: 500 x 2 = 1000 Lượt điểm danh thành công (AI nhận diện đúng & lưu log): 950 → Attendance Rate = (950 / 1000) * 100 = 95% */}
                 </CardHeader>
                 <CardContent>
                   <Overview />

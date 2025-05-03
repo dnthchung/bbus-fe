@@ -107,10 +107,22 @@ interface ApiServices {
     doi_thoi_gian_nam_hoc_hien_tai: (data: { name: string; startDate: string; endDate: string }) => Promise<any>
     doi_thoi_gian_mo_don: (data: { name: string; start: string; end: string }) => Promise<any>
   }
+  dashboard: {
+    dem_so_hoc_sinh: () => Promise<any>
+    dem_so_yeu_cau: () => Promise<any>
+    thong_so_account: () => Promise<any>
+    tong_tuyen_duong: () => Promise<any>
+  }
 }
 
 // Add the implementation in the students section of API_SERVICES
 export const API_SERVICES: ApiServices = {
+  dashboard: {
+    dem_so_hoc_sinh: () => apiClient.get(API_ENDPOINTS.DASHBOARD.DEM_SO_HOC_SINH),
+    dem_so_yeu_cau: () => apiClient.get(API_ENDPOINTS.DASHBOARD.DEM_SO_YEU_CAU),
+    thong_so_account: () => apiClient.get(API_ENDPOINTS.DASHBOARD.THONG_SO_ACCOUNT),
+    tong_tuyen_duong: () => apiClient.get(API_ENDPOINTS.DASHBOARD.TONG_TUYEN_DUONG),
+  },
   camera: {
     upload_student_to_camera: () => apiClient.get(API_ENDPOINTS.CAMERA.UPLOAD_STUDENT_TO_CAMERA),
   },

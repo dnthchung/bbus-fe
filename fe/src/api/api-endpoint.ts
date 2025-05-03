@@ -1,5 +1,11 @@
 //path : fe/src/api/api-endpoint.ts
 export const API_ENDPOINTS = {
+  DASHBOARD: {
+    DEM_SO_HOC_SINH: '/dashboard/count-total-student',
+    DEM_SO_YEU_CAU: '/dashboard/request-stats',
+    THONG_SO_ACCOUNT: '/dashboard/user-stats',
+    TONG_TUYEN_DUONG: '/dashboard/count-total-routes',
+  },
   AUTH: {
     LOGIN: '/auth/login',
     LOGOUT: '/auth/logout',
