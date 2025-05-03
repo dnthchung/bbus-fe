@@ -21,7 +21,6 @@ function formatVietnamTime(utcString: string | null): string {
   }).format(date)
 }
 
-// Kiểu backend trả về
 type RawRecord = {
   id: string
   date: string
@@ -35,9 +34,22 @@ type RawRecord = {
   checkpointName: string
   modifiedBy: string | null
 }
-
-// Ánh xạ dữ liệu từ backend sang dùng cho UI
-const mapRecord = (r: RawRecord) => ({
+const mapRecord = (
+  r: RawRecord
+): {
+  id: string
+  date: string
+  status: RawRecord['status']
+  busRoute: string
+  driver: string
+  busAttendant: string
+  location: string
+  notes: string
+  direction: 'to_school' | 'from_school' // 👈 Khai báo rõ
+  isSuccessful: boolean
+  checkin: string | null
+  checkout: string | null
+} => ({
   id: r.id,
   date: r.date,
   status: r.status,
@@ -91,11 +103,11 @@ export default function AttendanceDetails() {
     return <Badge className={colorMap[status]}>{statusLabels[status]}</Badge>
   }
 
-  const success = (ok: boolean) =>
+  const success = (ok: boolean, direction: 'to_school' | 'from_school') =>
     ok ? (
       <div className='mt-1 flex items-center text-xs text-green-600 dark:text-green-400'>
         <CheckCircle className='mr-1 h-3 w-3' />
-        <span>Đã thành công</span>
+        <span>{direction === 'to_school' ? 'Đã đến' : 'Đã về'}</span>
       </div>
     ) : (
       <div className='mt-1 flex items-center text-xs text-red-600 dark:text-red-400'>
@@ -110,7 +122,6 @@ export default function AttendanceDetails() {
 
   return (
     <div className='space-y-4'>
-      {/* filter header */}
       <div className='flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center'>
         <h3 className='text-lg font-semibold'>Lịch sử điểm danh</h3>
         <div className='flex items-center gap-2'>
@@ -136,14 +147,12 @@ export default function AttendanceDetails() {
         </div>
       </div>
 
-      {/* tabs */}
       <Tabs defaultValue='list'>
         <TabsList className='mb-4'>
           <TabsTrigger value='list'>Danh sách</TabsTrigger>
           <TabsTrigger value='summary'>Tổng quan</TabsTrigger>
         </TabsList>
 
-        {/* danh sách */}
         <TabsContent value='list'>
           {loading ? (
             <p className='py-8 text-center text-sm text-gray-500'>Đang tải...</p>
@@ -159,13 +168,13 @@ export default function AttendanceDetails() {
                       </div>
                       <div className='flex flex-col items-end'>
                         {badge(r.status)}
-                        {r.status !== 'ABSENT' && success(r.isSuccessful)}
+                        {r.status !== 'ABSENT' && success(r.isSuccessful, r.direction)}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className='p-4 pt-2'>
                     <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-                      {/* Left: thông tin chung */}
+                      {/* Left */}
                       <div className='space-y-2'>
                         <div className='flex items-center gap-2 text-sm'>
                           <Calendar className='h-4 w-4' />
@@ -180,8 +189,7 @@ export default function AttendanceDetails() {
                           <span>{r.location}</span>
                         </div>
                       </div>
-
-                      {/* Right: giờ & phụ xe */}
+                      {/* Right */}
                       <div className='space-y-2'>
                         <div className='flex items-center gap-2 text-sm'>
                           <Clock className='h-4 w-4' />
@@ -197,7 +205,6 @@ export default function AttendanceDetails() {
                         </div>
                       </div>
                     </div>
-
                     {r.notes && (
                       <div className='mt-2 flex items-start gap-2 text-sm'>
                         <Camera className='mt-0.5 h-4 w-4' />

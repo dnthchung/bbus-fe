@@ -138,36 +138,39 @@ function CheckpointsContent() {
                 <CheckpointsTable data={checkpointList} columns={columns} />
               </div>
             ) : (
-              <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
-                <Card className='lg:col-span-1'>
-                  <CardHeader className='pb-3'>
-                    <CardTitle className='text-lg'>
-                      <div className='flex items-center gap-2'>
-                        <MapPin className='h-5 w-5 text-primary' />
-                        Bản đồ điểm dừng
-                      </div>
-                    </CardTitle>
-                    <CardDescription>Hiển thị vị trí các điểm dừng trên bản đồ</CardDescription>
-                  </CardHeader>
-                  <CardContent className='p-0'>
-                    <CheckpointMap checkpoints={checkpointList} selectedCheckpoint={selectedCheckpoint} onCheckpointClick={handleCheckpointClick} height='600px' />
-                  </CardContent>
-                </Card>
+              <>
+                <div className='mt-4 h-px w-full bg-border' aria-hidden='true'></div>
+                <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+                  <Card className='border-none shadow-sm lg:col-span-1'>
+                    <CardHeader className='pb-3'>
+                      <CardTitle className='text-lg'>
+                        <div className='flex items-center gap-2'>
+                          <MapPin className='h-5 w-5 text-primary' />
+                          Bản đồ điểm dừng
+                        </div>
+                      </CardTitle>
+                      <CardDescription>Hiển thị vị trí các điểm dừng trên bản đồ</CardDescription>
+                    </CardHeader>
+                    <CardContent className='p-1'>
+                      <CheckpointMap checkpoints={checkpointList} selectedCheckpoint={selectedCheckpoint} onCheckpointClick={handleCheckpointClick} height='600px' />
+                    </CardContent>
+                  </Card>
 
-                <Card className='lg:col-span-1'>
-                  <CardHeader className='pb-3'>
-                    <CardTitle className='text-lg'>Danh sách điểm dừng</CardTitle>
-                    <CardDescription>Quản lý thông tin chi tiết các điểm dừng</CardDescription>
-                  </CardHeader>
-                  <CardContent className='p-0 pt-6'>
-                    <div className='flex h-[600px] flex-col'>
-                      <div className='flex-grow overflow-auto'>
-                        <CheckpointsTable columns={filteredColumns} data={checkpointList} onRowClick={handleCheckpointClick} highlightedRowId={selectedCheckpoint?.id} hideCheckboxes={true} className='flex h-full flex-col' />
+                  <Card className='border-none shadow-sm lg:col-span-1'>
+                    <CardHeader className='pb-3'>
+                      <CardTitle className='text-lg'>Danh sách điểm dừng</CardTitle>
+                      <CardDescription>Quản lý thông tin chi tiết các điểm dừng</CardDescription>
+                    </CardHeader>
+                    <CardContent className='p-0 pt-6'>
+                      <div className='flex h-[600px] flex-col p-1'>
+                        <div className='flex-grow overflow-auto'>
+                          <CheckpointsTable columns={filteredColumns} data={checkpointList} onRowClick={handleCheckpointClick} highlightedRowId={selectedCheckpoint?.id} hideCheckboxes={true} className='flex h-full flex-col' />
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
             )}
           </TabsContent>
           {/* ====================================== */}

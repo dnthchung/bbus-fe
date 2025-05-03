@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
 import { LimitedTextarea } from '@/components/mine/limited-textarea'
+import { Status } from '@/components/mine/status'
 import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
@@ -296,11 +296,12 @@ export default function CreateCheckpointPage() {
           <table className='w-full'>
             <thead className='sticky top-0 bg-muted text-left'>
               <tr>
-                <th className='p-3 text-sm font-medium'>Tên điểm dừng</th>
-                <th className='p-3 text-sm font-medium'>Trạng thái</th>
-                <th className='p-3 text-sm font-medium'>Vị trí</th>
+                <th className='w-[40%] p-3 text-sm font-medium'>Tên điểm dừng</th>
+                <th className='w-[20%] p-3 text-sm font-medium'>Trạng thái</th>
+                <th className='w-[40%] p-3 text-sm font-medium'>Vị trí</th>
               </tr>
             </thead>
+
             <tbody>
               {checkpoints.length === 0 ? (
                 <tr>
@@ -311,16 +312,16 @@ export default function CreateCheckpointPage() {
               ) : (
                 checkpoints.map((cp) => (
                   <tr key={cp.id} className='border-b hover:bg-muted/50'>
-                    <td className='p-3'>
+                    <td className='w-[20%] p-3'>
                       <div>
                         <p className='font-medium'>{cp.name}</p>
                         <p className='text-xs text-muted-foreground'>{cp.description}</p>
                       </div>
                     </td>
-                    <td className='p-3'>
-                      <Badge variant={cp.status === 'ACTIVE' ? 'default' : 'secondary'} className='text-xs'>
-                        {cp.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
-                      </Badge>
+                    <td className='w-[20%] p-3'>
+                      <Status color={cp.status === 'ACTIVE' ? 'green' : 'gray'} showDot={true}>
+                        {cp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Không hoạt động'}
+                      </Status>
                     </td>
                     <td className='p-3'>
                       <div className='text-xs'>

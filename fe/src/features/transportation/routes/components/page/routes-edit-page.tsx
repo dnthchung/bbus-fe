@@ -182,14 +182,19 @@ export default function EditRouteManagement() {
     const checkpointToAdd = availableCheckpoints.find((cp) => cp.id === selectedCheckpoint)
     if (!checkpointToAdd) return
 
-    // Add to the end of selectedCheckpoints
-    setSelectedCheckpoints([...selectedCheckpoints, checkpointToAdd])
+    // Chèn vào đầu danh sách, trừ điểm cuối
+    const newCheckpoints = [checkpointToAdd, ...selectedCheckpoints.slice(0, -1), selectedCheckpoints[selectedCheckpoints.length - 1]]
+    setSelectedCheckpoints(newCheckpoints)
 
-    // Remove from available checkpoints
-    setAvailableCheckpoints(availableCheckpoints.filter((cp) => cp.id !== selectedCheckpoint))
-    setFilteredCheckpoints(filteredCheckpoints.filter((cp) => cp.id !== selectedCheckpoint))
+    const newTimes = ['', ...checkpointTimes.slice(0, -1), checkpointTimes[checkpointTimes.length - 1]]
+    setCheckpointTimes(newTimes)
 
-    // Reset selection
+    // Cập nhật danh sách còn lại
+    const updatedAvailable = availableCheckpoints.filter((cp) => cp.id !== selectedCheckpoint)
+    const updatedFiltered = filteredCheckpoints.filter((cp) => cp.id !== selectedCheckpoint)
+    setAvailableCheckpoints(updatedAvailable)
+    setFilteredCheckpoints(updatedFiltered)
+
     setSelectedCheckpoint('')
     setSearchTerm('')
   }
@@ -367,7 +372,7 @@ export default function EditRouteManagement() {
     if (checkpointCount < 3 || checkpointCount > 5) {
       toast({
         title: 'Không thể lưu',
-        description: 'Tuyến đường phải có từ 3 đến 5 điểm dừng (bao gồm cả Trường Ngôi Sao).',
+        description: 'Tuyến đường phải / chỉ có từ 3 đến 5 điểm dừng (bao gồm cả Trường Ngôi Sao).',
         variant: 'deny',
       })
       return
@@ -660,7 +665,7 @@ export default function EditRouteManagement() {
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
-                                              <Button variant='ghost' size='icon' onClick={() => moveCheckpointUp(index)} disabled={index === 0} className='h-8 w-8'>
+                                              <Button variant='outline' size='icon' onClick={() => moveCheckpointUp(index)} disabled={index === 0} className='h-8 w-8'>
                                                 <ArrowUp className='h-4 w-4' />
                                               </Button>
                                             </TooltipTrigger>
@@ -671,7 +676,7 @@ export default function EditRouteManagement() {
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
-                                              <Button variant='ghost' size='icon' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 2} className='h-8 w-8'>
+                                              <Button variant='outline' size='icon' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 2} className='h-8 w-8'>
                                                 <ArrowDown className='h-4 w-4' />
                                               </Button>
                                             </TooltipTrigger>
@@ -689,7 +694,7 @@ export default function EditRouteManagement() {
                                         <Tooltip>
                                           <TooltipTrigger asChild>
                                             <Button variant='ghost' size='icon' onClick={() => handleRemoveCheckpoint(index)} className={checkpoint.studentCount && checkpoint.studentCount > 0 ? 'cursor-not-allowed opacity-50' : ''}>
-                                              <X className='h-4 w-4' />
+                                              <X className='h-4 w-4 text-red-600' />
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent>{checkpoint.studentCount && checkpoint.studentCount > 0 ? 'Không thể xóa điểm dừng có học sinh' : 'Xóa điểm dừng'}</TooltipContent>

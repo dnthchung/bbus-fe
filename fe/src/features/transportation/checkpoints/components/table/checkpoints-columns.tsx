@@ -26,7 +26,7 @@ export const columns: ColumnDef<Checkpoint>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Tên điểm dừng' />,
-    cell: ({ row }) => <LongText className='max-w-[500px]'>{row.getValue('name')}</LongText>,
+    cell: ({ row }) => <LongText className='max-w-[200px]'>{row.getValue('name')}</LongText>,
     meta: { className: 'w-48' },
   },
   // {
