@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
+//path : fe/src/features/dashboard/components/common/downloadable-reports.tsx
 // Define report types
 const reportTypes = [
   {

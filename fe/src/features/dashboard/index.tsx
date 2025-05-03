@@ -139,11 +139,11 @@ export default function Dashboard() {
           <TabsContent value='overview' className='space-y-4'>
             {/* KPI Cards */}
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-              <AnalyticsCard icon={<IconUser className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số học sinh đang hoạt động' value={metrics.studentCount} changeText='Học sinh sử dụng hệ thống' changeTextVariant='green' />
+              <AnalyticsCard icon={<IconUser className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số học sinh đang hoạt động' value={metrics.studentCount} changeText={`Học sinh sử dụng hệ thống`} changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconBus className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tuyến xe bus trong hệ thống' value={metrics.busRouteCount} changeText='Tổng tuyến xe hiện có' changeTextVariant='green' />
+              <AnalyticsCard icon={<IconBus className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tuyến xe bus' value={metrics.busRouteCount} changeText={`Tổng tuyến xe hiện có`} changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconFileTypeDoc className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tài khoản người dùng' value={metrics.totalAccounts} changeText='Tài khoản người dùng hệ thống' changeTextVariant='green' />
+              <AnalyticsCard icon={<IconFileTypeDoc className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tài khoản người dùng' value={metrics.totalAccounts} changeText={`Tài khoản người dùng hệ thống`} changeTextVariant='green' />
 
               <AnalyticsCard icon={<IconDropletQuestion className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Yêu cầu đang chờ cần xử lý' value={metrics.pendingRequests} changeText={`Cần xử lý ${metrics.pendingRequests} yêu cầu`} changeTextVariant='red' />
             </div>
