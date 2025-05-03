@@ -140,8 +140,16 @@ export function EventDialog({ open, onClose, mode, title, submitLabel, defaultVa
 
     try {
       setLoading(true)
-      const formattedStart = new Date(formState.start).toISOString()
-      const formattedEnd = new Date(formState.end).toISOString()
+      const formatToLocalISOString = (date: Date) => {
+        const pad = (n: number) => n.toString().padStart(2, '0')
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+      }
+
+      const formattedStart = formatToLocalISOString(new Date(formState.start))
+      const formattedEnd = formatToLocalISOString(new Date(formState.end))
+
+      console.log('[EventDialog] formattedStart:', formattedStart)
+      console.log('[EventDialog] formattedEnd:', formattedEnd)
 
       if (openEvent) {
         await API_SERVICES.event.update_event({

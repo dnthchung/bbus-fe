@@ -3,7 +3,7 @@
 // ===== Imports =====
 import { useState } from 'react'
 import { IconBus, IconDropletQuestion, IconUser, IconFileTypeDoc } from '@tabler/icons-react'
-import { toast } from '@/hooks/use-toast'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -29,11 +29,24 @@ export default function Dashboard() {
   return (
     <>
       {/* ===== Header ===== */}
-      <Header>
-        <div className='ml-auto flex items-center space-x-4'>
-          <Search placeholder='Tìm kiếm...' />
-          <ThemeSwitch />
-          <ProfileDropdown />
+      <Header fixed>
+        <div className='flex w-full items-center'>
+          <Breadcrumb className='flex-1'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href='/'>Trang chủ</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Bảng điều khiển</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className='flex items-center space-x-4'>
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
         </div>
       </Header>
 
