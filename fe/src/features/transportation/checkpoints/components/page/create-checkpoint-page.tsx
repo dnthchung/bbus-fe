@@ -141,7 +141,7 @@ export default function CreateCheckpointPage() {
       <div className='flex flex-col md:flex-row md:space-x-6'>
         {/* Left: Map */}
         <div className='w-full md:w-1/2'>
-          <Card className='relative border-border'>
+          <Card className='relative border-border shadow-sm'>
             <CardHeader className='pb-2'>
               <CardTitle className='flex items-center gap-2'>
                 <MapPin className='h-5 w-5 text-primary' /> Bản đồ điểm dừng
@@ -202,7 +202,7 @@ export default function CreateCheckpointPage() {
         </div>
         {/* Right: Checkpoint Form */}
         <div className='w-full md:w-1/2'>
-          <Card className='border-border'>
+          <Card className='border-border shadow-sm'>
             <CardHeader className='pb-2'>
               <CardTitle className='flex items-center gap-2'>
                 <Plus className='h-5 w-5 text-primary' /> Thông tin điểm dừng
@@ -293,15 +293,14 @@ export default function CreateCheckpointPage() {
           <p className='text-sm text-muted-foreground'>Các điểm dừng hiện có trong hệ thống</p>
         </div>
         <ScrollArea className='h-[850px]'>
-          <table className='w-full'>
-            <thead className='sticky top-0 bg-muted text-left'>
+          <table className='w-full table-auto'>
+            <thead className='bg-muted text-left text-sm font-medium'>
               <tr>
-                <th className='w-[40%] p-3 text-sm font-medium'>Tên điểm dừng</th>
-                <th className='w-[20%] p-3 text-sm font-medium'>Trạng thái</th>
-                <th className='w-[40%] p-3 text-sm font-medium'>Vị trí</th>
+                <th className='w-[10%] px-4 py-3'>Tên điểm dừng</th>
+                <th className='w-[50%] px-4 py-3 text-center'>Trạng thái</th>
+                <th className='w-[40%] px-4 py-3'>Vị trí</th>
               </tr>
             </thead>
-
             <tbody>
               {checkpoints.length === 0 ? (
                 <tr>
@@ -312,26 +311,24 @@ export default function CreateCheckpointPage() {
               ) : (
                 checkpoints.map((cp) => (
                   <tr key={cp.id} className='border-b hover:bg-muted/50'>
-                    <td className='w-[20%] p-3'>
+                    <td className='px-4 py-3'>
                       <div>
                         <p className='font-medium'>{cp.name}</p>
                         <p className='text-xs text-muted-foreground'>{cp.description}</p>
                       </div>
                     </td>
-                    <td className='w-[20%] p-3'>
-                      <Status color={cp.status === 'ACTIVE' ? 'green' : 'gray'} showDot={true}>
+                    <td className='px-4 py-3 text-center'>
+                      <Status color={cp.status === 'ACTIVE' ? 'green' : 'red'} showDot>
                         {cp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Không hoạt động'}
                       </Status>
                     </td>
-                    <td className='p-3'>
-                      <div className='text-xs'>
-                        <p>
-                          <span className='font-medium'>Lat:</span> {cp.latitude}
-                        </p>
-                        <p>
-                          <span className='font-medium'>Long:</span> {cp.longitude}
-                        </p>
-                      </div>
+                    <td className='px-4 py-3 text-sm text-muted-foreground'>
+                      <p>
+                        <span className='font-medium'>Lat:</span> {cp.latitude}
+                      </p>
+                      <p>
+                        <span className='font-medium'>Long:</span> {cp.longitude}
+                      </p>
                     </td>
                   </tr>
                 ))
