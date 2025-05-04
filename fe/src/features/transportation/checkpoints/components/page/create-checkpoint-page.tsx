@@ -8,7 +8,6 @@ import { X, Navigation, Search, MapPin, Plus } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import { API_SERVICES } from '@/api/api-services'
 import { toast } from '@/hooks/use-toast'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -20,6 +19,7 @@ import { Status } from '@/components/mine/status'
 import { useCheckpoints } from '@/features/transportation/checkpoints/context/checkpoints-context'
 
 const DEFAULT_POSITION: [number, number] = [21.0285, 105.8542] // Hà Nội
+const SCHOOL_ID = 'fdcb7b87-7cf4-4648-820e-b86ca2e4aa88'
 
 // Component to update the map view remotely
 const MapController = ({ center, zoom }: { center?: [number, number]; zoom?: number }) => {
@@ -50,9 +50,45 @@ export default function CreateCheckpointPage() {
   const [checkpointName, setCheckpointName] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingSchool, setLoadingSchool] = useState(false)
+
   const mapRef = useRef(null)
   // Use the context instead of local state for checkpoints
   const { checkpoints, refreshCheckpoints } = useCheckpoints()
+
+  const goToSchool = async () => {
+    try {
+      setLoadingSchool(true)
+
+      // 4.1. Gọi API lấy chi tiết checkpoint
+      const schoolCpRes = await API_SERVICES.checkpoints.get_a_checkpoint_by_checkpoint_id(SCHOOL_ID)
+      const schoolCp = schoolCpRes.data.data
+
+      if (!schoolCp || !schoolCp.latitude || !schoolCp.longitude) {
+        toast({
+          title: 'Không tìm thấy Trường Ngôi Sao',
+          description: 'API không trả về tọa độ hợp lệ.',
+          variant: 'deny',
+        })
+        return
+      }
+
+      // 4.2. Chuyển string → number
+      const coords: [number, number] = [Number.parseFloat(schoolCp.latitude), Number.parseFloat(schoolCp.longitude)]
+
+      // 4.3. Cập nhật bản đồ
+      setMapCenter(coords)
+      setCheckpoint(coords) // comment nếu KHÔNG muốn đặt marker
+    } catch (error) {
+      toast({
+        title: 'Lỗi khi lấy tọa độ Trường Ngôi Sao',
+        description: 'Vui lòng thử lại sau.',
+        variant: 'deny',
+      })
+    } finally {
+      setLoadingSchool(false)
+    }
+  }
 
   // Get current location and zoom to it
   const getCurrentLocation = () => {
@@ -183,7 +219,7 @@ export default function CreateCheckpointPage() {
                     </Button>
                   </div>
                   {searchResults.length > 0 && (
-                    <ScrollArea className='mt-2 max-h-40 rounded-md border bg-card'>
+                    <ScrollArea className='mt-2 max-h-40 overflow-y-auto rounded-md border bg-card'>
                       {searchResults.map((result, index) => (
                         <div key={index} className='cursor-pointer border-b p-2 last:border-b-0 hover:bg-accent' onClick={() => selectLocation(result)}>
                           <p className='text-sm'>{result.display_name}</p>
@@ -193,9 +229,19 @@ export default function CreateCheckpointPage() {
                   )}
                 </div>
                 {/* Current Location Button */}
-                <Button variant='secondary' onClick={getCurrentLocation} title='Sử dụng vị trí hiện tại' className='absolute bottom-4 left-4 z-[10] h-9 px-3 shadow-lg'>
-                  <Navigation className='mr-2 h-4 w-4' /> Vị trí hiện tại
-                </Button>
+                <div className='absolute bottom-4 left-4 z-[10] flex gap-2'>
+                  {/* Nút vị trí hiện tại (giữ nguyên) */}
+                  <Button variant='secondary' onClick={getCurrentLocation} className='h-9 px-3 shadow-lg'>
+                    <Navigation className='mr-2 h-4 w-4' />
+                    Vị trí hiện tại
+                  </Button>
+
+                  {/* Nút đi tới Trường Ngôi Sao */}
+                  <Button variant='secondary' onClick={goToSchool} disabled={loadingSchool} className='h-9 px-3 shadow-lg' title='Đến Trường Liên cấp Ngôi Sao'>
+                    {loadingSchool ? <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' /> : <MapPin className='mr-2 h-4 w-4 text-red-600' />}
+                    Trường Ngôi Sao
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
