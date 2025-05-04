@@ -277,8 +277,8 @@ export default function MonthlyScheduleCalendar() {
                                   <tr key={index} className={`${isPastDate ? 'text-gray-400' : ''}`}>
                                     <td className='py-1.5'>{format(date, 'EEEE, dd/MM/yyyy', { locale: vi })}</td>
                                     <td className='w-10 text-right'>
-                                      {isEditMode && !isPastDate && (
-                                        <button className='ml-2 h-6 w-6 rounded-full p-0 text-red-500 hover:bg-red-50 hover:text-red-600' onClick={() => handleConfirmDelete(date)}>
+                                      {isEditMode && !isPastDate && !isSameDay(date, today) && (
+                                        <button className='ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600' onClick={() => handleConfirmDelete(date)}>
                                           <X className='h-4 w-4' />
                                         </button>
                                       )}
