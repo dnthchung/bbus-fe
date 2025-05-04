@@ -1,4 +1,4 @@
-// path: fe/src/features/settings/profile/profile-page.tsx
+// path: fe/src/features/settings/profile/components/profile-form.tsx
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import ChangeAvatarTab from './tab/change-avatar-tab'
 import InformationTab from './tab/change-information-tab'

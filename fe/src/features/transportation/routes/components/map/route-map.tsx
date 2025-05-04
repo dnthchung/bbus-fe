@@ -105,7 +105,7 @@ export default function RouteMap({ selectedRouteId, checkpoints = [], className 
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [mapCenter, setMapCenter] = useState<[number, number]>([21.0285, 105.8542]) // Default to Hanoi
+  const [mapCenter, setMapCenter] = useState<[number, number]>([21.0047195, 105.7829959]) // Default to Trường Liên cấp TH & THCS Ngôi Sao Hà Nội
   const [routeCheckpoints, setRouteCheckpoints] = useState<Checkpoint[]>([])
 
   // Fix for Leaflet marker icons in React
@@ -120,6 +120,49 @@ export default function RouteMap({ selectedRouteId, checkpoints = [], className 
       shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
     })
   }, [])
+
+  // --- 1. Icon đỏ cho Trường Ngôi Sao ---
+  const schoolIcon = new L.DivIcon({
+    className: 'custom-div-icon',
+    html: `
+    <div style="position:relative">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
+        <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24C24 5.4 18.6 0 12 0z"
+              fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+        <circle cx="12" cy="12" r="5" fill="white"/>
+      </svg>
+    </div>
+  `,
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
+    popupAnchor: [0, -36],
+  })
+
+  // --- 2. Hàm tạo icon xanh có số thứ tự ---
+  const createNumberedIcon = (index: number) =>
+    new L.DivIcon({
+      className: 'custom-div-icon',
+      html: `
+      <div style="position:relative">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
+          <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24C24 5.4 18.6 0 12 0z"
+                fill="#3b82f6" stroke="#2563eb" stroke-width="1"/>
+          <circle cx="12" cy="12" r="5" fill="white"/>
+        </svg>
+        <span style="
+          position:absolute;
+          top:4px; left:0;
+          width:24px; text-align:center;
+          font-size:12px; font-weight:700;
+          color:#1e3a8a;">
+          ${index}
+        </span>
+      </div>
+    `,
+      iconSize: [24, 36],
+      iconAnchor: [12, 36],
+      popupAnchor: [0, -36],
+    })
 
   // Custom marker icons
   const checkpointIcon = new L.DivIcon({
@@ -307,19 +350,32 @@ export default function RouteMap({ selectedRouteId, checkpoints = [], className 
             {routeCheckpoints.length > 1 && <RoutingMachine checkpoints={routeCheckpoints} />}
 
             {/* Render checkpoints */}
-            {routeCheckpoints.map((checkpoint, index) => (
-              <Marker key={checkpoint.id} position={[Number.parseFloat(checkpoint.latitude as string), Number.parseFloat(checkpoint.longitude as string)]} icon={checkpoint.isInvalid ? invalidCheckpointIcon : checkpointIcon}>
-                <Popup>
-                  <div>
-                    <div className='font-medium'>{checkpoint.name}</div>
-                    {checkpoint.description && <div className='text-sm text-muted-foreground'>{checkpoint.description}</div>}
-                    <div className='mt-1 text-sm'>Điểm dừng #{index + 1}</div>
-                    {checkpoint.studentCount !== undefined && <div className='mt-1 text-sm font-medium'>Số học sinh: {checkpoint.studentCount}</div>}
-                    {checkpoint.isInvalid && <div className='mt-1 text-sm font-medium text-amber-600'>Vị trí không hợp lệ</div>}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            {routeCheckpoints.map((cp, i) => {
+              // 4.1. Kiểm tra có phải Trường Ngôi Sao hay không
+              const isSchool = Number(cp.latitude) === 21.0047195 && Number(cp.longitude) === 105.7829959
+
+              // 4.2. Chọn icon phù hợp
+              const icon = cp.isInvalid
+                ? invalidCheckpointIcon // tọa độ sai
+                : isSchool
+                  ? schoolIcon // Trường Ngôi Sao
+                  : createNumberedIcon(i + 1) // checkpoint thường
+
+              return (
+                <Marker key={cp.id} position={[Number(cp.latitude), Number(cp.longitude)]} icon={icon}>
+                  {/* giữ nguyên Popup */}
+                  <Popup>
+                    <div>
+                      <div className='font-medium'>{cp.name}</div>
+                      {cp.description && <div className='text-sm text-muted-foreground'>{cp.description}</div>}
+                      <div className='mt-1 text-sm'>Điểm dừng #{i + 1}</div>
+                      {cp.studentCount !== undefined && <div className='mt-1 text-sm font-medium'>Số học sinh: {cp.studentCount}</div>}
+                      {cp.isInvalid && <div className='mt-1 text-sm font-medium text-amber-600'>Vị trí không hợp lệ</div>}
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            })}
           </MapContainer>
         </div>
       </CardContent>

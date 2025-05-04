@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
-import { CalendarIcon, CaretSortIcon, CheckIcon } from '@radix-ui/react-icons'
+import { CalendarIcon, CaretSortIcon } from '@radix-ui/react-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
+import { CheckIcon, Loader2 } from 'lucide-react'
+import { API_SERVICES } from '@/api/api-services'
 import { cn } from '@/lib/utils'
+import { useAuthQuery } from '@/hooks/use-auth'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -12,6 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Status } from '@/components/mine/status'
 
 const genders = [
   { label: 'Nam', value: 'MALE' },
@@ -31,71 +36,115 @@ const roleOptions = [
   { label: 'Khách', value: 'GUEST' },
 ]
 
-const userData = {
-  id: 'a9ce782b-15ae-4610-b541-e4ef71f9cfef',
-  username: 'sysadmin', // Giữ lại trong data nhưng không hiển thị
-  name: 'Tài khoản sysadmin',
-  gender: 'MALE',
-  dob: '2025-02-16',
-  email: 'sysadmin@gmail.com',
-  avatar: 'https://avatar.iran.liara.run/public/21',
-  phone: '0912345671',
-  address: '74 An Dương',
-  status: 'ACTIVE',
-  role: 'SYSADMIN',
-  twoFactorEnabled: true,
-  lastLogin: '2025-03-15T08:24:16Z',
-  accountCreated: '2024-10-05T14:30:00Z',
-}
-
-const isAdmin = userData.role === 'SYSADMIN' || userData.role === 'ADMIN'
-
 const informationSchema = z.object({
-  // username: z.string().min(4, 'Tên người dùng phải có ít nhất 4 ký tự.'), // Comment schema username
-  name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự.').max(30, 'Tên không được quá 30 ký tự.'),
-  email: z.string().email('Vui lòng nhập một địa chỉ email hợp lệ.'),
-  phone: z.string().min(10, 'Số điện thoại phải có ít nhất 10 số.').max(11, 'Số điện thoại tối đa 11 số.'),
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Tên phải có ít nhất 2 ký tự.')
+    .max(30, 'Tên không được quá 30 ký tự.')
+    .refine((val) => !/[!@#$%^&*()_+\-=\[\]{}\\|;:'".?/]/g.test(val), {
+      message: 'Tên không được chứa ký tự đặc biệt.',
+    }),
+
+  email: z
+    .string()
+    .email('Vui lòng nhập một địa chỉ email hợp lệ.')
+    .transform((val) => val.trim()),
+
+  phone: z
+    .string()
+    .min(10, 'Số điện thoại phải có ít nhất 10 số.')
+    .max(11, 'Số điện thoại tối đa 11 số.')
+    .transform((val) => val.trim())
+    .refine((val) => !/[!@#$%^&*()_+\-=\[\]{}\\|;:'"?/]/g.test(val), {
+      message: 'Số điện thoại không được chứa ký tự đặc biệt.',
+    }),
+
   gender: z.string(),
+
   dob: z.date({ required_error: 'Ngày sinh là bắt buộc' }),
-  address: z.string().optional(),
-  role: z.string(),
-  status: z.string(),
-  twoFactorEnabled: z.boolean(),
+
+  address: z
+    .string()
+    .trim()
+    .min(2, 'Địa chỉ phải có ít nhất 2 ký tự.')
+    .max(100, 'Địa chỉ không được quá 100 ký tự.')
+    .refine((val) => !/[!@#$%^&*()_+\-=\[\]{}\\|;:'"?/]/g.test(val), {
+      message: 'Địa chỉ không được chứa ký tự đặc biệt.',
+    }),
 })
 
 type InformationFormValues = z.infer<typeof informationSchema>
 
-const defaultValues: InformationFormValues = {
-  // username: userData.username, // Comment default value username
-  name: userData.name,
-  email: userData.email,
-  phone: userData.phone,
-  gender: userData.gender,
-  dob: new Date(userData.dob),
-  address: userData.address,
-  role: userData.role,
-  status: userData.status,
-  twoFactorEnabled: userData.twoFactorEnabled,
-}
-
 export default function InformationTab() {
   const [isEditing, setIsEditing] = useState(false)
+  const queryClient = useQueryClient()
+  const { user, isLoading } = useAuthQuery()
+
+  const defaultValues = useMemo(() => {
+    if (!user) return undefined
+
+    console.log('Default values:', user)
+
+    return {
+      id: user.userId,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      gender: user.gender,
+      dob: new Date(user.dob),
+      address: user.address ?? '',
+    }
+  }, [user])
+
   const form = useForm<InformationFormValues>({
     resolver: zodResolver(informationSchema),
     defaultValues,
     mode: 'onChange',
   })
 
-  function onSubmit(data: InformationFormValues) {
-    toast({
-      title: 'Cập nhật thành công!',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
-    setIsEditing(false)
+  const {
+    handleSubmit,
+    control,
+    reset,
+    formState: { isSubmitting },
+  } = form
+
+  const isAdmin = user?.role === 'SYSADMIN' || user?.role === 'ADMIN'
+
+  const onSubmit = async (data: InformationFormValues) => {
+    try {
+      const userDataToUpdate = {
+        ...user,
+        ...data,
+        id: user?.userId,
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        email: data.email.trim(),
+        address: data.address.trim(),
+      }
+
+      await API_SERVICES.users.update(userDataToUpdate)
+
+      // ✅ Refetch lại dữ liệu user sau khi update
+      queryClient.invalidateQueries({ queryKey: ['authUser'] })
+
+      toast({
+        title: 'Cập nhật thành công!',
+        description: 'Thông tin cá nhân đã được cập nhật.',
+        variant: 'success',
+      })
+
+      form.reset(data)
+      setIsEditing(false)
+    } catch (error: any) {
+      console.error('Lỗi cập nhật:', error)
+      toast({
+        title: 'Cập nhật thất bại!',
+        description: error?.message || 'Có lỗi xảy ra khi cập nhật thông tin.',
+        variant: 'deny',
+      })
+    }
   }
 
   const onCancelEdit = () => {
@@ -103,28 +152,14 @@ export default function InformationTab() {
     setIsEditing(false)
   }
 
+  if (isLoading || !user) return <p className='text-muted-foreground'>Đang tải thông tin người dùng...</p>
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         <div className='flex flex-col-reverse items-start justify-between md:flex-row md:items-start'>
           <div className='w-full md:pr-8'>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-              {/* Comment phần username */}
-              {/* <FormField
-                control={form.control}
-                name='username'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tên đăng nhập</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Tên người dùng' {...field} disabled={!isEditing || !isAdmin} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              {/* NAME */}
               <FormField
                 control={form.control}
                 name='name'
@@ -139,7 +174,6 @@ export default function InformationTab() {
                 )}
               />
 
-              {/* EMAIL */}
               <FormField
                 control={form.control}
                 name='email'
@@ -154,7 +188,6 @@ export default function InformationTab() {
                 )}
               />
 
-              {/* PHONE */}
               <FormField
                 control={form.control}
                 name='phone'
@@ -169,7 +202,6 @@ export default function InformationTab() {
                 )}
               />
 
-              {/* DOB */}
               <FormField
                 control={form.control}
                 name='dob'
@@ -196,7 +228,6 @@ export default function InformationTab() {
                 )}
               />
 
-              {/* GENDER */}
               <FormField
                 control={form.control}
                 name='gender'
@@ -207,7 +238,7 @@ export default function InformationTab() {
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button variant='outline' role='combobox' className={cn('w-full justify-between', !field.value && 'text-muted-foreground')} disabled={!isEditing}>
-                            {field.value ? genders.find((g) => g.value === field.value)?.label : 'Chọn giới tính'}
+                            {genders.find((g) => g.value === field.value)?.label || 'Chọn giới tính'}
                             <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                           </Button>
                         </FormControl>
@@ -215,18 +246,12 @@ export default function InformationTab() {
                       {isEditing && (
                         <PopoverContent className='w-full p-0'>
                           <Command>
-                            <CommandInput placeholder='Tìm kiếm giới tính...' />
+                            <CommandInput placeholder='Tìm giới tính...' />
                             <CommandEmpty>Không tìm thấy giới tính.</CommandEmpty>
                             <CommandGroup>
                               <CommandList>
                                 {genders.map((g) => (
-                                  <CommandItem
-                                    key={g.value}
-                                    value={g.label}
-                                    onSelect={() => {
-                                      form.setValue('gender', g.value)
-                                    }}
-                                  >
+                                  <CommandItem key={g.value} value={g.label} onSelect={() => form.setValue('gender', g.value)}>
                                     <CheckIcon className={cn('mr-2 h-4 w-4', g.value === field.value ? 'opacity-100' : 'opacity-0')} />
                                     {g.label}
                                   </CommandItem>
@@ -242,7 +267,6 @@ export default function InformationTab() {
                 )}
               />
 
-              {/* ADDRESS */}
               <FormField
                 control={form.control}
                 name='address'
@@ -256,105 +280,27 @@ export default function InformationTab() {
                   </FormItem>
                 )}
               />
-
-              {/* ROLE (chỉ sửa nếu là Admin/Sysadmin) */}
-              {isAdmin && (
-                <FormField
-                  control={form.control}
-                  name='role'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vai trò</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant='outline' role='combobox' className={cn('w-full justify-between', !field.value && 'text-muted-foreground')} disabled={!isEditing}>
-                              {roleOptions.find((r) => r.value === field.value)?.label || 'Chọn vai trò'}
-                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        {isEditing && (
-                          <PopoverContent className='w-full p-0'>
-                            <Command>
-                              <CommandInput placeholder='Tìm vai trò...' />
-                              <CommandEmpty>Không tìm thấy.</CommandEmpty>
-                              <CommandGroup>
-                                <CommandList>
-                                  {roleOptions.map((r) => (
-                                    <CommandItem
-                                      key={r.value}
-                                      value={r.label}
-                                      onSelect={() => {
-                                        form.setValue('role', r.value)
-                                      }}
-                                    >
-                                      <CheckIcon className={cn('mr-2 h-4 w-4', r.value === field.value ? 'opacity-100' : 'opacity-0')} />
-                                      {r.label}
-                                    </CommandItem>
-                                  ))}
-                                </CommandList>
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        )}
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              {/* STATUS (chỉ sửa nếu là Admin/Sysadmin) */}
-              {isAdmin && (
-                <FormField
-                  control={form.control}
-                  name='status'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Trạng thái</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant='outline' role='combobox' className={cn('w-full justify-between', !field.value && 'text-muted-foreground')} disabled={!isEditing}>
-                              {statusOptions.find((s) => s.value === field.value)?.label || 'Chọn trạng thái'}
-                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        {isEditing && (
-                          <PopoverContent className='w-full p-0'>
-                            <Command>
-                              <CommandInput placeholder='Tìm trạng thái...' />
-                              <CommandEmpty>Không tìm thấy.</CommandEmpty>
-                              <CommandGroup>
-                                <CommandList>
-                                  {statusOptions.map((s) => (
-                                    <CommandItem
-                                      key={s.value}
-                                      value={s.label}
-                                      onSelect={() => {
-                                        form.setValue('status', s.value)
-                                      }}
-                                    >
-                                      <CheckIcon className={cn('mr-2 h-4 w-4', s.value === field.value ? 'opacity-100' : 'opacity-0')} />
-                                      {s.label}
-                                    </CommandItem>
-                                  ))}
-                                </CommandList>
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        )}
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
-            {/* ACTION BUTTONS */}
+            {/* STATIC ROLE & STATUS */}
+            {/* STATIC ROLE & STATUS */}
+            {isAdmin && (
+              <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-2'>
+                <div>
+                  <p className='text-sm text-muted-foreground'>Vai trò</p>
+                  <Status color='blue' showDot>
+                    {roleOptions.find((r) => r.value === user?.role)?.label || user?.role}
+                  </Status>
+                </div>
+                <div>
+                  <p className='text-sm text-muted-foreground'>Trạng thái</p>
+                  <Status color={user?.status === 'ACTIVE' ? 'green' : user?.status === 'SUSPENDED' ? 'red' : user?.status === 'PENDING' ? 'yellow' : 'gray'} showDot>
+                    {statusOptions.find((s) => s.value === user?.status)?.label || user?.status}
+                  </Status>
+                </div>
+              </div>
+            )}
+
             <div className='mt-6 flex justify-end space-x-4'>
               {!isEditing ? (
                 <Button type='button' onClick={() => setIsEditing(true)}>
@@ -365,7 +311,10 @@ export default function InformationTab() {
                   <Button type='button' variant='outline' onClick={onCancelEdit}>
                     Hủy
                   </Button>
-                  <Button type='submit'>Lưu</Button>
+                  <Button type='submit' disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                    Lưu
+                  </Button>
                 </>
               )}
             </div>

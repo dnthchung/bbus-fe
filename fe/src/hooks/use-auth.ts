@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast.ts'
 
 // Định nghĩa kiểu AuthUser dựa trên cấu trúc trả về từ API
 interface AuthUser {
-  id: number
+  userId: number
   name: string
   email: string
   phone: string
@@ -81,6 +81,7 @@ export const useAuthQuery = () => {
         throw new Error('No valid user ID')
       }
       const response: FetchUserResponse = await API_SERVICES.auth.fetchUser(userId)
+
       const userData = response.data.data
 
       // Check if user has valid role
@@ -103,10 +104,10 @@ export const useAuthQuery = () => {
         navigate({ to: '/sign-in' })
         throw new Error('Unauthorized role')
       }
-      // console.log('User data: =>', userData.role)
       //save role to localStorage
       localStorage.setItem('role', userData.role)
 
+      // console.log('User data: =>', userData)
       return userData
     },
     enabled: isAuthenticated && !!userId,

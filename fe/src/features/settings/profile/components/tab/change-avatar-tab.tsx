@@ -1,98 +1,111 @@
-//path: /D:/Workspace/Github_folder/bbus-fe/fe/src/features/settings/profile/components/tab/change-avatar-tab.tsx
-import { useState, useRef, ChangeEvent } from 'react'
-import { Cross2Icon } from '@radix-ui/react-icons'
+// path: fe/src/features/settings/profile/components/tab/change-avatar-tab.tsx
+import { useEffect, useRef, useState } from 'react'
+import { CrossIcon, Loader2 } from 'lucide-react'
+import { API_SERVICES } from '@/api/api-services'
+import { useAuthQuery } from '@/hooks/use-auth'
 import { toast } from '@/hooks/use-toast'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
 export default function ChangeAvatarTab() {
-  const userData = {
-    id: 'a9ce782b-15ae-4610-b541-e4ef71f9cfef',
-    username: 'sysadmin',
-    name: 'Tài khoản sysadmin',
-    gender: 'MALE',
-    dob: '2025-02-16',
-    email: 'sysadmin@gmail.com',
-    avatar: 'https://avatar.iran.liara.run/public/21',
-    phone: '0912345671',
-    address: '74 An Dương',
-    status: 'ACTIVE',
-    role: 'SYSADMIN',
-    twoFactorEnabled: true,
-    lastLogin: '2025-03-15T08:24:16Z',
-    accountCreated: '2024-10-05T14:30:00Z',
-  }
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const { user, isLoading } = useAuthQuery()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
-  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const triggerFileInput = () => fileInputRef.current?.click()
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
-      if (!validImageTypes.includes(file.type)) {
-        toast({
-          title: 'Lỗi',
-          description: 'Vui lòng chọn file ảnh (JPEG, PNG, GIF, WebP hoặc SVG)',
-          variant: 'destructive',
-        })
-        return
-      }
-      setAvatarFile(file)
-      const reader = new FileReader()
-      reader.onloadend = () => setAvatarPreview(reader.result as string)
-      reader.readAsDataURL(file)
-    }
-  }
+    if (!file) return
 
-  const handleAvatarButtonClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const clearAvatarInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-    setAvatarFile(null)
-    setAvatarPreview(null)
-  }
-
-  const handleSaveAvatar = () => {
-    if (avatarFile) {
-      // Logic gọi API để lưu avatar mới
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+    if (!validTypes.includes(file.type)) {
       toast({
-        title: 'Cập nhật ảnh đại diện thành công!',
-        description: `Ảnh đã chọn: ${avatarFile.name}`,
+        title: 'Lỗi',
+        description: 'Vui lòng chọn file ảnh hợp lệ (JPEG, PNG, GIF, WebP, SVG)',
+        variant: 'deny',
       })
-      // Sau khi lưu thành công, có thể reset trạng thái nếu cần
-      // setAvatarFile(null);
-      // setAvatarPreview(null);
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setSelectedAvatar(file)
+    setAvatarPreviewUrl(previewUrl)
+  }
+
+  const handleCancelAvatarUpload = () => {
+    if (avatarPreviewUrl) {
+      URL.revokeObjectURL(avatarPreviewUrl)
+    }
+    fileInputRef.current && (fileInputRef.current.value = '')
+    setSelectedAvatar(null)
+    setAvatarPreviewUrl(null)
+  }
+
+  const handleAvatarUpload = async () => {
+    if (!selectedAvatar || !user?.userId) {
+      toast({ title: 'Lỗi', description: 'Thiếu file hoặc userId', variant: 'deny' })
+      return
+    }
+
+    try {
+      setUploadingAvatar(true)
+      await API_SERVICES.users.update_avatar(`${user.userId}`, selectedAvatar)
+
+      // ✅ Cập nhật lại user sau khi upload
+      toast({
+        title: 'Thành công',
+        description: 'Ảnh đại diện đã được cập nhật',
+        variant: 'success',
+      })
+
+      handleCancelAvatarUpload()
+    } catch (err) {
+      toast({ title: 'Lỗi', description: 'Không thể cập nhật ảnh đại diện', variant: 'deny' })
+    } finally {
+      setUploadingAvatar(false)
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreviewUrl) {
+        URL.revokeObjectURL(avatarPreviewUrl)
+      }
+    }
+  }, [avatarPreviewUrl])
+
+  if (isLoading || !user) return <p className='text-muted-foreground'>Đang tải dữ liệu...</p>
 
   return (
     <div className='flex flex-col items-center space-y-4'>
       <Avatar className='h-40 w-40'>
-        <AvatarImage src={avatarPreview || userData.avatar} alt={userData.name} />
-        <AvatarFallback>{userData.name.substring(0, 2)}</AvatarFallback>
+        <AvatarImage src={avatarPreviewUrl || user.avatar} alt={user.name} />
+        <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
       </Avatar>
+
       <div className='flex flex-col items-center space-y-2'>
-        <input type='file' ref={fileInputRef} onChange={handleAvatarChange} style={{ display: 'none' }} accept='image/png,image/jpeg,image/gif,image/webp,image/svg+xml' />
+        <input type='file' ref={fileInputRef} onChange={handleAvatarChange} style={{ display: 'none' }} accept='image/*' />
+
         <div className='flex space-x-2'>
-          <Button type='button' variant='outline' onClick={handleAvatarButtonClick}>
+          <Button type='button' variant='outline' onClick={triggerFileInput}>
             Thay đổi ảnh đại diện
           </Button>
-          {avatarFile && (
-            <Button type='button' variant='outline' onClick={clearAvatarInput}>
-              <Cross2Icon className='mr-2 h-4 w-4' />
-              Xóa
+          {selectedAvatar && (
+            <Button type='button' variant='outline' onClick={handleCancelAvatarUpload}>
+              <CrossIcon className='mr-2 h-4 w-4' /> Xóa
             </Button>
           )}
         </div>
-        {avatarFile && <div className='text-sm text-muted-foreground'>Ảnh đã chọn: {avatarFile.name}</div>}
+
+        {selectedAvatar && <div className='text-sm text-muted-foreground'>Ảnh đã chọn: {selectedAvatar.name}</div>}
       </div>
-      {avatarFile && (
-        <Button type='button' onClick={handleSaveAvatar}>
+
+      {selectedAvatar && (
+        <Button type='button' onClick={handleAvatarUpload} disabled={uploadingAvatar}>
+          {uploadingAvatar && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
           Lưu ảnh đại diện
         </Button>
       )}

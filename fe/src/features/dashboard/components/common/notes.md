@@ -72,3 +72,98 @@ Tổng hợp hoạt động của tài xế và phụ xe, đặc biệt là hỗ
 
 ---
 
+Dưới đây là mô tả sơ bộ UI **của từng loại báo cáo** sử dụng cú pháp **Markdown**, kết hợp **bảng**, **danh sách**, và **heading** để bạn có thể dễ dàng hình dung hoặc dùng trong tài liệu nội bộ hoặc thiết kế Figma/Notion.
+
+---
+
+## 📘 Báo cáo 1: Báo cáo tổng kết năm học (`summary`)
+
+
+# Báo cáo tổng kết năm học - [Tên Trường]
+
+## 1. Thông tin tổng quát
+- 🗓️ Năm học: 2024–2025
+- 📅 Ngày bắt đầu: 05/09/2024
+- 📅 Ngày kết thúc: 25/05/2025
+- 🚌 Tổng số ngày xe hoạt động: [số ngày thực tế]
+
+---
+
+## 2. Số lượng học sinh tham gia
+
+| STT | Khối/Lớp | Tổng học sinh đăng ký | Số học sinh nghỉ giữa chừng | Ghi chú         |
+|-----|----------|------------------------|------------------------------|------------------|
+| 1   | Lớp 1    | 40                     | 1                            | -                |
+| 2   | Lớp 2    | 38                     | 0                            | -                |
+| ... | ...      | ...                    | ...                          | ...              |
+|     | **Tổng** | **191**                | **2**                        |                  |
+
+- Tổng số học sinh đăng ký sử dụng xe buýt: **191**
+- Số học sinh nghỉ: nghỉ học, chuyển trường, ngừng đi xe buýt…
+
+---
+
+## 3. Số lượng xe buýt hoạt động
+
+| STT | Biển số xe | Tài xế | Phụ xe | Tổng số chuyến | Ghi chú     |
+|-----|------------|--------|--------|----------------|-------------|
+| 1   | 29A-12345  | Nguyễn A | Trần B | 320 chuyến     | Xe 45 chỗ   |
+| 2   | 29B-67890  | Lê C     | Phạm D | 310 chuyến     | Xe 29 chỗ   |
+|     | ...        | ...      | ...    | ...            | ...         |
+|     |            |         |        | **630 chuyến** |             |
+
+---
+
+## 4. Tổng số tuyến xe đã vận hành
+
+| STT | Tuyến | Các điểm đón | Số học sinh phục vụ | Tổng chuyến | Ghi chú |
+|-----|-------|---------------|----------------------|-------------|---------|
+| 1   | Tuyến 1 | Mỹ Đình 1, 2… | 30                   | 300 chuyến |         |
+| 2   | Tuyến 2 | Trường Yên…  | 28                   | 310 chuyến |         |
+
+
+
+
+## 📗 Báo cáo 2: Báo cáo điểm danh học sinh (`attendance`)
+
+
+# Báo cáo điểm danh học sinh
+
+## 1. Tổng số lượt đi/về trong năm cho từng học sinh
+
+| STT | Họ tên học sinh | Lớp | Lượt đi | Lượt về | Tổng lượt đi+về | Ghi chú   |
+|-----|------------------|------|----------|----------|------------------|-----------|
+| 1   | Nguyễn Văn A     | 1A   | 180      | 180      | 360              | Đi học đều |
+| 2   | Trần Thị Bích    | 2B   | 175      | 174      | 349              |           |
+| ... | ...              | ...  | ...      | ...      | ...              |           |
+
+**🟢 Ghi chú:**
+- Lượt đi: điểm danh khi học sinh lên xe buổi sáng
+- Lượt về: điểm danh khi học sinh xuống xe chiều
+- attended = 1 là thành công
+
+
+---
+
+## 📕 Báo cáo 3: Báo cáo hoạt động của xe buýt (`activity`)
+
+# Báo cáo hoạt động của tài xế và phụ xe
+
+## 1. Số học sinh được hỗ trợ điểm danh thủ công
+
+| STT | Tài xế       | Phụ xe        | Số học sinh thủ công | Ghi chú                     |
+|-----|--------------|---------------|------------------------|-----------------------------|
+| 1   | Nguyễn Văn A | Trần Thị B    | 6 học sinh             | Camera lỗi nhận diện       |
+| 2   | Lê Văn C      | Phạm Thị D    | 10 học sinh            | FaceID lỗi hoặc nhận chậm  |
+| ... | ...          | ...           | ...                    | ...                         |
+
+
+---
+
+💡 **Gợi ý thêm cho UI thực tế (Figma/React):**
+
+* **Header mỗi báo cáo**: Dùng `<Card>` hoặc `<Section>` với tiêu đề + mô tả.
+* **Tables**: Responsive, có scroll ngang trên mobile.
+* **Tổng kết (tổng cộng)**: Hiển thị rõ ràng với font bold hoặc nền khác biệt.
+* **Mỗi tab download**: Có thể preview nội dung dạng collapsible trước khi tải.
+

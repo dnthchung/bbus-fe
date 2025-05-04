@@ -11,7 +11,7 @@ import { PasswordInput } from '@/components/common/password-input'
 import { BusLoader } from '@/components/mine/loader/bus-loader'
 import { AUTH_MESSAGES } from '@/features/auth/sign-in/data'
 
-// 👈 import thêm
+// path : fe/src/features/auth/sign-in/components/user-auth-form.tsx
 
 const formSchema = z.object({
   phone: z
