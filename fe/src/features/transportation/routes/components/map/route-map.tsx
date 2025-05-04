@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getListCheckpointByRouteId, getNumberOfStudentInEachCheckpoint } from '@/features/transportation/function'
 import './map.css'
 
+// ngôi sao id: fdcb7b87-7cf4-4648-820e-b86ca2e4aa88
+const SCHOOL_ID = 'fdcb7b87-7cf4-4648-820e-b86ca2e4aa88'
+
 // Component to recenter map when route changes
 function MapUpdater({ center }: { center: [number, number] | null }) {
   const map = useMap()
@@ -107,6 +110,8 @@ export default function RouteMap({ selectedRouteId, checkpoints = [], className 
   const [error, setError] = useState<string | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([21.0047195, 105.7829959]) // Default to Trường Liên cấp TH & THCS Ngôi Sao Hà Nội
   const [routeCheckpoints, setRouteCheckpoints] = useState<Checkpoint[]>([])
+
+  //id của trường ngôi sao trong db luôn là : fdcb7b87-7cf4-4648-820e-b86ca2e4aa88
 
   // Fix for Leaflet marker icons in React
   useEffect(() => {
@@ -352,7 +357,9 @@ export default function RouteMap({ selectedRouteId, checkpoints = [], className 
             {/* Render checkpoints */}
             {routeCheckpoints.map((cp, i) => {
               // 4.1. Kiểm tra có phải Trường Ngôi Sao hay không
-              const isSchool = Number(cp.latitude) === 21.0047195 && Number(cp.longitude) === 105.7829959
+              // const isSchool = Number(cp.latitude) === 21.0047195 && Number(cp.longitude) === 105.7829959
+              // 4.1. Kiểm tra có phải Trường Ngôi Sao hay không (dựa trên id)
+              const isSchool = cp.id === SCHOOL_ID
 
               // 4.2. Chọn icon phù hợp
               const icon = cp.isInvalid
