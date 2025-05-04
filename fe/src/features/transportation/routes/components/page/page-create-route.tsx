@@ -1,6 +1,6 @@
 'use client'
 
-//path : fe/src/features/transportation/routes/components/page/page-create-route.tsx
+/* --------------------------------- IMPORTS -------------------------------- */
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { IconSearch } from '@tabler/icons-react'
 import { validateCheckpointTimesWithoutStar } from '@/helpers/validate-checkpoint-times-without-star'
 import { MapPin, Trash2, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react'
+import { API_SERVICES } from '@/api/api-services'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -31,6 +32,10 @@ import { createRoute } from '@/features/transportation/function'
 import { getAllCheckpointButNotInRoute } from './checkpoint-service'
 import LeafletMap from './leaflet-map'
 
+/* ------------------------------ CONSTANTS --------------------------------- */
+const SCHOOL_ID = 'fdcb7b87-7cf4-4648-820e-b86ca2e4aa88'
+
+/* ------------------------------- TYPE DEFS -------------------------------- */
 interface Checkpoint {
   id: string
   name: string
@@ -44,15 +49,22 @@ interface RouteFormValues {
   description: string
 }
 
+/* --------------------------- ZOD SCHEMA ----------------------------------- */
 const routeFormSchema = z.object({
   description: z.string().min(3, 'Mô tả phải có ít nhất 3 ký tự.').max(3000, 'Mô tả không được vượt quá 3000 ký tự'),
 })
 
+/* =========================== MAIN COMPONENT =============================== */
 export default function PageCreateRoute() {
+  /* -------------------- STATE & HOOKS ----------------------------------- */
   const [checkpointTimes, setCheckpointTimes] = useState<string[]>([])
-  const [openDialog, setOpenDialog] = useState<{ index: number; type: 'go' | 'return' } | null>(null)
+  const [openDialog, setOpenDialog] = useState<{
+    index: number
+    type: 'go' | 'return'
+  } | null>(null)
 
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([])
+  const [schoolCheckpoint, setSchoolCheckpoint] = useState<Checkpoint | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedCheckpoints, setSelectedCheckpoints] = useState<Checkpoint[]>([])
   const [open, setOpen] = useState(false)
@@ -60,18 +72,17 @@ export default function PageCreateRoute() {
 
   const form = useForm<RouteFormValues>({
     resolver: zodResolver(routeFormSchema),
-    defaultValues: {
-      description: '',
-    },
+    defaultValues: { description: '' },
   })
 
+  /* -------------------- LOAD CHECKPOINT LIST --------------------------- */
   useEffect(() => {
     const loadCheckpoints = async () => {
       try {
         setLoading(true)
         const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
         setCheckpoints(data)
-      } catch (error) {
+      } catch {
         toast({
           title: 'Thất bại',
           description: 'Không thể tải danh sách điểm dừng. Vui lòng thử lại.',
@@ -81,14 +92,32 @@ export default function PageCreateRoute() {
         setLoading(false)
       }
     }
+
+    const loadSchoolCheckpoint = async () => {
+      try {
+        const cp = await API_SERVICES.checkpoints.get_a_checkpoint_by_checkpoint_id(SCHOOL_ID)
+        setSchoolCheckpoint(cp.data.data)
+      } catch {
+        toast({
+          title: 'Không tải được Trường Ngôi Sao',
+          description: 'Vui lòng thử lại sau.',
+          variant: 'deny',
+        })
+      }
+    }
+
     loadCheckpoints()
+    loadSchoolCheckpoint()
   }, [toast])
 
+  /* -------------------- DERIVED: checkpoint hiển thị ------------------- */
+  const displayCheckpoints: Checkpoint[] = [...selectedCheckpoints, ...(schoolCheckpoint ? [schoolCheckpoint] : [])]
+
+  /* -------------------- HANDLERS --------------------------------------- */
   const addCheckpoint = (checkpoint: Checkpoint) => {
     if (!selectedCheckpoints.some((cp) => cp.id === checkpoint.id)) {
       setSelectedCheckpoints((prev) => [...prev, checkpoint])
       setCheckpointTimes((prev) => [...prev, ''])
-      // Remove the added checkpoint from the available checkpoints list
       setCheckpoints((prev) => prev.filter((cp) => cp.id !== checkpoint.id))
       setOpen(false)
     } else {
@@ -104,7 +133,6 @@ export default function PageCreateRoute() {
     const removedCheckpoint = selectedCheckpoints[index]
     setSelectedCheckpoints((prev) => prev.filter((_, i) => i !== index))
     setCheckpointTimes((prev) => prev.filter((_, i) => i !== index))
-    // Add the removed checkpoint back to the available checkpoints list
     setCheckpoints((prev) => [...prev, removedCheckpoint])
   }
 
@@ -126,7 +154,9 @@ export default function PageCreateRoute() {
     })
   }
 
+  /* -------------------- SUBMIT ----------------------------------------- */
   const onSubmit = async (values: RouteFormValues) => {
+    // 2–5 checkpoint user‑pick
     if (selectedCheckpoints.length < 2 || selectedCheckpoints.length > 5) {
       toast({
         title: 'Lỗi xác thực',
@@ -136,6 +166,7 @@ export default function PageCreateRoute() {
       return
     }
 
+    // Kiểm tra đủ giờ đi/về
     const emptyIndex = checkpointTimes.findIndex((t) => {
       const [go, ret] = t.split('/')
       return !go || !ret
@@ -149,7 +180,7 @@ export default function PageCreateRoute() {
       return
     }
 
-    // ✅ Áp dụng validate giờ giấc nâng cao
+    // Validate logic nâng cao
     const validation = validateCheckpointTimesWithoutStar(selectedCheckpoints, checkpointTimes)
     if (!validation.valid) {
       toast({
@@ -160,9 +191,9 @@ export default function PageCreateRoute() {
       return
     }
 
+    // Payload KHÔNG chứa Trường Ngôi Sao
     const path = selectedCheckpoints.map((cp) => cp.id).join(' ')
     const checkpointTimeString = checkpointTimes.join(' ')
-
     const payload = {
       path,
       description: values.description.trim(),
@@ -170,14 +201,15 @@ export default function PageCreateRoute() {
     }
 
     try {
-      console.log(payload)
-
       await createRoute(payload)
-      toast({ title: 'Thành công', description: 'Tạo tuyến đường thành công', variant: 'success' })
+      toast({
+        title: 'Thành công',
+        description: 'Tạo tuyến đường thành công',
+        variant: 'success',
+      })
       form.reset()
       setSelectedCheckpoints([])
       setCheckpointTimes([])
-
       const data = (await getAllCheckpointButNotInRoute()).filter((cp): cp is Checkpoint => !!cp && cp.status !== 'INACTIVE' && typeof cp.name === 'string' && cp.name.trim() !== '')
       setCheckpoints(data)
     } catch (error) {
@@ -189,8 +221,10 @@ export default function PageCreateRoute() {
     }
   }
 
+  /* ========================== RENDER =================================== */
   return (
     <>
+      {/* ---------- HEADER ---------- */}
       <Header fixed>
         <div className='flex w-full items-center'>
           <Breadcrumb className='flex-1'>
@@ -212,6 +246,7 @@ export default function PageCreateRoute() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
           <div className='flex items-center space-x-4'>
             <Search />
             <ThemeSwitch />
@@ -219,6 +254,8 @@ export default function PageCreateRoute() {
           </div>
         </div>
       </Header>
+
+      {/* ---------- MAIN ---------- */}
       <Main>
         <div className='mb-4 flex flex-wrap items-center justify-between space-y-2'>
           <div>
@@ -226,14 +263,17 @@ export default function PageCreateRoute() {
             <p className='text-muted-foreground'>Chọn điểm dừng và nhập thông tin để khởi tạo tuyến đường mới.</p>
           </div>
         </div>
+
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-5'>
-          {/* Checkpoints Panel */}
+          {/* ==== PANEL TRÁI – CHỌN CHECKPOINT ==== */}
           <Card className='lg:col-span-3'>
             <CardHeader>
               <CardTitle>Danh sách điểm dừng</CardTitle>
               <CardDescription>Chọn và thêm điểm dừng vào tuyến đường của bạn</CardDescription>
             </CardHeader>
+
             <CardContent>
+              {/* loading */}
               {loading ? (
                 <div className='space-y-2'>
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -242,6 +282,7 @@ export default function PageCreateRoute() {
                 </div>
               ) : (
                 <div className='space-y-4'>
+                  {/* Popover search */}
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                       <Button variant='outline' className='w-full justify-between'>
@@ -273,11 +314,13 @@ export default function PageCreateRoute() {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  {/* Selected Checkpoints List */}
+
+                  {/* Selected list */}
                   <div>
                     <div className='mb-2 flex items-center justify-between'>
-                      <h3 className='text-sm font-medium'>Điểm dừng đã chọn ({selectedCheckpoints.length})</h3>
-                      {selectedCheckpoints.length > 0 && (
+                      <h3 className='text-sm font-medium'>Điểm dừng đã chọn ({displayCheckpoints.length})</h3>
+
+                      {displayCheckpoints.length > 0 && (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -291,7 +334,8 @@ export default function PageCreateRoute() {
                         </TooltipProvider>
                       )}
                     </div>
-                    {selectedCheckpoints.length === 0 ? (
+
+                    {displayCheckpoints.length === 0 ? (
                       <div className='flex flex-col items-center justify-center rounded-md border p-6 text-center text-muted-foreground'>
                         <MapPin className='mb-2 h-8 w-8 opacity-50' />
                         <p>Chưa có điểm dừng được chọn</p>
@@ -300,46 +344,80 @@ export default function PageCreateRoute() {
                     ) : (
                       <ScrollArea className='h-[400px] rounded-md border p-2'>
                         <div className='space-y-2'>
-                          {selectedCheckpoints.map((checkpoint, index) => (
-                            <div key={checkpoint.id} className='flex items-center justify-between rounded-md border bg-muted/20 p-2'>
-                              <div className='flex items-center gap-2'>
-                                <Badge variant='outline' className='flex h-6 w-6 items-center justify-center rounded-full p-0'>
-                                  {index + 1}
-                                </Badge>
+                          {displayCheckpoints.map((checkpoint, index) => {
+                            const isSchool = checkpoint.id === SCHOOL_ID
+                            const timePair = !isSchool && checkpointTimes[index] ? checkpointTimes[index] : ''
+                            return (
+                              <div key={checkpoint.id} className='flex items-center justify-between rounded-md border bg-muted/20 p-2'>
+                                {/* Info */}
+                                <div className='flex items-center gap-2'>
+                                  <Badge variant='outline' className='flex h-6 w-6 items-center justify-center rounded-full p-0'>
+                                    {index + 1}
+                                  </Badge>
+                                  <div className='min-w-0 flex-1'>
+                                    <p className='truncate font-medium'>
+                                      {checkpoint.name}
+                                      {isSchool && ' (Trường Ngôi Sao)'}
+                                    </p>
+                                    <p className='truncate text-xs text-muted-foreground'>{checkpoint.description}</p>
+                                  </div>
+                                </div>
 
-                                <div className='min-w-0 flex-1'>
-                                  <p className='truncate font-medium'>{checkpoint.name}</p>
-                                  <p className='truncate text-xs text-muted-foreground'>{checkpoint.description}</p>
+                                {/* Actions */}
+                                <div className='flex items-center justify-end gap-1'>
+                                  {/* Time buttons (ẩn nếu school) */}
+                                  {!isSchool && (
+                                    <div className='item mt-1 flex gap-1'>
+                                      <Button
+                                        size='sm'
+                                        variant='outline'
+                                        className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted'
+                                        onClick={() =>
+                                          setOpenDialog({
+                                            index,
+                                            type: 'go',
+                                          })
+                                        }
+                                      >
+                                        {timePair.split('/')[0] || '--:--'}
+                                        <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                      </Button>
+                                      <span className='flex items-center text-xs'>-</span>
+                                      <Button
+                                        size='sm'
+                                        variant='outline'
+                                        className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted'
+                                        onClick={() =>
+                                          setOpenDialog({
+                                            index,
+                                            type: 'return',
+                                          })
+                                        }
+                                      >
+                                        {timePair.split('/')[1] || '--:--'}
+                                        <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                      </Button>
+                                    </div>
+                                  )}
+
+                                  {/* Up/Down/Delete (ẩn nếu school) */}
+                                  {!isSchool && (
+                                    <div className='flex items-center gap-1'>
+                                      <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointUp(index)} disabled={index === 0}>
+                                        <ArrowUp className='h-4 w-4' />
+                                      </Button>
+                                      <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1}>
+                                        <ArrowDown className='h-4 w-4' />
+                                      </Button>
+                                      <Button size='icon' variant='ghost' className='h-7 w-7 text-destructive hover:text-destructive' onClick={() => removeCheckpoint(index)}>
+                                        <Trash2 className='h-4 w-4' />
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-
-                              <div className='flex items-center justify-end gap-1'>
-                                <div className='item mt-1 flex gap-1'>
-                                  <Button size='sm' variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'go' })}>
-                                    {checkpointTimes[index]?.split('/')[0] || '--:--'}
-                                    <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
-                                  </Button>
-                                  <span className='flex items-center text-xs'>-</span>
-                                  <Button size='sm' variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'return' })}>
-                                    {checkpointTimes[index]?.split('/')[1] || '--:--'}
-                                    <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
-                                  </Button>
-                                </div>
-
-                                <div className='flex items-center gap-1'>
-                                  <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointUp(index)} disabled={index === 0}>
-                                    <ArrowUp className='h-4 w-4' />
-                                  </Button>
-                                  <Button size='icon' variant='ghost' className='h-7 w-7' onClick={() => moveCheckpointDown(index)} disabled={index === selectedCheckpoints.length - 1}>
-                                    <ArrowDown className='h-4 w-4' />
-                                  </Button>
-                                  <Button size='icon' variant='ghost' className='h-7 w-7 text-destructive hover:text-destructive' onClick={() => removeCheckpoint(index)}>
-                                    <Trash2 className='h-4 w-4' />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       </ScrollArea>
                     )}
@@ -348,25 +426,31 @@ export default function PageCreateRoute() {
               )}
             </CardContent>
           </Card>
-          {/* Route Form Panel */}
+
+          {/* ==== PANEL PHẢI – FORM + MAP ==== */}
           <Card className='lg:col-span-2'>
             <CardHeader>
               <CardTitle>Thông tin tuyến</CardTitle>
               <CardDescription>Xem bản đồ và nhập mô tả tuyến xe bus</CardDescription>
             </CardHeader>
+
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+                  {/* MAP */}
                   <div className='relative h-[400px] overflow-hidden rounded-md border'>
                     <LeafletMap
-                      checkpoints={selectedCheckpoints.map((cp) => ({
+                      checkpoints={displayCheckpoints.map((cp) => ({
                         ...cp,
                         latitude: parseFloat(cp.latitude),
                         longitude: parseFloat(cp.longitude),
                       }))}
                     />
                   </div>
+
                   <Separator />
+
+                  {/* DESCRIPTION */}
                   <FormField
                     control={form.control}
                     name='description'
@@ -380,6 +464,8 @@ export default function PageCreateRoute() {
                       </FormItem>
                     )}
                   />
+
+                  {/* SUBMIT */}
                   <Button type='submit' className='w-full' disabled={selectedCheckpoints.length < 2}>
                     Tạo tuyến xe
                   </Button>
@@ -389,6 +475,7 @@ export default function PageCreateRoute() {
           </Card>
         </div>
 
+        {/* DIALOG CHỌN GIỜ */}
         {openDialog && (
           <TimePickerDialog
             open={true}

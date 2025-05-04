@@ -115,16 +115,19 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
           <div className='w-full rounded border border-gray-100 dark:border-gray-600'>
             <table className='w-full table-fixed text-sm'>
               <tbody>
-                <InfoRow
-                  label='Học sinh'
-                  value={
-                    requestData.studentName || (
-                      <Badge variant='soft' color='yellow'>
-                        Trống
-                      </Badge>
-                    )
-                  }
-                />
+                {currentRequestType === 'leave' && (
+                  <InfoRow
+                    label='Học sinh'
+                    value={
+                      requestData.studentName || (
+                        <Badge variant='soft' color='yellow'>
+                          Trống
+                        </Badge>
+                      )
+                    }
+                  />
+                )}
+
                 <InfoRow label='Ngày gửi' value={formatDate(getSubmissionDate())} />
                 <InfoRow label='Loại đơn' value={requestData.requestTypeName} />
 

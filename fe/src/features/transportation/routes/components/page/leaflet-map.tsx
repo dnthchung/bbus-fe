@@ -21,6 +21,24 @@ interface LeafletMapProps {
   checkpoints: Checkpoint[]
 }
 
+const SCHOOL_ID = 'fdcb7b87-7cf4-4648-820e-b86ca2e4aa88'
+
+const schoolIcon = new L.DivIcon({
+  className: 'custom-div-icon',
+  html: `
+    <div style="position:relative">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
+        <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24C24 5.4 18.6 0 12 0z"
+              fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+        <circle cx="12" cy="12" r="5" fill="white"/>
+      </svg>
+    </div>
+  `,
+  iconSize: [24, 36],
+  iconAnchor: [12, 36],
+  popupAnchor: [0, -36],
+})
+
 // Component to fit map bounds to markers
 function FitBounds({ checkpoints }: { checkpoints: Checkpoint[] }) {
   const map = useMap()
@@ -92,14 +110,30 @@ function RoutingControl({ checkpoints }: { checkpoints: Checkpoint[] }) {
 }
 
 // Custom marker icon with number
-const createNumberedIcon = (number: number) => {
-  return L.divIcon({
-    className: 'custom-marker-icon',
-    html: `<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">${number}</div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+const createNumberedIcon = (index: number) =>
+  new L.DivIcon({
+    className: 'custom-div-icon',
+    html: `
+      <div style="position:relative">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
+          <path d="M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24C24 5.4 18.6 0 12 0z"
+                fill="#3b82f6" stroke="#2563eb" stroke-width="1"/>
+          <circle cx="12" cy="12" r="5" fill="white"/>
+        </svg>
+        <span style="
+          position:absolute;
+          top:4px; left:0;
+          width:24px; text-align:center;
+          font-size:12px; font-weight:700;
+          color:#1e3a8a;">
+          ${index}
+        </span>
+      </div>
+    `,
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
+    popupAnchor: [0, -36],
   })
-}
 
 export default function LeafletMap({ checkpoints }: LeafletMapProps) {
   // Default center (Ho Chi Minh City)
@@ -138,21 +172,24 @@ export default function LeafletMap({ checkpoints }: LeafletMapProps) {
       {checkpoints.length > 1 && <RoutingControl checkpoints={checkpoints} />}
 
       {/* Place markers for each checkpoint */}
-      {checkpoints.map((checkpoint, index) => (
-        <Marker key={checkpoint.id} position={[checkpoint.latitude, checkpoint.longitude]} icon={createNumberedIcon(index + 1)}>
-          <Popup>
-            <div className='p-1'>
-              <h3 className='font-medium'>{checkpoint.name}</h3>
-              <p className='text-xs text-gray-600'>{checkpoint.description}</p>
-              {checkpoint.studentCount !== undefined && (
-                <p className='mt-1 text-xs'>
-                  <span className='font-medium'>Students:</span> {checkpoint.studentCount}
-                </p>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+      {checkpoints.map((checkpoint, index) => {
+        const isSchool = checkpoint.id === SCHOOL_ID
+        return (
+          <Marker key={checkpoint.id} position={[checkpoint.latitude, checkpoint.longitude]} icon={isSchool ? schoolIcon : createNumberedIcon(index + 1)}>
+            <Popup>
+              <div className='p-1'>
+                <h3 className='font-medium'>{checkpoint.name}</h3>
+                <p className='text-xs text-gray-600'>{checkpoint.description}</p>
+                {checkpoint.studentCount !== undefined && (
+                  <p className='mt-1 text-xs'>
+                    <span className='font-medium'>Students:</span> {checkpoint.studentCount}
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        )
+      })}
 
       {/* Show message when no checkpoints */}
       {checkpoints.length === 0 && (
