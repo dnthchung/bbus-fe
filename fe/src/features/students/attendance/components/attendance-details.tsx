@@ -10,17 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getStudentHistoryStudentId } from '../functions'
 import { useAttendanceStore } from '../stores/attendance-store'
 
-// function formatVietnamTime(utcString: string | null): string {
-//   if (!utcString) return 'Trống'
-//   const date = new Date(utcString)
-//   return new Intl.DateTimeFormat('vi-VN', {
-//     hour: '2-digit',
-//     minute: '2-digit',
-//     timeZone: 'Asia/Ho_Chi_Minh',
-//     hour12: false,
-//   }).format(date)
-// }
-
 function formatVietnamTime(utcString: string | null): JSX.Element | string {
   if (!utcString) {
     return <span className='italic text-muted-foreground text-red-500'>Trống</span>
@@ -61,7 +50,7 @@ const mapRecord = (
   busAttendant: string
   location: string
   notes: string
-  direction: 'to_school' | 'from_school' // 👈 Khai báo rõ
+  direction: 'to_school' | 'from_school'
   isSuccessful: boolean
   checkin: string | null
   checkout: string | null
@@ -75,7 +64,8 @@ const mapRecord = (
   location: r.checkpointName,
   notes: r.modifiedBy ?? '',
   direction: r.direction === 'PICK_UP' ? 'to_school' : 'from_school',
-  isSuccessful: r.status !== 'ABSENT',
+  isSuccessful: r.status === 'ATTENDED',
+
   checkin: r.checkin,
   checkout: r.checkout,
 })
@@ -106,7 +96,7 @@ export default function AttendanceDetails() {
   const badge = (status: RawRecord['status']) => {
     const statusLabels: Record<RawRecord['status'], string> = {
       ABSENT: 'Vắng mặt',
-      ATTENDED: 'Đã đến',
+      ATTENDED: 'Đã hoàn thành',
       IN_BUS: 'Đang trên xe',
     }
 
@@ -123,7 +113,7 @@ export default function AttendanceDetails() {
     ok ? (
       <div className='mt-1 flex items-center text-xs text-green-600 dark:text-green-400'>
         <CheckCircle className='mr-1 h-3 w-3' />
-        <span>{direction === 'to_school' ? 'Đã đến' : 'Đã về'}</span>
+        <span>{direction === 'to_school' ? 'Đã đến thành công' : 'Đã về thành công'}</span>
       </div>
     ) : (
       <div className='mt-1 flex items-center text-xs text-red-600 dark:text-red-400'>
