@@ -78,3 +78,18 @@ export async function tong_tuyen_duong() {
     throw new Error('Failed to get total routes')
   }
 }
+
+//final report
+///attendance/final-report
+
+//function get pre data for final report
+//1. cần thông tin tổng quát
+//- 1 biến lấy năm học dựa trên thời gian hiện tại , 1 biến lấy ngày bắt đầu của năm và ngày kết thúc của năm dựa vào biến năm học lấy được, 1 biến tổng số ngày xe hoạt động
+//được tính bằng cách lấy ngày kết thúc - ngày bắt đầu - 9 ngày nghỉ lễ - tổng số ngày thứ 7 và chủ nhật trong khoảng thời gian đó.
+//2. cần thông tin số lượng học sinh tham gia
+//- Có api trả về từ //attendance/final-report :  // { "status": 200, "message": "Final report", "data": [ { "grade": 1, "amountOfStudentRegistered": 1, "amountOfStudentDeregistered": 0 }, { "grade": 2, "amountOfStudentRegistered": 2, "amountOfStudentDeregistered": 1 }, { "grade": 3, "amountOfStudentRegistered": 1, "amountOfStudentDeregistered": 0 }, { "grade": 4, "amountOfStudentRegistered": 2, "amountOfStudentDeregistered": 0 }, { "grade": 5, "amountOfStudentRegistered": 8, "amountOfStudentDeregistered": 0 } ] }
+
+export async function getPreDataForFinalReport() {
+  try {
+  } catch (error) {}
+}

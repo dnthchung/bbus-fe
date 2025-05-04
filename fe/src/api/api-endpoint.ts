@@ -1,5 +1,11 @@
 //path : fe/src/api/api-endpoint.ts
 export const API_ENDPOINTS = {
+  ATTENDANCE: {
+    FINAL_REPORT: '/attendance/final-report',
+    BUS_REPORT: '/attendance/bus-report',
+    ROUTE_REPORT: '/attendance/route-report',
+    DRIVER_ASSISTANT_REPORT: '/attendance/driver-assistant-report',
+  },
   DASHBOARD: {
     DEM_SO_HOC_SINH: '/dashboard/count-total-student',
     DEM_SO_YEU_CAU: '/dashboard/request-stats',

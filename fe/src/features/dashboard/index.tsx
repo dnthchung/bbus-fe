@@ -2,7 +2,7 @@
 
 // ===== Imports =====
 import { useEffect, useState } from 'react'
-import { IconBus, IconDropletQuestion, IconUser, IconFileTypeDoc } from '@tabler/icons-react'
+import { IconBus, IconUser, IconFileTypeDoc, IconUsersGroup } from '@tabler/icons-react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,7 +16,7 @@ import AnalyticsCard from '@/components/mine/analytic-card'
 import { DownloadableReports } from './components/common/downloadable-reports'
 import { EventDialog } from './components/common/event-dialogs'
 import { Overview } from './components/overview'
-import { dashboardData, summaryMetrics } from './fake-data'
+import { dashboardData } from './fake-data'
 import { dem_so_hoc_sinh, dem_so_yeu_cau, thong_so_account, tong_tuyen_duong } from './functions'
 
 //path : fe/src/features/dashboard/index.tsx
@@ -93,17 +93,6 @@ export default function Dashboard() {
         <div className='mb-2 flex items-center justify-between'>
           <h1 className='text-2xl font-bold tracking-tight'>Bảng điều khiển</h1>
           <div className='flex gap-2'>
-            {/* <Button
-              onClick={() => {
-                toast({
-                  title: 'Tải xuống thành công',
-                  description: 'Đã tải xuống tất cả báo cáo (1 file Excel với nhiều sheet)',
-                  variant: 'success',
-                })
-              }}
-            >
-              Tải xuống
-            </Button> */}
             <Button variant='outline' onClick={() => setEventDialogOpen(true)}>
               Mở ngày đăng ký
             </Button>
@@ -143,9 +132,9 @@ export default function Dashboard() {
 
               <AnalyticsCard icon={<IconBus className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tuyến xe bus' value={metrics.busRouteCount} changeText={`Tổng tuyến xe hiện có`} changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconFileTypeDoc className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tài khoản người dùng' value={metrics.totalAccounts} changeText={`Tài khoản người dùng hệ thống`} changeTextVariant='green' />
+              <AnalyticsCard icon={<IconUsersGroup className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Tổng số tài khoản người dùng' value={metrics.totalAccounts} changeText={`Tài khoản người dùng hệ thống`} changeTextVariant='green' />
 
-              <AnalyticsCard icon={<IconDropletQuestion className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Yêu cầu đang chờ cần xử lý' value={metrics.pendingRequests} changeText={`Cần xử lý ${metrics.pendingRequests} yêu cầu`} changeTextVariant='red' />
+              <AnalyticsCard icon={<IconFileTypeDoc className='h-4 w-4 text-gray-600 dark:text-gray-300' />} label='Yêu cầu đang chờ cần xử lý' value={metrics.pendingRequests} changeText={`Cần xử lý ${metrics.pendingRequests} yêu cầu`} changeTextVariant='red' />
             </div>
 
             {/* Chart + Mini Blocks */}

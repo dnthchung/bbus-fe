@@ -113,10 +113,22 @@ interface ApiServices {
     thong_so_account: () => Promise<any>
     tong_tuyen_duong: () => Promise<any>
   }
+  attendance: {
+    final_report: () => Promise<any>
+    bus_report: () => Promise<any>
+    route_report: () => Promise<any>
+    driver_assistant_report: () => Promise<any>
+  }
 }
 
 // Add the implementation in the students section of API_SERVICES
 export const API_SERVICES: ApiServices = {
+  attendance: {
+    final_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.FINAL_REPORT),
+    bus_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.BUS_REPORT),
+    route_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.ROUTE_REPORT),
+    driver_assistant_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.DRIVER_ASSISTANT_REPORT),
+  },
   dashboard: {
     dem_so_hoc_sinh: () => apiClient.get(API_ENDPOINTS.DASHBOARD.DEM_SO_HOC_SINH),
     dem_so_yeu_cau: () => apiClient.get(API_ENDPOINTS.DASHBOARD.DEM_SO_YEU_CAU),

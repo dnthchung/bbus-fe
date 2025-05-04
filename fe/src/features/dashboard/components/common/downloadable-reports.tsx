@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { exportYearReportExcel } from '@/helpers/export-excel'
 import { Download, FileSpreadsheet } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -46,16 +47,13 @@ export function DownloadableReports() {
 
   const handleDownloadAll = () => {
     setDownloading('all')
-
-    // Simulate download delay
-    setTimeout(() => {
-      toast({
-        title: 'Tải xuống thành công',
-        description: 'Đã tải xuống tất cả báo cáo (1 file Excel với nhiều sheet)',
-        variant: 'success',
-      })
-      setDownloading(null)
-    }, 2000)
+    exportYearReportExcel()
+    toast({
+      title: 'Tải xuống thành công',
+      description: 'Đã tải xuống tất cả báo cáo (1 file Excel với nhiều sheet)',
+      variant: 'success',
+    })
+    setDownloading(null)
   }
 
   return (
