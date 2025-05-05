@@ -1,7 +1,7 @@
 // src/helpers/export-excel.ts
 import { saveAs } from 'file-saver'
 import * as XLSX from 'xlsx'
-import { getPreDataForFinalReport, getBusReportForFinalReport, getRouteReportForFinalReport } from '@/features/dashboard/functions'
+import { getPreDataForFinalReport, getBusReportForFinalReport, getRouteReportForFinalReport, getAttendanceReport } from '@/features/dashboard/functions'
 
 export async function exportYearReportExcel() {
   try {
@@ -55,13 +55,19 @@ export async function exportYearReportExcel() {
     // ===========================================================================================================
 
     // 2. Sheet: placeholder (Hoạt động xe buýt)
-    const ws2 = XLSX.utils.aoa_to_sheet([
-      ['STT', 'Biển số xe', 'Tài xế chính', 'Phụ xe', 'Tổng chuyến', 'Ghi chú'],
-      ['1', '29A-12345', 'Nguyễn Văn A', 'Trần Thị B', '320 chuyến', 'Xe 45 chỗ'],
-      ['2', '29B-67890', 'Lê Văn C', 'Phạm Thị D', '310 chuyến', 'Xe 29 chỗ'],
-      ['', '', '', '', '630 chuyến', ''],
-    ])
-    XLSX.utils.book_append_sheet(wb, ws2, 'Hoạt động xe buýt')
+    const { report: attendance, totalStudents, totalPickUps, totalDropOffs } = await getAttendanceReport()
+    const sheet2: any[][] = [['1. Tổng số lượt đi và về trong năm cho mỗi học sinh:'], ['STT', 'Họ và tên học sinh', 'Lớp', 'Tổng lượt đi (lên xe)', 'Tổng lượt về (xuống xe)', 'Tổng lượt đi + về', 'Ghi chú']]
+
+    attendance.forEach((item) => {
+      sheet2.push([item.stt, item.studentName, item.className ?? '', item.pickUpCount, item.dropOffCount, item.totalTrips, item.note])
+    })
+
+    sheet2.push(['Tổng cộng', '', '', totalPickUps, totalDropOffs, totalPickUps + totalDropOffs, ''])
+
+    sheet2.push([], ['Giải thích:'], ['- Lượt đi: Học sinh được điểm danh (FaceID) thành công lúc lên xe buổi sáng.'], ['- Lượt về: Học sinh được điểm danh thành công lúc xuống xe tại điểm đón cuối ngày.'], ['- Tổng số lượt đi + về = đi + về trong suốt năm học.'])
+
+    const ws2 = XLSX.utils.aoa_to_sheet(sheet2)
+    XLSX.utils.book_append_sheet(wb, ws2, 'Điểm danh học sinh')
 
     // 3. Sheet: placeholder (Tuyến xe đã chạy)
     const ws3 = XLSX.utils.aoa_to_sheet([

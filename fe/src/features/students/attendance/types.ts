@@ -18,6 +18,7 @@ export interface ParentProfile {
 }
 
 export interface Student {
+  className: string | null // tên lớp, VD: "Lớp 1A"
   /* các field cơ bản */
   id: string // UUID
   rollNumber: string // mã học sinh, VD: "HS00027"

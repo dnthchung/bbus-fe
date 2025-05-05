@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
     BUS_REPORT: '/attendance/bus-report',
     ROUTE_REPORT: '/attendance/route-report',
     DRIVER_ASSISTANT_REPORT: '/attendance/driver-assistant-report',
+    CHART: '/attendance/dashboard',
   },
   DASHBOARD: {
     DEM_SO_HOC_SINH: '/dashboard/count-total-student',

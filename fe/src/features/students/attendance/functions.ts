@@ -126,18 +126,15 @@ export async function getAllStudent(): Promise<Student[]> {
   }
 }
 
-// Lấy lịch sử điểm danh theo studentId
-// export async function getStudentHistoryStudentId(studentId: string): Promise<AttendanceRecord[]> {
-//   try {
-//     console.log('studentId', studentId)
-//     const res = await API_SERVICES.students.get_history_by_student_id(studentId.trim())
-//     return res.data?.data ?? res.data ?? []
-//   } catch (err) {
-//     console.error('getStudentHistoryStudentId ➜', err)
-//     return []
-//   }
-// }
+/**
+//  * status : IN_BUS, ABSENT, ATTENDED ( trên xe , vắng mặt , đã điểm danh )
+//  * direction : PICK_UP, DROP_OFF ( đón , trả )
+//  * check_in : thời gian lên xe ( có thể null vì chưa lên xe hoặc điểm danh vắng mặt )
+//  * check_out : thời gian xuống xe ( có thể null vì chưa xuống xe hoặc điểm danh vắng mặt )
+//  * những thằng nào trả về là null, trống thì hiển thị trong lịch sử điểm danh là badge trống
+  */
 
+// Lấy lịch sử điểm danh theo studentId
 export async function getStudentHistoryStudentId(studentId: string) {
   const cleanId = studentId.trim()
   console.log('studentId gửi BE ➜', cleanId, 'length:', cleanId.length)

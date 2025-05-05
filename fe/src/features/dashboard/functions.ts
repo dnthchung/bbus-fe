@@ -1,5 +1,7 @@
 //url file :  fe/src/features/dashboard/functions.ts
 import { API_SERVICES } from '@/api/api-services'
+import { getAllStudent, getStudentHistoryStudentId } from '@/features/students/attendance/functions'
+import { Student, AttendanceRecord } from '@/features/students/attendance/types'
 
 const formatDate = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, '0')
@@ -191,4 +193,102 @@ export async function getRouteReportForFinalReport() {
   }
 }
 
-//Báo cáo điểm danh học sinh:
+//Báo cáo điểm danh học sinh - sheet 2
+// đầu tiên lấy danh sách học sinh trong hệ thống
+//sau đó lấy danh sách id của chúng
+//sau đó dự vào id để gọi api lấy ra lịch sử điểm danh, sử dụng hệ thống
+//sau đó gọi hàm tính toán : tổng số lượt đi , tổng số lượt về (PICK UP , DROP OFF)
+// Hàm lấy báo cáo điểm danh học sinh
+// Hàm lấy báo cáo điểm danh học sinh
+// Hàm lấy báo cáo điểm danh học sinh
+export async function getAttendanceReport(): Promise<{
+  report: {
+    stt: number
+    studentName: string
+    className: string
+    pickUpCount: number
+    dropOffCount: number
+    totalTrips: number
+    note: string
+  }[]
+  totalStudents: number
+  totalPickUps: number
+  totalDropOffs: number
+}> {
+  try {
+    // 1. Lấy danh sách học sinh trong hệ thống
+    const students = await getAllStudent()
+    if (students.length === 0) {
+      throw new Error('Không có học sinh nào trong hệ thống')
+    }
+
+    // 2. Lấy danh sách ID của học sinh
+    const studentIds = students.map((student) => student.id)
+
+    // 3. Lấy lịch sử điểm danh cho từng học sinh
+    const attendancePromises = studentIds.map(async (studentId) => {
+      const history = await getStudentHistoryStudentId(studentId)
+      return { studentId, history }
+    })
+
+    const attendanceResults = await Promise.all(attendancePromises)
+
+    // 4. Tính toán báo cáo
+    const report = attendanceResults
+      .map(({ studentId, history }, index) => {
+        const student = students.find((s) => s.id === studentId)
+        if (!student) {
+          console.warn(`Không tìm thấy thông tin học sinh với ID: ${studentId}`)
+          return null
+        }
+
+        // Lọc các bản ghi điểm danh thành công
+        const attendedRecords = history.filter((record: AttendanceRecord) => record.status === 'ATTENDED')
+
+        // Tính số lượt đi và về
+        const pickUpCount = attendedRecords.filter((record: AttendanceRecord) => record.direction === 'PICK_UP').length
+        const dropOffCount = attendedRecords.filter((record: AttendanceRecord) => record.direction === 'DROP_OFF').length
+        const totalTrips = pickUpCount + dropOffCount
+        return {
+          stt: index + 1,
+          studentName: student.name,
+          className: student.className || 'Chưa có lớp',
+          pickUpCount,
+          dropOffCount,
+          totalTrips,
+          note: '',
+        }
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+
+    // Tính tổng
+    const totalPickUps = report.reduce((sum, item) => sum + item.pickUpCount, 0)
+    const totalDropOffs = report.reduce((sum, item) => sum + item.dropOffCount, 0)
+
+    return {
+      report,
+      totalStudents: students.length,
+      totalPickUps,
+      totalDropOffs,
+    }
+  } catch (error) {
+    console.error('Lỗi khi tạo báo cáo điểm danh:', error)
+    throw error
+  }
+}
+
+//chart : tổng quan điểm danh
+//Attendance Rate (%) = (Số lượt điểm danh thành công / Tổng số lượt cần điểm danh) * 100 Ví dụ: Tổng số học sinh cần đi học hôm nay: 500 Mỗi học sinh có 2 lượt cần điểm danh (lên xe và xuống xe) → Tổng lượt cần điểm danh: 500 x 2 = 1000 Lượt điểm danh thành công (AI nhận diện đúng & lưu log): 950
+// api : { "status": 200, "message": "Dashboard", "data": { "totalActiveStudent": 23, "totalActiveRoute": 3, "totalActiveUser": 29, "attendanceRate": [ { "percentage": null, "month": "2024-09" }, { "percentage": null, "month": "2024-10" }, { "percentage": null, "month": "2024-11" }, { "percentage": null, "month": "2024-12" }, { "percentage": null, "month": "2025-01" }, { "percentage": null, "month": "2025-02" }, { "percentage": null, "month": "2025-03" }, { "percentage": null, "month": "2025-04" }, { "percentage": 100.00, "month": "2025-05" }, { "percentage": null, "month": "2025-06" } ] } }
+//tháng nào có % mà null thì cột đod có giá trị bằng 0
+// Cần thêm logic để xử lý giá trị null trong attendanceRate
+export async function getAttendanceRate() {
+  try {
+    const response = await API_SERVICES.attendance.chart_dashboard()
+    const data = response.data.data.attendanceRate
+    return data
+  } catch (error) {
+    console.error('Error fetching attendance rate:', error)
+    throw new Error('Failed to fetch attendance rate')
+  }
+}

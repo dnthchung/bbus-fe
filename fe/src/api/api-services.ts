@@ -118,12 +118,14 @@ interface ApiServices {
     bus_report: () => Promise<any>
     route_report: () => Promise<any>
     driver_assistant_report: () => Promise<any>
+    chart_dashboard: () => Promise<any>
   }
 }
 
 // Add the implementation in the students section of API_SERVICES
 export const API_SERVICES: ApiServices = {
   attendance: {
+    chart_dashboard: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.CHART),
     final_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.FINAL_REPORT),
     bus_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.BUS_REPORT),
     route_report: () => apiClient.get(API_ENDPOINTS.ATTENDANCE.ROUTE_REPORT),

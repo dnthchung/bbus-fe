@@ -17,7 +17,7 @@ import { DownloadableReports } from './components/common/downloadable-reports'
 import { EventDialog } from './components/common/event-dialogs'
 import { Overview } from './components/overview'
 import { dashboardData } from './fake-data'
-import { dem_so_hoc_sinh, dem_so_yeu_cau, thong_so_account, tong_tuyen_duong } from './functions'
+import { dem_so_hoc_sinh, dem_so_yeu_cau, getAttendanceReport, thong_so_account, tong_tuyen_duong } from './functions'
 import { getPreDataForFinalReport } from './functions'
 
 //path : fe/src/features/dashboard/index.tsx
@@ -68,7 +68,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchPreData() {
       try {
-        const preData = await getPreDataForFinalReport()
+        const preData = await getAttendanceReport()
         console.log('Pre data for final report:', preData)
       } catch (err) {
         console.error('Failed to fetch pre data for final report', err)
