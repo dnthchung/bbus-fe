@@ -1,3 +1,4 @@
+//path : src/features/auth/auth-layout.tsx
 import BBusLogo from '@/assets/logo-bbus-2.svg'
 
 interface Props {

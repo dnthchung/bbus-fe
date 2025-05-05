@@ -19,6 +19,8 @@ import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
 import { Route as AuthenticatedRequestsIndexImport } from './routes/_authenticated/requests/index'
+import { Route as authTermIndexImport } from './routes/(auth)/term/index'
+import { Route as authPrivacyIndexImport } from './routes/(auth)/privacy/index'
 import { Route as AuthenticatedTransportationRoutesIndexImport } from './routes/_authenticated/transportation/routes/index'
 import { Route as AuthenticatedRequestsListIndexImport } from './routes/_authenticated/requests/list/index'
 import { Route as AuthenticatedStudentsDetailsIdImport } from './routes/_authenticated/students/details/$id'
@@ -291,6 +293,18 @@ const AuthenticatedRequestsIndexRoute = AuthenticatedRequestsIndexImport.update(
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any,
 )
+
+const authTermIndexRoute = authTermIndexImport.update({
+  id: '/(auth)/term/',
+  path: '/term/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const authPrivacyIndexRoute = authPrivacyIndexImport.update({
+  id: '/(auth)/privacy/',
+  path: '/privacy/',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AuthenticatedTransportationSchedulesLazyRoute =
   AuthenticatedTransportationSchedulesLazyImport.update({
@@ -604,6 +618,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransportationSchedulesLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/(auth)/privacy/': {
+      id: '/(auth)/privacy/'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof authPrivacyIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/term/': {
+      id: '/(auth)/term/'
+      path: '/term'
+      fullPath: '/term'
+      preLoaderRoute: typeof authTermIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/_authenticated/requests/': {
       id: '/_authenticated/requests/'
       path: '/requests'
@@ -879,6 +907,8 @@ export interface FileRoutesByFullPath {
   '/students/attendance': typeof AuthenticatedStudentsAttendanceLazyRoute
   '/transportation/checkpoints': typeof AuthenticatedTransportationCheckpointsLazyRoute
   '/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
+  '/privacy': typeof authPrivacyIndexRoute
+  '/term': typeof authTermIndexRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/buses': typeof AuthenticatedBusesIndexLazyRoute
@@ -921,6 +951,8 @@ export interface FileRoutesByTo {
   '/students/attendance': typeof AuthenticatedStudentsAttendanceLazyRoute
   '/transportation/checkpoints': typeof AuthenticatedTransportationCheckpointsLazyRoute
   '/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
+  '/privacy': typeof authPrivacyIndexRoute
+  '/term': typeof authTermIndexRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/buses': typeof AuthenticatedBusesIndexLazyRoute
@@ -967,6 +999,8 @@ export interface FileRoutesById {
   '/_authenticated/students/attendance': typeof AuthenticatedStudentsAttendanceLazyRoute
   '/_authenticated/transportation/checkpoints': typeof AuthenticatedTransportationCheckpointsLazyRoute
   '/_authenticated/transportation/schedules': typeof AuthenticatedTransportationSchedulesLazyRoute
+  '/(auth)/privacy/': typeof authPrivacyIndexRoute
+  '/(auth)/term/': typeof authTermIndexRoute
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/buses/': typeof AuthenticatedBusesIndexLazyRoute
@@ -1013,6 +1047,8 @@ export interface FileRouteTypes {
     | '/students/attendance'
     | '/transportation/checkpoints'
     | '/transportation/schedules'
+    | '/privacy'
+    | '/term'
     | '/requests'
     | '/apps'
     | '/buses'
@@ -1054,6 +1090,8 @@ export interface FileRouteTypes {
     | '/students/attendance'
     | '/transportation/checkpoints'
     | '/transportation/schedules'
+    | '/privacy'
+    | '/term'
     | '/requests'
     | '/apps'
     | '/buses'
@@ -1098,6 +1136,8 @@ export interface FileRouteTypes {
     | '/_authenticated/students/attendance'
     | '/_authenticated/transportation/checkpoints'
     | '/_authenticated/transportation/schedules'
+    | '/(auth)/privacy/'
+    | '/(auth)/term/'
     | '/_authenticated/requests/'
     | '/_authenticated/apps/'
     | '/_authenticated/buses/'
@@ -1136,6 +1176,8 @@ export interface RootRouteChildren {
   errors404LazyRoute: typeof errors404LazyRoute
   errors500LazyRoute: typeof errors500LazyRoute
   errors503LazyRoute: typeof errors503LazyRoute
+  authPrivacyIndexRoute: typeof authPrivacyIndexRoute
+  authTermIndexRoute: typeof authTermIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -1151,6 +1193,8 @@ const rootRouteChildren: RootRouteChildren = {
   errors404LazyRoute: errors404LazyRoute,
   errors500LazyRoute: errors500LazyRoute,
   errors503LazyRoute: errors503LazyRoute,
+  authPrivacyIndexRoute: authPrivacyIndexRoute,
+  authTermIndexRoute: authTermIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -1174,7 +1218,9 @@ export const routeTree = rootRoute
         "/(errors)/403",
         "/(errors)/404",
         "/(errors)/500",
-        "/(errors)/503"
+        "/(errors)/503",
+        "/(auth)/privacy/",
+        "/(auth)/term/"
       ]
     },
     "/_authenticated": {
@@ -1278,6 +1324,12 @@ export const routeTree = rootRoute
     "/_authenticated/transportation/schedules": {
       "filePath": "_authenticated/transportation/schedules.lazy.tsx",
       "parent": "/_authenticated"
+    },
+    "/(auth)/privacy/": {
+      "filePath": "(auth)/privacy/index.tsx"
+    },
+    "/(auth)/term/": {
+      "filePath": "(auth)/term/index.tsx"
     },
     "/_authenticated/requests/": {
       "filePath": "_authenticated/requests/index.tsx",

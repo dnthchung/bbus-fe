@@ -79,7 +79,7 @@ export default function SignIn() {
 
         <p className='px-4 text-center text-sm text-muted-foreground'>
           Bằng cách nhấn vào đăng nhập, bạn đồng ý với{' '}
-          <a href='/terms' className='underline underline-offset-4 hover:text-primary'>
+          <a href='/term' className='underline underline-offset-4 hover:text-primary'>
             Điều khoản dịch vụ
           </a>{' '}
           và{' '}
