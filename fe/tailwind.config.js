@@ -19,6 +19,7 @@ export default {
       fontFamily: {
         inter: ['Inter', ...fontFamily.sans],
         manrope: ['Manrope', ...fontFamily.sans],
+        system: [...fontFamily.sans],
       },
       borderRadius: {
         lg: 'var(--radius)',
