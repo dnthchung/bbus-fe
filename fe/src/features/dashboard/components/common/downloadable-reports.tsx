@@ -45,15 +45,24 @@ export function DownloadableReports() {
     }, 1500)
   }
 
-  const handleDownloadAll = () => {
-    setDownloading('all')
-    exportYearReportExcel()
-    toast({
-      title: 'Tải xuống thành công',
-      description: 'Đã tải xuống tất cả báo cáo (1 file Excel với nhiều sheet)',
-      variant: 'success',
-    })
-    setDownloading(null)
+  const handleDownloadAll = async () => {
+    try {
+      setDownloading('all')
+      await exportYearReportExcel()
+      toast({
+        title: 'Tải xuống thành công',
+        description: 'Đã tải xuống tất cả báo cáo (1 file Excel với nhiều sheet)',
+        variant: 'success',
+      })
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: 'Tải xuống thất bại',
+        description: 'Vui lòng thử lại sau',
+      })
+    } finally {
+      setDownloading(null)
+    }
   }
 
   return (

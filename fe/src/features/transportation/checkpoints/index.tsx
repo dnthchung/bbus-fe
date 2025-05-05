@@ -77,7 +77,7 @@ function CheckpointsContent() {
             <TabsList>
               <TabsTrigger value='list'>Danh sách</TabsTrigger>
               <TabsTrigger value='create'>Tạo mới</TabsTrigger>
-              <TabsTrigger value='events'>Cài đặt sự kiện</TabsTrigger>
+              {/* <TabsTrigger value='events'>Cài đặt sự kiện</TabsTrigger> */}
             </TabsList>
           </div>
           {/* ====================================== */}
@@ -184,7 +184,7 @@ function CheckpointsContent() {
             </div>
           </TabsContent>
           {/* ====================================== */}
-          <TabsContent value='events' className='space-y-4'>
+          {/* <TabsContent value='events' className='space-y-4'>
             <div className='pb-4'>
               <div className='mb-6'>
                 <h2 className='text-2xl font-bold tracking-tight'>Quản lý điểm dừng xe bus</h2>
@@ -194,7 +194,7 @@ function CheckpointsContent() {
                 <EvenPage />
               </div>
             </div>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </Main>
       <CheckpointsDialogs />
