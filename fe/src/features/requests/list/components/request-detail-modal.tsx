@@ -115,7 +115,7 @@ export function RequestDetailModal({ request, requestType, onClose, onApprove, o
           <div className='w-full rounded border border-gray-100 dark:border-gray-600'>
             <table className='w-full table-fixed text-sm'>
               <tbody>
-                {currentRequestType === 'leave' && (
+                {(currentRequestType === 'leave' || currentRequestType === 'pickup') && (
                   <InfoRow
                     label='Học sinh'
                     value={
