@@ -541,6 +541,7 @@ export default function EditRouteManagement() {
                 <CardHeader>
                   <CardTitle>Quản lý điểm dừng</CardTitle>
                 </CardHeader>
+
                 <CardContent>
                   <div className='grid gap-6'>
                     {/* Add new checkpoint */}
@@ -551,7 +552,6 @@ export default function EditRouteManagement() {
                           <Input ref={searchInputRef} placeholder='Tìm kiếm điểm dừng...' value={searchTerm} onChange={handleSearchChange} className='pr-8' />
                           <SearchIcon className='absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                         </div>
-
                         {/* Select checkpoint */}
                         <Select value={selectedCheckpoint} onValueChange={setSelectedCheckpoint}>
                           <SelectTrigger className='w-[280px]'>
@@ -574,14 +574,11 @@ export default function EditRouteManagement() {
                             )}
                           </SelectContent>
                         </Select>
-
                         {/* Add button */}
                         <Button onClick={handleAddCheckpoint} disabled={!selectedCheckpoint}>
-                          <Plus className='mr-2 h-4 w-4' />
-                          Thêm
+                          <Plus className='mr-2 h-4 w-4' /> Thêm
                         </Button>
                       </div>
-
                       {/* Tìm thấy bao nhiêu điểm dừng */}
                       {filteredCheckpoints.length < availableCheckpoints.length && (
                         <div className='text-right text-xs text-muted-foreground'>
@@ -589,7 +586,6 @@ export default function EditRouteManagement() {
                         </div>
                       )}
                     </div>
-
                     {/* Checkpoint list */}
                     <div>
                       <h3 className='mb-2 font-medium'>Danh sách điểm dừng ({selectedCheckpoints.length})</h3>
@@ -602,7 +598,6 @@ export default function EditRouteManagement() {
                               <TableRow>
                                 <TableHead style={{ width: 50 }}>STT</TableHead>
                                 <TableHead>Tên điểm dừng</TableHead>
-                                {/* <TableHead>Mã</TableHead> */}
                                 <TableHead>Trạng thái</TableHead>
                                 <TableHead>Số HS</TableHead>
                                 <TableHead className='flex items-center justify-center'>
@@ -616,7 +611,7 @@ export default function EditRouteManagement() {
                               {selectedCheckpoints.map((checkpoint, index) => (
                                 <TableRow key={checkpoint.id}>
                                   <TableCell>{index + 1}</TableCell>
-                                  {/* tên  */}
+                                  {/* Tên điểm dừng */}
                                   <TableCell>
                                     <TooltipProvider>
                                       <Tooltip>
@@ -630,35 +625,49 @@ export default function EditRouteManagement() {
                                       </Tooltip>
                                     </TooltipProvider>
                                   </TableCell>
-
-                                  {/* <TableCell>{checkpoint.id}</TableCell> */}
-
+                                  {/* Trạng thái */}
                                   <TableCell>
                                     <Status color={checkpoint.status === 'ACTIVE' ? 'green' : 'red'} showDot={true}>
                                       {checkpoint.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                     </Status>
                                   </TableCell>
-                                  {/* student count */}
+                                  {/* Số học sinh */}
                                   <TableCell>
                                     <Badge variant='outline'>{checkpoint.studentCount || 0}</Badge>
                                   </TableCell>
-                                  {/* time checkpoint */}
+                                  {/* Giờ đi / về */}
                                   <TableCell>
                                     <div className='flex items-center justify-center gap-1'>
-                                      <div className='flex gap-1'>
-                                        <Button variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'go' })}>
-                                          {checkpointTimes[index]?.split('/')[0] || '--:--'}
-                                          <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
-                                        </Button>
-                                        <span className='flex items-center px-5'>-</span>
-                                        <Button variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'return' })}>
-                                          {checkpointTimes[index]?.split('/')[1] || '--:--'}
-                                          <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
-                                        </Button>
-                                      </div>
+                                      {index === selectedCheckpoints.length - 1 ? (
+                                        // Ẩn nút chỉnh sửa giờ cho checkpoint cuối cùng (Ngôi Sao)
+                                        <div className='flex gap-1'>
+                                          <Button disabled variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'go' })}>
+                                            {checkpointTimes[index]?.split('/')[0] || '--:--'}
+                                            <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                          </Button>
+                                          <span className='flex items-center px-5'>-</span>
+                                          <Button disabled variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'return' })}>
+                                            {checkpointTimes[index]?.split('/')[1] || '--:--'}
+                                            <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        // Hiển thị nút chỉnh sửa giờ cho các checkpoint khác
+                                        <div className='flex gap-1'>
+                                          <Button variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'go' })}>
+                                            {checkpointTimes[index]?.split('/')[0] || '--:--'}
+                                            <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                          </Button>
+                                          <span className='flex items-center px-5'>-</span>
+                                          <Button variant='outline' className='h-9 w-24 justify-between rounded-md border border-input bg-background px-3 text-left font-normal hover:bg-muted' onClick={() => setOpenDialog({ index, type: 'return' })}>
+                                            {checkpointTimes[index]?.split('/')[1] || '--:--'}
+                                            <Clock className='ml-2 h-4 w-4 text-muted-foreground' />
+                                          </Button>
+                                        </div>
+                                      )}
                                     </div>
                                   </TableCell>
-                                  {/* move checkpoint up/down */}
+                                  {/* Di chuyển thứ tự */}
                                   <TableCell>
                                     {index !== selectedCheckpoints.length - 1 && (
                                       <div className='flex space-x-1'>
@@ -672,7 +681,6 @@ export default function EditRouteManagement() {
                                             <TooltipContent>Di chuyển lên</TooltipContent>
                                           </Tooltip>
                                         </TooltipProvider>
-
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
@@ -686,8 +694,7 @@ export default function EditRouteManagement() {
                                       </div>
                                     )}
                                   </TableCell>
-
-                                  {/* remove checkpoint */}
+                                  {/* Xóa checkpoint */}
                                   <TableCell>
                                     {index !== selectedCheckpoints.length - 1 && (
                                       <TooltipProvider>
@@ -711,6 +718,7 @@ export default function EditRouteManagement() {
                     </div>
                   </div>
                 </CardContent>
+
                 <CardFooter className='flex justify-end gap-2'>
                   <Button variant='destructive' onClick={handleCancelClick}>
                     Hủy
