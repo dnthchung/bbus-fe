@@ -36,13 +36,20 @@ export function DownloadableReports() {
 
     // Simulate download delay
     setTimeout(() => {
+      // toast({
+      //   title: 'Tải xuống thành công',
+      //   description: `Đã tải xuống báo cáo ${reportTypes.find((r) => r.id === reportId)?.name}`,
+      //   variant: 'success',
+
+      // })
+
       toast({
-        title: 'Tải xuống thành công',
-        description: `Đã tải xuống báo cáo ${reportTypes.find((r) => r.id === reportId)?.name}`,
-        variant: 'success',
+        title: 'Chức năng chưa khả dụng',
+        description: `Chức năng tải xuống báo cáo ${reportTypes.find((r) => r.id === reportId)?.name} chưa khả dụng`,
+        variant: 'default',
       })
       setDownloading(null)
-    }, 1500)
+    }, 1000)
   }
 
   const handleDownloadAll = async () => {
@@ -93,10 +100,10 @@ export function DownloadableReports() {
                 </TableCell>
                 <TableCell className='hidden md:table-cell'>{report.description}</TableCell>
                 <TableCell>
-                  <Button variant='ghost' size='icon' onClick={() => handleDownload(report.id)} disabled={downloading !== null}>
+                  {/* <Button variant='ghost' size='icon' onClick={() => handleDownload(report.id)} disabled={downloading !== null}>
                     <Download className='h-4 w-4' />
                     <span className='sr-only'>Tải xuống {report.name}</span>
-                  </Button>
+                  </Button> */}
                 </TableCell>
               </TableRow>
             ))}

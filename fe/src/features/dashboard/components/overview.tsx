@@ -1,13 +1,30 @@
+'use client'
+
 // src/features/dashboard/components/overview.tsx
+import { useEffect, useState } from 'react'
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts'
-import { attendanceRateByMonth } from '../fake-data'
+import { getAttendanceRate } from '@/features/dashboard/functions'
 
 export function Overview() {
+  const [chartData, setChartData] = useState<{ name: string; rate: number }[]>([])
+
+  useEffect(() => {
+    async function fetchChartData() {
+      try {
+        const data = await getAttendanceRate()
+        setChartData(data)
+      } catch (err) {
+        console.error('Failed to fetch attendance chart data', err)
+      }
+    }
+    fetchChartData()
+  }, [])
+
   return (
     <ResponsiveContainer width='100%' height={250}>
-      <BarChart data={attendanceRateByMonth}>
+      <BarChart data={chartData}>
         <XAxis dataKey='name' stroke='#888888' fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke='#888888' fontSize={12} tickLine={false} axisLine={false} domain={[20, 100]} tickFormatter={(v) => `${v}%`} />
+        <YAxis stroke='#888888' fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
         <Tooltip formatter={(value: number) => `${value}%`} />
         <Bar dataKey='rate' radius={[6, 6, 0, 0]} className='fill-primary' />
       </BarChart>

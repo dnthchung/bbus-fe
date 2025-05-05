@@ -285,8 +285,18 @@ export async function getAttendanceReport(): Promise<{
 export async function getAttendanceRate() {
   try {
     const response = await API_SERVICES.attendance.chart_dashboard()
-    const data = response.data.data.attendanceRate
-    return data
+    const rawData = response.data.data.attendanceRate
+
+    const processedData = rawData.map((item: { month: string; percentage: number | null }) => {
+      const date = new Date(item.month + '-01') // Convert to date
+      const monthName = date.toLocaleString('default', { month: 'short' }) // e.g. Jan
+      return {
+        name: monthName,
+        rate: item.percentage ?? 0, // Convert null to 0
+      }
+    })
+
+    return processedData
   } catch (error) {
     console.error('Error fetching attendance rate:', error)
     throw new Error('Failed to fetch attendance rate')
