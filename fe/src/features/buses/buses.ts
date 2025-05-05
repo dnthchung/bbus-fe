@@ -17,7 +17,10 @@ export async function getAllBuses(): Promise<Bus[]> {
 
     // console.log('Raw buses data:', rawBuses)
     const parsedBuses = busListSchema.parse(rawBuses)
-    return parsedBuses
+
+    const filteredBuses = parsedBuses.filter((bus) => bus.name !== 'Bus 000')
+
+    return filteredBuses
   } catch (error) {
     console.error('Error getAllBuses in buses.ts:', error)
     throw error
