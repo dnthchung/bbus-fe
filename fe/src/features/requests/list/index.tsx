@@ -126,8 +126,10 @@ function RequestContent() {
             <TabsList className='grid w-1/2 grid-cols-4'>
               <TabsTrigger value='leave'>Đơn xin nghỉ học</TabsTrigger>
               <TabsTrigger value='pickup'>Đổi điểm đón/trả</TabsTrigger>
-              <TabsTrigger value='report'>Báo cáo</TabsTrigger>
               <TabsTrigger value='other'>Đơn khác</TabsTrigger>
+              <TabsTrigger value='report' disabled>
+                Báo cáo
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value='leave'>
