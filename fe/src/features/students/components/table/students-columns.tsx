@@ -218,7 +218,7 @@ export const columns: ColumnDef<Student>[] = [
       return value.includes(row.getValue(id))
     },
 
-    enableSorting: false,
+    enableSorting: true,
   },
   // --- Row actions (sửa/xoá) ---
   {

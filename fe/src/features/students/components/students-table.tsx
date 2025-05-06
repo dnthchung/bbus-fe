@@ -70,7 +70,7 @@ export function StudentsTable({ columns, data }: DataTableProps) {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className='group/row bg-muted/100 text-foreground dark:bg-muted/20'>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan} className={cn('text-sm font-semibold text-foreground', header.column.columnDef.meta?.className ?? '')}>
+                  <TableHead key={header.id} colSpan={header.colSpan} className={cn('text-xs font-semibold text-foreground', header.column.columnDef.meta?.className ?? '')}>
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}

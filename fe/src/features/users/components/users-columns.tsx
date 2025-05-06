@@ -65,7 +65,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: 'phone',
     header: ({ column }) => <DataTableColumnHeader column={column} title='Số điện thoại' />,
     cell: ({ row }) => <div>{row.getValue('phone')}</div>,
-    enableSorting: false,
+    enableSorting: true,
     meta: { className: 'w-36' },
   },
 
@@ -137,7 +137,7 @@ export const columns: ColumnDef<User>[] = [
     },
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
     enableHiding: false,
-    enableSorting: false,
+    enableSorting: true,
     meta: { className: 'w-40 text-center' },
   },
 
