@@ -12,11 +12,11 @@ import { ThemeSwitch } from '@/components/common/theme-switch'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import AnalyticsCard from '@/components/mine/analytic-card'
+import { dem_so_hoc_sinh, dem_so_yeu_cau, thong_so_account, tong_tuyen_duong } from '@/features/dashboard/functions'
 import { DashboardSkeleton } from './components/common/dashboard-skeleton'
 import { DownloadableReports } from './components/common/downloadable-reports'
 import { EventDialog } from './components/common/event-dialogs'
 import { Overview } from './components/overview'
-import { dem_so_hoc_sinh, dem_so_yeu_cau, thong_so_account, tong_tuyen_duong, getAttendanceReport } from './functions'
 
 type Metrics = {
   studentCount: number

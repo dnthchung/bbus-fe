@@ -79,14 +79,14 @@ export const columns: ColumnDef<Student>[] = [
     },
   },
   // --- Ngày sinh ---
-  {
-    accessorKey: 'dob',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='Ngày sinh' />,
-    cell: ({ row }) => {
-      const dob = row.getValue('dob') as string
-      return <span>{formatDate(dob)}</span>
-    },
-  },
+  // {
+  //   accessorKey: 'dob',
+  //   header: ({ column }) => <DataTableColumnHeader column={column} title='Ngày sinh' />,
+  //   cell: ({ row }) => {
+  //     const dob = row.getValue('dob') as string
+  //     return <span>{formatDate(dob)}</span>
+  //   },
+  // },
   // --- Giới tính ---
   {
     accessorKey: 'gender',
